@@ -1,0 +1,82 @@
+[
+  {
+    "id": "TRX-001",
+    "date": "2026-09-18",
+    "type": "INCOME",
+    "category": "Order",
+    "item": "Banner Spanduk Outdoor (ORD-20260918-008)",
+    "qty": 1,
+    "total": 42500,
+    "notes": "Cash di kasir"
+  },
+  {
+    "id": "TRX-002",
+    "date": "2026-09-20",
+    "type": "EXPENSE",
+    "category": "Operasional",
+    "item": "Listrik & Internet Workshop September",
+    "qty": 1,
+    "total": 450000,
+    "notes": "PLN & Indihome"
+  },
+  {
+    "id": "TRX-003",
+    "date": "2026-09-21",
+    "type": "INCOME",
+    "category": "Order",
+    "item": "Poster Custom A3+ (ORD-20260921-002)",
+    "qty": 20,
+    "total": 280000,
+    "notes": "Pembayaran QRIS"
+  },
+  {
+    "id": "TRX-004",
+    "date": "2026-09-22",
+    "type": "INCOME",
+    "category": "Order",
+    "item": "Roll Up Banner Aluminium (ORD-20260922-003)",
+    "qty": 2,
+    "total": 170000,
+    "notes": "Transfer BCA"
+  },
+  {
+    "id": "TRX-005",
+    "date": "2026-09-22",
+    "type": "INCOME",
+    "category": "Order",
+    "item": "Kartu Nama Bisnis (ORD-20260922-004)",
+    "qty": 4,
+    "total": 156000,
+    "notes": "Transfer BCA"
+  },
+  {
+    "id": "TRX-006",
+    "date": "2026-09-23",
+    "type": "INCOME",
+    "category": "Order",
+    "item": "Banner Spanduk Korea (ORD-20260923-005)",
+    "qty": 1,
+    "total": 289000,
+    "notes": "Transfer Mandiri"
+  },
+  {
+    "id": "TRX-007",
+    "date": "2026-09-23",
+    "type": "INCOME",
+    "category": "Order",
+    "item": "Stiker Vinyl Meteran (ORD-20260923-006)",
+    "qty": 2,
+    "total": 240000,
+    "notes": "QRIS"
+  },
+  {
+    "id": "TRX-008",
+    "date": "2026-09-24",
+    "type": "INCOME",
+    "category": "Order",
+    "item": "Flyer Promosi A5 (ORD-20260924-007)",
+    "qty": 500,
+    "total": 325000,
+    "notes": "Transfer BCA"
+  }
+]

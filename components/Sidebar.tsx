@@ -1,0 +1,201 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  FileCheck,
+  Kanban,
+  Package,
+  Layers,
+  AlertTriangle,
+  Scissors,
+  TrendingUp,
+  BarChart3,
+  Bot,
+  LogOut,
+  ArrowLeft,
+  Printer,
+  Loader2,
+} from "lucide-react";
+
+export default function Sidebar() {
+  const pathname = usePathname();
+  const { data: session } = useSession();
+  const [lowStockCount, setLowStockCount] = useState(0);
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
+
+  // Reset status navigasi ketika halaman tujuan selesai dimuat
+  useEffect(() => {
+    setNavigatingTo(null);
+  }, [pathname]);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function checkLowStock() {
+      try {
+        const res = await fetch("/api/materials?lowStock=true");
+        if (res.ok && isMounted) {
+          const data = await res.json();
+          setLowStockCount(data.materials?.length || 0);
+        }
+      } catch (e) {
+        // Abaikan
+      }
+    }
+    checkLowStock();
+    // Cek berkala setiap 60 detik (bukan setiap kali klik menu)
+    const timer = setInterval(checkLowStock, 60000);
+    return () => {
+      isMounted = false;
+      clearInterval(timer);
+    };
+  }, []);
+
+  const navGroups = [
+    {
+      title: "Utama",
+      items: [
+        { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { href: "/admin/production", label: "Antrean Produksi", icon: Kanban },
+        { href: "/admin/analytics/products", label: "Produk Terlaris", icon: BarChart3 },
+        { href: "/admin/analytics/revenue", label: "Analisis Revenue", icon: TrendingUp },
+      ],
+    },
+    {
+      title: "Pesanan & Desain",
+      items: [
+        { href: "/admin/orders", label: "Semua Pesanan", icon: ShoppingBag },
+        { href: "/admin/orders/design-check", label: "Validasi Desain", icon: FileCheck },
+      ],
+    },
+    {
+      title: "Inventaris & Master",
+      items: [
+        { href: "/admin/products", label: "Kelola Produk", icon: Package },
+        { href: "/admin/materials", label: "Kelola Material", icon: Layers },
+        {
+          href: "/admin/materials/low-stock",
+          label: "Stok Rendah",
+          icon: AlertTriangle,
+          badge: lowStockCount > 0 ? lowStockCount : undefined,
+        },
+        { href: "/admin/finishings", label: "Opsi Finishing", icon: Scissors },
+      ],
+    },
+  ];
+
+  return (
+    <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0 min-h-screen border-r border-slate-800 relative">
+      {/* Top Navigation Progress Bar */}
+      {navigatingTo && (
+        <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-slate-800 overflow-hidden pointer-events-none">
+          <div className="h-full bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 w-full animate-pulse" />
+        </div>
+      )}
+
+      {/* Brand Header */}
+      <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+        <Link href="/admin/dashboard" className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/30">
+            <Printer className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="font-bold text-base text-white tracking-tight leading-none block">
+              CetakKilat
+            </span>
+            <span className="text-[10px] text-blue-400 font-medium tracking-wider uppercase">
+              Admin Copilot
+            </span>
+          </div>
+        </Link>
+      </div>
+
+      {/* Navigation Links */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-6">
+        {navGroups.map((group, idx) => (
+          <div key={idx}>
+            <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+              {group.title}
+            </p>
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const isCurrentActive = pathname === item.href;
+                const isPending = navigatingTo === item.href;
+                const isActive = isCurrentActive || isPending;
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    prefetch={true}
+                    onClick={() => {
+                      if (pathname !== item.href) {
+                        setNavigatingTo(item.href);
+                      }
+                    }}
+                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition duration-150 ${
+                      isActive
+                        ? "bg-blue-600 text-white shadow-sm font-semibold"
+                        : "text-slate-400 hover:text-white hover:bg-slate-800"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      {isPending ? (
+                        <Loader2 className="w-4 h-4 shrink-0 animate-spin text-white" />
+                      ) : (
+                        <Icon className="w-4 h-4 shrink-0" />
+                      )}
+                      <span>{item.label}</span>
+                    </div>
+                    {isPending ? (
+                      <span className="text-[10px] text-blue-200 animate-pulse font-normal">
+                        Memuat...
+                      </span>
+                    ) : item.badge !== undefined ? (
+                      <span className="px-1.5 py-0.5 text-[10px] font-bold bg-rose-500 text-white rounded-full">
+                        {item.badge}
+                      </span>
+                    ) : null}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer Info & Logout */}
+      <div className="p-3 border-t border-slate-800 space-y-2">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Ke Portal Pelanggan</span>
+        </Link>
+
+        <div className="p-2.5 rounded-xl bg-slate-800/60 border border-slate-800 flex items-center justify-between">
+          <div className="text-left text-xs leading-tight">
+            <span className="font-semibold text-white block">
+              {session?.user?.name || "Admin"}
+            </span>
+            <span className="text-[10px] text-slate-400">
+              {(session?.user as any)?.role || "ADMIN"}
+            </span>
+          </div>
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            title="Keluar"
+            className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </aside>
+  );
+}

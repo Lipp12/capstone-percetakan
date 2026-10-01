@@ -1,0 +1,134 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  role      String   @default("CUSTOMER") // CUSTOMER | ADMIN | OPERATOR
+  orders    Order[]
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id          String            @id @default(cuid())
+  name        String
+  slug        String            @unique
+  description String
+  category    String
+  basePrice   Float
+  unit        String            // "m2" atau "pcs"
+  imageUrl    String?
+  materials   ProductMaterial[]
+  orders      Order[]
+  createdAt   DateTime          @default(now())
+}
+
+model Material {
+  id           String            @id @default(cuid())
+  name         String
+  description  String?
+  pricePerUnit Float
+  unit         String
+  stock        Float             @default(0)
+  minStock     Float             @default(10)
+  products     ProductMaterial[]
+  usages       MaterialUsage[]
+  orders       Order[]
+  createdAt    DateTime          @default(now())
+}
+
+model ProductMaterial {
+  id              String   @id @default(cuid())
+  productId       String
+  materialId      String
+  additionalPrice Float    @default(0)
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  material        Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+}
+
+model Finishing {
+  id        String           @id @default(cuid())
+  name      String
+  price     Float
+  unit      String
+  orders    OrderFinishing[]
+  createdAt DateTime         @default(now())
+}
+
+model Order {
+  id              String               @id @default(cuid())
+  orderNumber     String               @unique
+  userId          String
+  productId       String
+  materialId      String?
+  width           Float?
+  height          Float?
+  quantity        Int
+  pickupMethod    String               // PICKUP | DELIVERY
+  address         String?
+  totalPrice      Float
+  status          String               @default("PENDING_PAYMENT")
+  designFileUrl   String?
+  designNotes     String?
+  paymentProofUrl String?
+  paymentMethod   String?
+  notes           String?
+  user            User                 @relation(fields: [userId], references: [id])
+  product         Product              @relation(fields: [productId], references: [id])
+  material        Material?            @relation(fields: [materialId], references: [id])
+  finishings      OrderFinishing[]
+  statusHistory   OrderStatusHistory[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+}
+
+model OrderFinishing {
+  id          String    @id @default(cuid())
+  orderId     String
+  finishingId String
+  price       Float
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  finishing   Finishing @relation(fields: [finishingId], references: [id])
+}
+
+model OrderStatusHistory {
+  id        String   @id @default(cuid())
+  orderId   String
+  status    String
+  notes     String?
+  changedBy String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model MaterialUsage {
+  id         String   @id @default(cuid())
+  materialId String
+  orderId    String
+  quantity   Float
+  unit       String
+  material   Material @relation(fields: [materialId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  type      String   // INCOME | EXPENSE
+  category  String
+  item      String
+  qty       Int
+  total     Float
+  orderId   String?
+  date      DateTime
+  notes     String?
+  createdAt DateTime @default(now())
+}
