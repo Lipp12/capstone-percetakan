@@ -24,11 +24,7 @@ export default async function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-blue-900 via-indigo-900 to-slate-900 text-white py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-semibold uppercase tracking-wider mb-6">
-            <Sparkles className="w-3.5 h-3.5" />
-            Didukung AI Copilot & Auto-Quoting
-          </div>
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight">
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight mt-4">
             Cetak Kebutuhan Bisnis Anda{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-teal-300">
               Cepat & Tanpa Ribet
@@ -45,13 +41,6 @@ export default async function HomePage() {
             >
               <span>Jelajahi Katalog Produk</span>
               <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/chat"
-              className="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold text-sm border border-white/20 transition flex items-center gap-2"
-            >
-              <Sparkles className="w-4 h-4 text-amber-300" />
-              <span>Tanya AI Assistant</span>
             </Link>
           </div>
         </div>

@@ -18,7 +18,6 @@ export default function Navbar() {
   const navLinks = [
     { href: "/katalog", label: "Katalog Produk", icon: ShoppingBag },
     { href: "/orders", label: "Pesanan Saya", icon: Clock, authRequired: true },
-    { href: "/chat", label: "AI Assistant", icon: Sparkles },
   ];
 
   return (

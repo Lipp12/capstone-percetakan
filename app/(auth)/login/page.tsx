@@ -84,7 +84,11 @@ export default function LoginPage() {
         )}
 
         {/* Form Login */}
-        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+        <form onSubmit={handleSubmit} autoComplete="off" className="mt-8 space-y-5">
+          {/* Dummy inputs to prevent aggressive browser autofill */}
+          <input type="text" style={{ display: "none" }} tabIndex={-1} autoComplete="off" />
+          <input type="password" style={{ display: "none" }} tabIndex={-1} autoComplete="off" />
+
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
               Alamat Email
@@ -95,6 +99,8 @@ export default function LoginPage() {
               </div>
               <input
                 type="email"
+                name="login_email"
+                autoComplete="off"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -114,6 +120,8 @@ export default function LoginPage() {
               </div>
               <input
                 type="password"
+                name="login_password"
+                autoComplete="new-password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

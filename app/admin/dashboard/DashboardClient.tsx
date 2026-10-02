@@ -390,7 +390,7 @@ export default function DashboardClient({
 
             {/* Container ChatBox */}
             <div className="w-full shadow-2xl rounded-2xl overflow-hidden bg-white">
-              <ChatBox role="admin" />
+              <ChatBox role="admin" onClose={() => setShowAiCopilot(false)} />
             </div>
           </div>
         </div>

@@ -22,10 +22,11 @@ export type ChatSession = {
 interface ChatBoxProps {
   role?: Role;
   onRoleChange?: (role: Role) => void;
+  onClose?: () => void;
 }
 
-const STORAGE_KEY = "capstone_chat_sessions_v2";
-const ACTIVE_KEY = "capstone_chat_active_id_v2";
+const getStorageKey = (r: Role) => `capstone_chat_sessions_${r}_v3`;
+const getActiveKey = (r: Role) => `capstone_chat_active_id_${r}_v3`;
 
 function createNewSession(role: Role = "customer"): ChatSession {
   const now = Date.now();
@@ -68,6 +69,7 @@ function formatTimestamp(timestamp: number): string {
 export default function ChatBox({
   role = "customer",
   onRoleChange,
+  onClose,
 }: ChatBoxProps) {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string>("");
@@ -90,24 +92,22 @@ export default function ChatBox({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 1. Muat data dari localStorage saat komponen mount di browser
+  // 1. Muat data dari localStorage khusus untuk role ini (Admin / Customer terpisah)
   useEffect(() => {
     setIsMounted(true);
+    const storageKey = getStorageKey(role);
+    const activeKey = getActiveKey(role);
+
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed: ChatSession[] = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setSessions(parsed);
-          const savedActiveId = localStorage.getItem(ACTIVE_KEY);
+          const savedActiveId = localStorage.getItem(activeKey);
           const exists = parsed.some((s) => s.id === savedActiveId);
           const activeId = exists && savedActiveId ? savedActiveId : parsed[0].id;
           setActiveSessionId(activeId);
-
-          const found = parsed.find((s) => s.id === activeId);
-          if (found && onRoleChange && found.role) {
-            onRoleChange(found.role);
-          }
           return;
         }
       }
@@ -115,24 +115,27 @@ export default function ChatBox({
       console.error("Gagal membaca history dari localStorage:", e);
     }
 
-    // Default jika belum ada riwayat sama sekali
+    // Default jika belum ada riwayat sama sekali untuk role ini
     const initial = createNewSession(role);
     setSessions([initial]);
     setActiveSessionId(initial.id);
-  }, []);
+  }, [role]);
 
-  // 2. Simpan ke localStorage setiap ada perubahan sesi
+  // 2. Simpan ke localStorage khusus untuk role ini
   useEffect(() => {
     if (!isMounted || sessions.length === 0) return;
+    const storageKey = getStorageKey(role);
+    const activeKey = getActiveKey(role);
+
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+      localStorage.setItem(storageKey, JSON.stringify(sessions));
       if (activeSessionId) {
-        localStorage.setItem(ACTIVE_KEY, activeSessionId);
+        localStorage.setItem(activeKey, activeSessionId);
       }
     } catch (e) {
       console.error("Gagal menyimpan history ke localStorage:", e);
     }
-  }, [sessions, activeSessionId, isMounted]);
+  }, [sessions, activeSessionId, isMounted, role]);
 
   // Sesi aktif saat ini
   const activeSession = useMemo(() => {
@@ -635,7 +638,30 @@ export default function ChatBox({
             </div>
           </div>
 
-
+          {/* Tombol Tutup / Close (X) */}
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-2.5 py-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer border border-gray-200/80 shadow-2xs shrink-0"
+              title="Tutup Chat"
+            >
+              <span className="hidden sm:inline">Tutup</span>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2.5"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          )}
         </header>
 
         {/* Area Pesan Chat */}
