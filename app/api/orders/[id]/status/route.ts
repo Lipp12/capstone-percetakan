@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  PRODUCTION_AREA_STATUSES,
+  evaluateProductionGate,
+  productionGateMessage,
+} from "@/lib/order-rules";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +46,7 @@ export async function POST(
       include: {
         product: true,
         material: true,
+        statusHistory: { select: { status: true } },
       },
     });
 
@@ -49,6 +55,45 @@ export async function POST(
     }
 
     const userName = session.user.name || "Admin";
+
+    // GUARD ATURAN BISNIS (server-side, tidak bisa di-bypass via API):
+    // Pesanan tidak boleh masuk area antrean produksi kecuali pembayaran
+    // sudah lunas dan desain sudah di-ACC.
+    const isProductionTarget = (PRODUCTION_AREA_STATUSES as readonly string[]).includes(
+      status
+    );
+
+    if (isProductionTarget) {
+      const historyStatuses = order.statusHistory.map((h) => h.status);
+
+      // Kasus khusus target DESIGN_APPROVED: status ini sedang di-"assign"
+      // oleh aksi approve itu sendiri, jadi desain belum tercatat di riwayat.
+      // Yang wajib dipastikan di sini hanya lunas. Setelah update berhasil,
+      // entri DESIGN_APPROVED masuk ke riwayat sehingga gate penuh berlaku
+      // untuk semua tahap produksi berikutnya.
+      if (status === "DESIGN_APPROVED") {
+        const isPaid =
+          historyStatuses.includes("PAID") || order.status === "PAID";
+
+        if (!isPaid) {
+          return NextResponse.json(
+            {
+              error:
+                "Pesanan tidak bisa masuk area antrean produksi: pembayaran belum lunas. Konfirmasi pembayaran terlebih dahulu.",
+            },
+            { status: 409 }
+          );
+        }
+      } else {
+        const gate = evaluateProductionGate(order.status, historyStatuses);
+        if (!gate.canEnterProduction) {
+          return NextResponse.json(
+            { error: productionGateMessage(gate) || "Persyaratan produksi belum terpenuhi." },
+            { status: 409 }
+          );
+        }
+      }
+    }
 
     // PENCATATAN PENGGUNAAN BAHAN OTOMATIS:
     // Trigger saat status berubah ke IN_PRODUCTION

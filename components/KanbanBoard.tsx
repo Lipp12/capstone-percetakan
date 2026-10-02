@@ -23,6 +23,8 @@ import {
   ExternalLink,
   ChevronRight,
   ChevronLeft,
+  AlertTriangle,
+  X,
 } from "lucide-react";
 
 interface OrderCardItem {
@@ -36,6 +38,10 @@ interface OrderCardItem {
   product: { name: string; unit: string };
   material?: { name: string } | null;
   user: { name: string };
+  /** Desain sudah disetujui oleh admin (diverifikasi dari status + riwayat) */
+  isDesignApproved?: boolean;
+  /** Pembayaran sudah lunas (diverifikasi dari status + riwayat) */
+  isPaymentPaid?: boolean;
 }
 
 interface Props {
@@ -244,6 +250,7 @@ function KanbanCard({
 export default function KanbanBoard({ initialOrders }: Props) {
   const [orders, setOrders] = useState<OrderCardItem[]>(initialOrders);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -251,13 +258,34 @@ export default function KanbanBoard({ initialOrders }: Props) {
   );
 
   async function updateOrderStatus(orderId: string, newStatus: string) {
+    setErrorMessage(null);
+    const target = orders.find((o) => o.id === orderId);
+
+    // Guard di client hanya untuk UX cepat. Guard yang authoritative ada di
+    // server (app/api/orders/[id]/status/route.ts).
+    if (newStatus === "DESIGN_APPROVED" && target) {
+      if (target.isDesignApproved === false) {
+        setErrorMessage(
+          "Pesanan tidak bisa masuk To Do (ACC): desain belum disetujui. Validasi desain terlebih dahulu."
+        );
+        return;
+      }
+      if (target.isPaymentPaid === false) {
+        setErrorMessage(
+          "Pesanan tidak bisa masuk To Do (ACC): pembayaran belum lunas. Konfirmasi pembayaran terlebih dahulu."
+        );
+        return;
+      }
+    }
+
     // Optimistic update
+    const previousStatus = target?.status;
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
     );
 
     try {
-      await fetch(`/api/orders/${orderId}/status`, {
+      const res = await fetch(`/api/orders/${orderId}/status`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -265,8 +293,29 @@ export default function KanbanBoard({ initialOrders }: Props) {
           notes: `Dipindahkan ke antrean ${newStatus} lewat Kanban Board`,
         }),
       });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+
+        // Rollback: kembalikan status kartu ke nilai sebelumnya
+        if (previousStatus) {
+          setOrders((prev) =>
+            prev.map((o) => (o.id === orderId ? { ...o, status: previousStatus } : o))
+          );
+        }
+
+        setErrorMessage(
+          data?.error || "Gagal memperbarui status pesanan. Silakan coba lagi."
+        );
+      }
     } catch (err) {
       console.error("Gagal update status Kanban:", err);
+      if (previousStatus) {
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, status: previousStatus } : o))
+        );
+      }
+      setErrorMessage("Koneksi bermasalah. Perubahan status tidak tersimpan.");
     }
   }
 
@@ -297,11 +346,41 @@ export default function KanbanBoard({ initialOrders }: Props) {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
+      {errorMessage && (
+        <div className="mb-5 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-2.5">
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold">Perubahan tidak dapat diterapkan</p>
+            <p className="text-xs mt-0.5">{errorMessage}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setErrorMessage(null)}
+            className="p-1 text-amber-600 hover:text-amber-900 rounded-lg hover:bg-amber-100 transition shrink-0"
+            title="Tutup notifikasi"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {COLUMNS.map((col) => {
           const colOrders = orders.filter((o) => {
             if (col.id === "READY") {
               return o.status === "READY" || o.status === "COMPLETED";
+            }
+            if (col.id === "DESIGN_APPROVED") {
+              // Kolom "To Do (ACC)" hanya untuk pesanan yang:
+              // 1. desainnya sudah disetujui, dan
+              // 2. pembayarannya sudah lunas.
+              // Status DESIGN_APPROVED bisa berasal dari board sebelum aturan ini,
+              // jadi tetap divalidasi lewat flag dari server.
+              return (
+                o.status === "DESIGN_APPROVED" &&
+                o.isDesignApproved !== false &&
+                o.isPaymentPaid !== false
+              );
             }
             return o.status === col.id;
           });

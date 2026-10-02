@@ -3,7 +3,9 @@ import { z } from "zod";
 export const registerSchema = z.object({
   name: z.string().min(3, "Nama minimal 3 karakter"),
   email: z.string().email("Format email tidak valid"),
-  phone: z.string().min(10, "Nomor telepon minimal 10 digit"),
+  phone: z
+    .string()
+    .regex(/^08[0-9]{8,13}$/, "Nomor telepon harus diawali 08 dan terdiri dari 10-15 digit (contoh: 081234567890)"),
   password: z.string().min(6, "Password minimal 6 karakter"),
 });
 

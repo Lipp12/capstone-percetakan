@@ -18,6 +18,11 @@ interface ChatViewProps {
    * Sidebar sehingga tombol kembali & tombol tutup tidak diperlukan.
    */
   showBackButton?: boolean;
+  /**
+   * Tampilkan tombol "Tutup" (X) di kanan header percakapan ChatBox.
+   * Default true. Set false untuk menghilangkan tombol tutup saja.
+   */
+  showCloseButton?: boolean;
 }
 
 /**
@@ -30,6 +35,7 @@ export default function ChatView({
   homeHref,
   subtitle,
   showBackButton = true,
+  showCloseButton = true,
 }: ChatViewProps) {
   const { status } = useSession();
   const router = useRouter();
@@ -72,7 +78,10 @@ export default function ChatView({
       </div>
 
       {/* Tanpa onClose => tombol "Tutup" di header ChatBox tidak dirender */}
-      <ChatBox role={role} onClose={showBackButton ? handleClose : undefined} />
+      <ChatBox
+        role={role}
+        onClose={showCloseButton ? handleClose : undefined}
+      />
     </main>
   );
 }

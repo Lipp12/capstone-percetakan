@@ -385,7 +385,7 @@ export default function OrderFormClient({
                   Kirim ke Alamat (Delivery)
                 </span>
                 <span className="text-[11px] text-slate-500">
-                  Dikirim via ekspedisi / kurir.
+                  Dikirim via kurir.
                 </span>
               </div>
             </button>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
-import { ShoppingBag, Clock, CheckCircle2, ArrowRight, Printer, Sparkles, RefreshCw } from "lucide-react";
+import { ShoppingBag, Clock, CheckCircle2, ArrowRight, Printer, Sparkles, RefreshCw, AlertTriangle, Upload } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +32,26 @@ export default async function CustomerDashboardPage() {
     (o) => !["COMPLETED", "CANCELLED"].includes(o.status)
   ).length;
   const completedOrders = orders.filter((o) => o.status === "COMPLETED").length;
+  const rejectedDesignOrders = orders.filter(
+    (o) => o.status === "DESIGN_REJECTED"
+  );
+
+  // Alasan penolakan terbaru per pesanan (dari statusHistory)
+  const rejectionReasons = await prisma.orderStatusHistory.findMany({
+    where: {
+      orderId: { in: rejectedDesignOrders.map((o) => o.id) },
+      status: "DESIGN_REJECTED",
+    },
+    orderBy: { createdAt: "desc" },
+    select: { orderId: true, notes: true, createdAt: true },
+  });
+
+  const reasonByOrder = new Map<string, string>();
+  for (const r of rejectionReasons) {
+    if (!reasonByOrder.has(r.orderId)) {
+      reasonByOrder.set(r.orderId, r.notes || "");
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -47,6 +67,12 @@ export default async function CustomerDashboardPage() {
           <p className="text-sm text-blue-100 mt-1 max-w-xl">
             Pantau status proses produksi pesanan cetak Anda atau buat pesanan custom baru dengan estimasi harga real-time.
           </p>
+          {rejectedDesignOrders.length > 0 && (
+            <span className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/25 border border-rose-300/40 text-rose-50 text-xs font-semibold">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              {rejectedDesignOrders.length} desain ditolak — perlu diunggah ulang
+            </span>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Link
@@ -98,6 +124,70 @@ export default async function CustomerDashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Notifikasi Desain Ditolak: CTA Unggah Ulang */}
+      {rejectedDesignOrders.length > 0 && (
+        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-5 sm:p-6 space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 bg-rose-100 text-rose-600 rounded-xl shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-sm font-bold text-rose-900">
+                Desain perlu diperbaiki
+              </h2>
+              <p className="text-xs text-rose-700 mt-0.5">
+                {rejectedDesignOrders.length} pesanan ditolak dan menunggu revisi
+                desain Anda. Silakan unggah file desain terbaru.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2.5">
+            {rejectedDesignOrders.map((order) => (
+              <div
+                key={order.id}
+                className="p-4 bg-white rounded-2xl border border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              >
+                <div className="min-w-0 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-sm text-slate-900">
+                      {order.orderNumber}
+                    </span>
+                    <OrderStatusBadge status={order.status} size="sm" />
+                  </div>
+                  <p className="text-xs text-slate-600 font-medium truncate">
+                    {order.product.name}
+                    {order.material ? ` • ${order.material.name}` : ""}
+                  </p>
+                  {reasonByOrder.get(order.id) && (
+                    <p className="text-[11px] text-rose-700 bg-rose-50 border border-rose-100 rounded-lg px-2 py-1">
+                      Catatan admin:{" "}
+                      {reasonByOrder.get(order.id)?.replace(/^Desain ditolak:\s*/i, "")}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <Link
+                    href={`/order/${order.id}/upload`}
+                    className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Unggah Desain Baru</span>
+                  </Link>
+                  <Link
+                    href={`/orders/${order.id}/tracking`}
+                    className="px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+                  >
+                    Detail
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Riwayat Pesanan Terbaru */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">

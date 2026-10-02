@@ -12,12 +12,40 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Nomor telepon Indonesia: wajib diawali 08, total 10-15 digit
+  const PHONE_PATTERN = /^08[0-9]{8,13}$/;
+
+  function handlePhoneChange(value: string) {
+    // Hanya izinkan angka
+    const digitsOnly = value.replace(/[^0-9]/g, "");
+    setPhone(digitsOnly);
+    if (digitsOnly.length === 0) {
+      setPhoneError("");
+    } else if (!PHONE_PATTERN.test(digitsOnly)) {
+      setPhoneError(
+        "Nomor telepon harus diawali 08 dan terdiri dari 10-15 digit (contoh: 081234567890)"
+      );
+    } else {
+      setPhoneError("");
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setPhoneError("");
+
+    if (!PHONE_PATTERN.test(phone)) {
+      setPhoneError(
+        "Nomor telepon harus diawali 08 dan terdiri dari 10-15 digit (contoh: 081234567890)"
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -111,7 +139,7 @@ export default function RegisterPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="nama@email.com"
+                placeholder="nama@gmail.com"
                 className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition"
               />
             </div>
@@ -128,12 +156,23 @@ export default function RegisterPage() {
               <input
                 type="tel"
                 required
+                inputMode="numeric"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => handlePhoneChange(e.target.value)}
                 placeholder="081234567890"
-                className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition"
+                className={`w-full pl-10 pr-4 py-2.5 text-sm border rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition ${
+                  phoneError
+                    ? "border-rose-400 bg-rose-50/40"
+                    : "border-slate-300"
+                }`}
               />
             </div>
+            {phoneError && (
+              <p className="mt-1.5 flex items-start gap-1.5 text-[11px] font-medium text-rose-600">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-px" />
+                <span>{phoneError}</span>
+              </p>
+            )}
           </div>
 
           <div>
