@@ -10,7 +10,6 @@ import {
   Clock,
   Users,
   AlertTriangle,
-  Bot,
   ArrowRight,
   Printer,
   Calendar,
@@ -108,17 +107,6 @@ export default function DashboardClient({
           <p className="text-xs text-slate-500 mt-0.5">
             Pantau arus transaksi, progres produksi, dan kesehatan stok inventaris percetakan.
           </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* Tombol Buka AI Copilot (navigasi ke halaman chat) */}
-          <Link
-            href="/admin/chat"
-            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 active:scale-95 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md shadow-purple-500/20 cursor-pointer"
-          >
-            <Bot className="w-4 h-4" />
-            <span>Buka AI Copilot</span>
-          </Link>
         </div>
       </div>
 

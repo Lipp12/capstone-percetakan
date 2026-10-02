@@ -5,7 +5,8 @@ import ChatView from "@/components/ChatView";
 /**
  * Halaman chat AI untuk ADMIN / OPERATOR (AI Copilot).
  * Persona: Admin Copilot, riwayat terpisah dari pelanggan.
- * Akses(route /admin/*) dijaga middleware.ts.
+ * Akses (route /admin/*) dijaga middleware.ts.
+ * Tanpa tombol Kembali / Tutup karena navigasi tersedia di Sidebar.
  */
 export default function AdminChatPage() {
   return (
@@ -13,6 +14,7 @@ export default function AdminChatPage() {
       role="admin"
       homeHref="/admin/dashboard"
       subtitle="Admin Copilot • OpenRouter AI"
+      showBackButton={false}
     />
   );
 }
