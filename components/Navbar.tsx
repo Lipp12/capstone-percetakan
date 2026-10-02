@@ -16,6 +16,7 @@ export default function Navbar() {
   const isAdminOrOperator = role === "ADMIN" || role === "OPERATOR";
 
   const navLinks = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, authRequired: true },
     { href: "/katalog", label: "Katalog Produk", icon: ShoppingBag },
     { href: "/orders", label: "Pesanan Saya", icon: Clock, authRequired: true },
   ];
