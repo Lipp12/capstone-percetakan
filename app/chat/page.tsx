@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import ChatBox from "@/components/ChatBox";
@@ -14,18 +14,14 @@ export default function ChatPage() {
   const userRole = (session?.user as any)?.role;
   const isAdminOrOperator = userRole === "ADMIN" || userRole === "OPERATOR";
 
-  // Default role sesuai login
-  const [role, setRole] = useState<Role>("customer");
+  // Mode AI dikunci ke Admin Copilot (tidak ada switch mode manual)
+  const role: Role = "admin";
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login?callbackUrl=/chat");
-    } else if (isAdminOrOperator) {
-      setRole("admin");
-    } else {
-      setRole("customer");
     }
-  }, [status, isAdminOrOperator, router]);
+  }, [status, router]);
 
   if (status === "loading") {
     return (
@@ -55,44 +51,12 @@ export default function ChatPage() {
           <span>Kembali</span>
         </button>
 
-        {/* Toggle Mode: Hanya muncul jika Admin/Operator */}
-        {isAdminOrOperator ? (
-          <div className="inline-flex p-1 bg-gray-200/80 rounded-xl text-xs font-medium shadow-inner">
-            <button
-              type="button"
-              onClick={() => setRole("customer")}
-              className={`px-3 py-1 rounded-lg transition cursor-pointer ${
-                role === "customer"
-                  ? "bg-white text-gray-900 shadow-xs font-semibold"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Mode Pelanggan
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole("admin")}
-              className={`px-3 py-1 rounded-lg transition cursor-pointer ${
-                role === "admin"
-                  ? "bg-white text-gray-900 shadow-xs font-semibold"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Mode Admin Copilot
-            </button>
-          </div>
-        ) : (
-          <span className="text-xs font-medium text-slate-500">
-            Asisten Percetakan Online
-          </span>
-        )}
+        <span className="text-xs font-medium text-slate-500">
+          Asisten Percetakan Online
+        </span>
       </div>
 
-      <ChatBox
-        role={role}
-        onRoleChange={isAdminOrOperator ? setRole : undefined}
-        onClose={handleClose}
-      />
+      <ChatBox role={role} onClose={handleClose} />
     </main>
   );
 }
