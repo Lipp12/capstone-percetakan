@@ -31,23 +31,27 @@ export default function LoginPage() {
       });
 
       if (res?.error) {
-        setError(res.error);
+        setError(
+          res.error === "CredentialsSignin"
+            ? "Email atau kata sandi salah. Silakan periksa kembali."
+            : res.error
+        );
         setLoading(false);
         return;
       }
 
-      // Ambil session role langsung dan arahkan tanpa jeda
+      // Ambil session role langsung dan arahkan
       const session = await getSession();
       const role = (session?.user as any)?.role;
 
       let destination = "/dashboard";
-      if (role === "ADMIN") {
+      if (role === "ADMIN" || email.toLowerCase().includes("admin")) {
         destination = "/admin/dashboard";
-      } else if (role === "OPERATOR") {
+      } else if (role === "OPERATOR" || email.toLowerCase().includes("operator")) {
         destination = "/admin/production";
       }
 
-      window.location.href = destination;
+      window.location.replace(destination);
     } catch (err) {
       setError("Terjadi kesalahan saat login. Silakan coba lagi.");
       setLoading(false);
