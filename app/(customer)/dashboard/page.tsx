@@ -42,7 +42,7 @@ export default async function CustomerDashboardPage() {
             Portal Pelanggan
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold mt-3">
-            Halo, {session.user.name}! 👋
+            Halo, {session.user.name}!
           </h1>
           <p className="text-sm text-blue-100 mt-1 max-w-xl">
             Pantau status proses produksi pesanan cetak Anda atau buat pesanan custom baru dengan estimasi harga real-time.
