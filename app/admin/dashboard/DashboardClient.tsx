@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
-import ChatBox from "@/components/ChatBox";
 import Link from "next/link";
 import {
   TrendingUp,
@@ -15,7 +14,6 @@ import {
   ArrowRight,
   Printer,
   Calendar,
-  X,
 } from "lucide-react";
 import {
   AreaChart,
@@ -41,7 +39,6 @@ export default function DashboardClient({
   lowStockMaterials,
 }: Props) {
   const [period, setPeriod] = useState<Period>("all");
-  const [showAiCopilot, setShowAiCopilot] = useState(false);
 
   // Filter pesanan berdasarkan periode
   const filteredOrders = useMemo(() => {
@@ -114,15 +111,14 @@ export default function DashboardClient({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Tombol Buka AI Copilot Pop-up */}
-          <button
-            type="button"
-            onClick={() => setShowAiCopilot(true)}
+          {/* Tombol Buka AI Copilot (navigasi ke halaman chat) */}
+          <Link
+            href="/chat"
             className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 active:scale-95 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md shadow-purple-500/20 cursor-pointer"
           >
             <Bot className="w-4 h-4" />
             <span>Buka AI Copilot</span>
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -350,51 +346,6 @@ export default function DashboardClient({
         </div>
       </div>
 
-      {/* Modal Dialog AI Copilot yang Luas dan Nyaman */}
-      {showAiCopilot && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-150">
-          {/* Backdrop Click to Close */}
-          <div
-            className="absolute inset-0 cursor-pointer"
-            onClick={() => setShowAiCopilot(false)}
-          />
-
-          <div className="relative z-10 w-full max-w-5xl flex flex-col items-center">
-            {/* Header Modal Bar */}
-            <div className="w-full flex items-center justify-between pb-2.5 px-1 text-white">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-500/30">
-                  <Bot className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-white">AI Admin Copilot</span>
-                    <span className="px-2 py-0.5 text-[10px] font-bold bg-purple-500/30 text-purple-200 border border-purple-400/30 rounded-full">
-                      Mode Admin
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-slate-300 hidden sm:inline">
-                    Konsultasi ringkasan pesanan, analisis bahan, dan draf balasan pelanggan
-                  </span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowAiCopilot(false)}
-                className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-xl transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer shadow-sm"
-              >
-                <X className="w-4 h-4" />
-                <span>Tutup</span>
-              </button>
-            </div>
-
-            {/* Container ChatBox */}
-            <div className="w-full shadow-2xl rounded-2xl overflow-hidden bg-white">
-              <ChatBox role="admin" onClose={() => setShowAiCopilot(false)} />
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );
