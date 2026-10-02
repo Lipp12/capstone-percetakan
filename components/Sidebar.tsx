@@ -63,6 +63,7 @@ export default function Sidebar() {
         { href: "/admin/production", label: "Antrean Produksi", icon: Kanban },
         { href: "/admin/analytics/products", label: "Produk Terlaris", icon: BarChart3 },
         { href: "/admin/analytics/revenue", label: "Analisis Revenue", icon: TrendingUp },
+        { href: "/admin/chat", label: "AI Copilot", icon: Bot },
       ],
     },
     {

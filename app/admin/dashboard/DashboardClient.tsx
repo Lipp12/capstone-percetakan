@@ -113,7 +113,7 @@ export default function DashboardClient({
         <div className="flex items-center gap-2">
           {/* Tombol Buka AI Copilot (navigasi ke halaman chat) */}
           <Link
-            href="/chat"
+            href="/admin/chat"
             className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 active:scale-95 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md shadow-purple-500/20 cursor-pointer"
           >
             <Bot className="w-4 h-4" />
