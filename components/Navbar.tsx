@@ -27,7 +27,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-md border border-blue-200 bg-blue-50 text-blue-700 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-md border border-rose-200 bg-rose-50 text-rose-700 flex items-center justify-center">
               <Printer className="w-6 h-6" />
             </div>
             <div>
