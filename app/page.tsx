@@ -25,7 +25,7 @@ export default async function HomePage() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative isolate flex min-h-[480px] items-end overflow-hidden bg-slate-950 px-5 py-12 text-white sm:min-h-[520px] sm:px-8 lg:min-h-[560px]">
+      <section className="relative isolate flex min-h-[480px] items-center overflow-hidden bg-slate-950 px-5 py-12 text-white sm:min-h-[520px] sm:px-8 lg:min-h-[560px]">
         <img
           src={heroImage}
           alt="Contoh hasil cetak poster dari Faeyza Printing"

@@ -78,7 +78,7 @@ export default function RegisterPage() {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
         {/* Logo & Header */}
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/30 mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl border border-blue-200 bg-blue-50 text-blue-700 mb-4">
             <Printer className="w-8 h-8" />
           </div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">

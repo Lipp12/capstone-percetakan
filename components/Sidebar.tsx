@@ -105,7 +105,7 @@ export default function Sidebar() {
       {/* Brand Header */}
       <div className="p-3 sm:p-4 border-b border-slate-800 flex items-center justify-between">
         <Link href="/admin/dashboard" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-md bg-rose-700 text-white flex items-center justify-center">
+          <div className="w-9 h-9 rounded-md border border-blue-200 bg-blue-50 text-blue-700 flex items-center justify-center">
             <Printer className="w-5 h-5" />
           </div>
           <div>
@@ -167,7 +167,7 @@ export default function Sidebar() {
                       <span>{item.label}</span>
                     </div>
                     {isPending ? (
-                        <span className="text-[10px] text-rose-200 animate-pulse font-normal">
+                      <span className="text-[10px] text-rose-200 animate-pulse font-normal">
                         Memuat...
                       </span>
                     ) : item.badge !== undefined ? (
