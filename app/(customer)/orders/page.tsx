@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
-import { ShoppingBag, Search, Clock, ArrowRight, RefreshCw, Upload, CreditCard } from "lucide-react";
+import { ShoppingBag, Search, Clock, RefreshCw, Upload, CreditCard } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -56,28 +56,32 @@ export default async function CustomerOrdersPage({ searchParams }: Props) {
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900">
-          Riwayat Pesanan Saya
+    <div className="space-y-6 sm:space-y-8">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="font-serif text-3xl font-semibold text-slate-900 sm:text-4xl">
+            Pesanan saya
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Pantau semua transaksi pemesanan produk cetak Anda di satu tempat.
-        </p>
+          <p className="text-sm text-slate-500 mt-1">
+            Lihat status, detail, dan tindakan untuk setiap pesanan.
+          </p>
+        </div>
+        <span className="text-xs text-slate-500">{orders.length} pesanan ditampilkan</span>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="space-y-3">
         {/* Tabs Status */}
-        <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
+        <div className="flex w-full gap-5 overflow-x-auto border-b border-stone-200">
           {filterTabs.map((tab) => (
             <Link
               key={tab.value}
               href={`/orders?status=${tab.value}${searchQuery ? `&search=${searchQuery}` : ""}`}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition ${
+              aria-current={statusFilter === tab.value ? "page" : undefined}
+              className={`shrink-0 border-b-2 px-0.5 pb-3 text-xs font-semibold transition ${
                 statusFilter === tab.value
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  ? "border-rose-700 text-rose-800"
+                  : "border-transparent text-slate-500 hover:border-stone-400 hover:text-slate-900"
               }`}
             >
               {tab.label}
@@ -86,7 +90,7 @@ export default async function CustomerOrdersPage({ searchParams }: Props) {
         </div>
 
         {/* Search */}
-        <form method="GET" action="/orders" className="relative w-full sm:w-64">
+        <form method="GET" action="/orders" className="relative w-full sm:max-w-sm">
           <input type="hidden" name="status" value={statusFilter} />
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -94,16 +98,16 @@ export default async function CustomerOrdersPage({ searchParams }: Props) {
             name="search"
             defaultValue={searchQuery}
             placeholder="Cari no. pesanan..."
-            className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
+            className="w-full rounded-md border border-stone-300 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-rose-600 focus:ring-2 focus:ring-rose-600/20"
           />
         </form>
       </div>
 
       {/* List Orders */}
       {orders.length === 0 ? (
-        <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center">
-          <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
-            <ShoppingBag className="w-6 h-6" />
+        <div className="border-y border-stone-200 py-10 text-center sm:py-14">
+          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-md bg-stone-100 text-slate-500">
+            <ShoppingBag className="h-5 w-5" />
           </div>
           <p className="text-base font-semibold text-slate-700">
             Tidak ada pesanan ditemukan
@@ -113,39 +117,39 @@ export default async function CustomerOrdersPage({ searchParams }: Props) {
           </p>
           <Link
             href="/katalog"
-            className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold"
+            className="mt-4 inline-block rounded-md bg-rose-700 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-800"
           >
             Mulai Pesan Sekarang
           </Link>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="divide-y divide-stone-200 border-y border-stone-200">
           {orders.map((order) => (
             <div
               key={order.id}
-              className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col md:flex-row md:items-center justify-between gap-6"
+              className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
             >
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-3">
-                  <span className="font-bold text-base text-slate-900">
+              <div className="min-w-0 space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-semibold text-sm text-slate-900 sm:text-base">
                     {order.orderNumber}
                   </span>
                   <OrderStatusBadge status={order.status} size="sm" />
                 </div>
-                <h3 className="text-sm font-semibold text-slate-800">
+                <h3 className="text-sm font-semibold text-slate-800 sm:text-base">
                   {order.product.name}
                   {order.material ? ` • ${order.material.name}` : ""}
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs leading-relaxed text-slate-500">
                   {order.width && order.height ? `${order.width}x${order.height}m • ` : ""}
                   Jumlah: {order.quantity} {order.product.unit} • Dibuat pada {formatDate(order.createdAt)}
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 md:gap-6 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 border-slate-100">
+              <div className="flex flex-col gap-3 border-t border-stone-200 pt-3 sm:flex-row sm:items-center sm:justify-end sm:gap-6 sm:border-0 sm:pt-0">
                 <div>
                   <span className="text-[10px] text-slate-400 block font-medium">Total Harga</span>
-                  <span className="text-base font-black text-slate-900">
+                  <span className="text-base font-bold text-slate-900">
                     {formatRupiah(order.totalPrice)}
                   </span>
                 </div>
@@ -155,7 +159,7 @@ export default async function CustomerOrdersPage({ searchParams }: Props) {
                   {order.status === "PENDING_PAYMENT" && (
                     <Link
                       href={`/checkout/${order.id}`}
-                      className="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                      className="px-3.5 py-2 rounded-md bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold transition flex items-center gap-1.5"
                     >
                       <CreditCard className="w-3.5 h-3.5" />
                       <span>Bayar</span>
@@ -166,7 +170,7 @@ export default async function CustomerOrdersPage({ searchParams }: Props) {
                   {!order.designFileUrl && (
                     <Link
                       href={`/order/${order.id}/upload`}
-                      className="px-3 py-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-semibold transition flex items-center gap-1.5"
+                      className="px-3 py-2 rounded-md bg-rose-50 text-rose-800 hover:bg-rose-100 text-xs font-semibold transition flex items-center gap-1.5"
                     >
                       <Upload className="w-3.5 h-3.5" />
                       <span>Unggah Desain</span>
@@ -176,7 +180,7 @@ export default async function CustomerOrdersPage({ searchParams }: Props) {
                   {/* Tombol Tracking */}
                   <Link
                     href={`/orders/${order.id}/tracking`}
-                    className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-1.5"
+                    className="px-4 py-2 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition flex items-center gap-1.5"
                   >
                     <Clock className="w-3.5 h-3.5" />
                     <span>Tracking</span>
@@ -186,7 +190,7 @@ export default async function CustomerOrdersPage({ searchParams }: Props) {
                   <Link
                     href={`/order/${order.productId}?repeatOrderId=${order.id}`}
                     title="Pesan Lagi dengan konfigurasi yang sama"
-                    className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:text-blue-600 hover:bg-slate-50 transition"
+                    className="p-2 rounded-md border border-stone-300 text-slate-600 hover:text-rose-700 hover:bg-rose-50 transition"
                   >
                     <RefreshCw className="w-4 h-4" />
                   </Link>

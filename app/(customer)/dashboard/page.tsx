@@ -54,37 +54,34 @@ export default async function CustomerDashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Welcome Banner */}
-      <div className="p-6 sm:p-8 bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-900 rounded-3xl text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <span className="px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold uppercase tracking-wider backdrop-blur-md">
-            Portal Pelanggan
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold mt-3">
+      <div className="flex flex-col gap-5 rounded-md border border-stone-200 border-l-4 border-l-rose-700 bg-[#f2ecdf] p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8 sm:p-7">
+        <div className="min-w-0">
+          <h1 className="font-serif text-3xl font-semibold leading-tight text-slate-900 sm:text-4xl">
             Halo, {session.user.name}!
           </h1>
-          <p className="text-sm text-blue-100 mt-1 max-w-xl">
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600">
             Pantau status proses produksi pesanan cetak Anda atau buat pesanan custom baru dengan estimasi harga real-time.
           </p>
           {rejectedDesignOrders.length > 0 && (
-            <span className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/25 border border-rose-300/40 text-rose-50 text-xs font-semibold">
+            <span className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800">
               <AlertTriangle className="w-3.5 h-3.5" />
-              {rejectedDesignOrders.length} desain ditolak — perlu diunggah ulang
+              {rejectedDesignOrders.length} desain ditolak, perlu diunggah ulang
             </span>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col gap-2 sm:w-48 sm:shrink-0">
           <Link
             href="/katalog"
-            className="px-5 py-3 rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-bold text-sm shadow-md transition flex items-center gap-2"
+            className="flex items-center justify-center gap-2 rounded-md bg-rose-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-800"
           >
             <Printer className="w-4 h-4" />
             <span>Pesan Cetak Baru</span>
           </Link>
           <Link
             href="/chat"
-            className="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold text-sm border border-white/20 transition flex items-center gap-2"
+            className="flex items-center justify-center gap-2 rounded-md border border-stone-400 bg-transparent px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
           >
             <Sparkles className="w-4 h-4 text-amber-300" />
             <span>AI Assistant</span>
@@ -93,43 +90,43 @@ export default async function CustomerDashboardPage() {
       </div>
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-            <ShoppingBag className="w-6 h-6" />
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        <div className="flex flex-col gap-2 rounded-md border border-stone-200 bg-white p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+          <div className="w-fit rounded-md bg-rose-50 p-2 text-rose-700 sm:p-3">
+            <ShoppingBag className="h-4 w-4 sm:h-6 sm:w-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-medium">Total Pesanan</span>
-            <p className="text-2xl font-bold text-slate-900">{totalOrders}</p>
+            <span className="text-[10px] font-medium text-slate-500 sm:text-xs">Total Pesanan</span>
+            <p className="text-xl font-bold text-slate-900 sm:text-2xl">{totalOrders}</p>
           </div>
         </div>
 
-        <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
-            <Clock className="w-6 h-6" />
+        <div className="flex flex-col gap-2 rounded-md border border-stone-200 bg-white p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+          <div className="w-fit rounded-md bg-amber-50 p-2 text-amber-700 sm:p-3">
+            <Clock className="h-4 w-4 sm:h-6 sm:w-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-medium">Pesanan Berjalan</span>
-            <p className="text-2xl font-bold text-amber-600">{activeOrders}</p>
+            <span className="text-[10px] font-medium text-slate-500 sm:text-xs">Pesanan Berjalan</span>
+            <p className="text-xl font-bold text-amber-700 sm:text-2xl">{activeOrders}</p>
           </div>
         </div>
 
-        <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-            <CheckCircle2 className="w-6 h-6" />
+        <div className="flex flex-col gap-2 rounded-md border border-stone-200 bg-white p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+          <div className="w-fit rounded-md bg-emerald-50 p-2 text-emerald-700 sm:p-3">
+            <CheckCircle2 className="h-4 w-4 sm:h-6 sm:w-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-medium">Pesanan Selesai</span>
-            <p className="text-2xl font-bold text-emerald-600">{completedOrders}</p>
+            <span className="text-[10px] font-medium text-slate-500 sm:text-xs">Pesanan Selesai</span>
+            <p className="text-xl font-bold text-emerald-700 sm:text-2xl">{completedOrders}</p>
           </div>
         </div>
       </div>
 
       {/* Notifikasi Desain Ditolak: CTA Unggah Ulang */}
       {rejectedDesignOrders.length > 0 && (
-        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-5 sm:p-6 space-y-4">
+        <div className="bg-rose-50 border border-rose-200 rounded-md p-4 sm:p-6 space-y-4">
           <div className="flex items-start gap-3">
-            <div className="p-2.5 bg-rose-100 text-rose-600 rounded-xl shrink-0">
+            <div className="p-2.5 bg-rose-100 text-rose-700 rounded-md shrink-0">
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div className="min-w-0">
@@ -147,7 +144,7 @@ export default async function CustomerDashboardPage() {
             {rejectedDesignOrders.map((order) => (
               <div
                 key={order.id}
-                className="p-4 bg-white rounded-2xl border border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="p-4 bg-white rounded-md border border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
                 <div className="min-w-0 space-y-1">
                   <div className="flex items-center gap-2">
@@ -190,7 +187,7 @@ export default async function CustomerDashboardPage() {
       )}
 
       {/* Riwayat Pesanan Terbaru */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-md border border-stone-200 overflow-hidden">
         <div className="p-5 border-b border-slate-100 flex items-center justify-between">
           <div>
             <h2 className="text-base font-bold text-slate-900">
@@ -202,7 +199,7 @@ export default async function CustomerDashboardPage() {
           </div>
           <Link
             href="/orders"
-            className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            className="text-xs font-semibold text-rose-700 hover:text-rose-800 flex items-center gap-1"
           >
             <span>Semua Pesanan</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -220,7 +217,7 @@ export default async function CustomerDashboardPage() {
             </p>
             <Link
               href="/katalog"
-              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-medium"
+              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-rose-700 text-white rounded-md text-xs font-medium"
             >
               Buka Katalog
             </Link>

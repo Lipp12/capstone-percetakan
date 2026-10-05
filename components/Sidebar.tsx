@@ -98,7 +98,7 @@ export default function Sidebar() {
       {/* Top Navigation Progress Bar */}
       {navigatingTo && (
         <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-slate-800 overflow-hidden pointer-events-none">
-          <div className="h-full bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 w-full animate-pulse" />
+          <div className="h-full w-full animate-pulse bg-rose-600" />
         </div>
       )}
 
@@ -154,7 +154,7 @@ export default function Sidebar() {
                     }}
                     className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition duration-150 ${
                       isActive
-                        ? "bg-blue-600 text-white shadow-sm font-semibold"
+                        ? "bg-rose-700 text-white shadow-sm font-semibold"
                         : "text-slate-400 hover:text-white hover:bg-slate-800"
                     }`}
                   >
@@ -167,7 +167,7 @@ export default function Sidebar() {
                       <span>{item.label}</span>
                     </div>
                     {isPending ? (
-                      <span className="text-[10px] text-blue-200 animate-pulse font-normal">
+                        <span className="text-[10px] text-rose-200 animate-pulse font-normal">
                         Memuat...
                       </span>
                     ) : item.badge !== undefined ? (
