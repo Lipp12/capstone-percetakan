@@ -160,7 +160,7 @@ export default function FinishingsClient({ initialFinishings }: Props) {
                       <button
                         type="button"
                         onClick={() => handleDelete(f.id)}
-                        className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition"
+                        className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition"
                         title="Hapus"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -190,7 +190,7 @@ export default function FinishingsClient({ initialFinishings }: Props) {
             </div>
 
             {error && (
-              <p className="text-xs text-rose-600 bg-rose-50 p-2.5 rounded-xl">{error}</p>
+              <p className="text-xs text-blue-600 bg-blue-50 p-2.5 rounded-xl">{error}</p>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">

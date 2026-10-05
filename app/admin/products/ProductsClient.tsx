@@ -230,7 +230,7 @@ export default function ProductsClient({ initialProducts }: Props) {
                       <button
                         type="button"
                         onClick={() => handleDelete(p.id)}
-                        className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition"
+                        className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition"
                         title="Hapus Produk"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -261,7 +261,7 @@ export default function ProductsClient({ initialProducts }: Props) {
             </div>
 
             {error && (
-              <div className="p-3 bg-rose-50 text-rose-700 text-xs rounded-xl flex items-center gap-2">
+              <div className="p-3 bg-blue-50 text-blue-700 text-xs rounded-xl flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -372,7 +372,7 @@ export default function ProductsClient({ initialProducts }: Props) {
                           setImagePreview("");
                           setImageUrl("");
                         }}
-                        className="px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded-xl hover:bg-rose-700 shadow-sm transition"
+                        className="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-xl hover:bg-blue-700 shadow-sm transition"
                       >
                         Hapus
                       </button>

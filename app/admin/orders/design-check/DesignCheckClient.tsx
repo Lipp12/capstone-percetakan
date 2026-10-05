@@ -93,7 +93,7 @@ export default function DesignCheckClient({ initialOrders }: Props) {
           className={`p-4 rounded-2xl text-xs flex items-center gap-2 border ${
             message.type === "success"
               ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-              : "bg-rose-50 text-rose-800 border-rose-200"
+              : "bg-blue-50 text-blue-800 border-blue-200"
           }`}
         >
           {message.type === "success" ? (
@@ -279,7 +279,7 @@ export default function DesignCheckClient({ initialOrders }: Props) {
                     type="button"
                     disabled={loading}
                     onClick={() => handleAction("REJECT")}
-                    className="w-full sm:w-auto py-3 px-5 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full sm:w-auto py-3 px-5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <XCircle className="w-4 h-4" />
                     <span>Tolak Desain (Minta Revisi)</span>

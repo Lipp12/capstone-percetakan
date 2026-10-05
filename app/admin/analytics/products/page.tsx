@@ -58,7 +58,7 @@ export default async function AdminBestSellingProductsPage() {
         </div>
         <div className="rounded-md border border-stone-200 bg-white p-4 sm:p-5">
           <p className="text-xs font-medium text-slate-500">Produk teratas</p>
-          <p className="mt-1 truncate text-lg font-bold text-rose-800">
+          <p className="mt-1 truncate text-lg font-bold text-blue-800">
             {topProduct?.name ?? "Belum ada data"}
           </p>
         </div>
@@ -95,14 +95,14 @@ export default async function AdminBestSellingProductsPage() {
                   </p>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-100 sm:hidden">
                     <div
-                      className="h-full bg-rose-700"
+                      className="h-full bg-blue-700"
                       style={{ width: `${(product.quantity / products[0].quantity) * 100}%` }}
                     />
                   </div>
                 </div>
                 <div className="hidden h-1.5 overflow-hidden rounded-full bg-stone-100 sm:block">
                   <div
-                    className="h-full bg-rose-700"
+                    className="h-full bg-blue-700"
                     style={{ width: `${(product.quantity / products[0].quantity) * 100}%` }}
                   />
                 </div>

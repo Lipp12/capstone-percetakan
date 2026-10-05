@@ -109,16 +109,16 @@ export default function DashboardClient({
 
       {/* Alert Jika Ada Stok Rendah */}
       {lowStockMaterials.length > 0 && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-lg flex items-center justify-between gap-4">
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-rose-600 text-white rounded-xl">
+            <div className="p-2 bg-blue-600 text-white rounded-xl">
               <AlertTriangle className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-sm font-bold text-rose-900">
+              <p className="text-sm font-bold text-blue-900">
                 Persediaan perlu diperiksa
               </p>
-              <p className="text-[11px] text-rose-700">
+              <p className="text-[11px] text-blue-700">
                 Ada {lowStockMaterials.length} bahan baku di bawah batas aman:{" "}
                 {lowStockMaterials.map((m) => m.name).join(", ")}.
               </p>
@@ -126,7 +126,7 @@ export default function DashboardClient({
           </div>
           <Link
             href="/admin/materials/low-stock"
-            className="px-3 py-2 bg-rose-700 text-white text-xs font-bold rounded-md hover:bg-rose-800 shrink-0"
+            className="px-3 py-2 bg-blue-700 text-white text-xs font-bold rounded-md hover:bg-blue-800 shrink-0"
           >
             Cek Stok
           </Link>
@@ -150,7 +150,7 @@ export default function DashboardClient({
             onClick={() => setPeriod(tab.id)}
             className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition ${
               period === tab.id
-                ? "bg-rose-700 text-white"
+                ? "bg-blue-700 text-white"
                 : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             }`}
           >
@@ -166,7 +166,7 @@ export default function DashboardClient({
             <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
               Omzet tercatat
             </span>
-            <div className="p-2 bg-rose-50 text-rose-700 rounded-md">
+            <div className="p-2 bg-blue-50 text-blue-700 rounded-md">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
@@ -222,7 +222,7 @@ export default function DashboardClient({
       <div className="bg-white p-4 sm:p-6 rounded-lg border border-stone-200 space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-slate-100">
           <h3 className="font-bold text-sm text-slate-800 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-rose-700" />
+            <TrendingUp className="w-4 h-4 text-blue-700" />
             <span>Grafik Penjualan Harian</span>
           </h3>
           <span className="text-xs text-slate-400">Nilai penjualan</span>
@@ -277,7 +277,7 @@ export default function DashboardClient({
           </div>
           <Link
             href="/admin/orders"
-            className="text-xs font-semibold text-rose-700 hover:text-rose-800 flex items-center gap-1"
+            className="text-xs font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-1"
           >
             <span>Kelola Semua Pesanan</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -301,7 +301,7 @@ export default function DashboardClient({
                   <td className="py-3 px-4 font-bold text-slate-900">
                     <Link
                       href={`/admin/orders/${o.id}`}
-                      className="hover:text-rose-700 transition"
+                      className="hover:text-blue-700 transition"
                     >
                       {o.orderNumber}
                     </Link>

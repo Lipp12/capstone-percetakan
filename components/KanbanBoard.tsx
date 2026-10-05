@@ -98,7 +98,7 @@ function KanbanColumn({
     <div
       ref={setNodeRef}
       className={`flex flex-col bg-stone-100/80 rounded-lg p-3 sm:p-4 min-h-[420px] border transition snap-start ${
-        isOver ? "border-rose-600 bg-rose-50/50" : "border-stone-200"
+        isOver ? "border-blue-600 bg-blue-50/50" : "border-stone-200"
       }`}
     >
       {/* Header Kolom */}
@@ -150,7 +150,7 @@ function KanbanCard({
         </span>
         <Link
           href={`/admin/orders/${order.id}`}
-          className="text-slate-400 hover:text-rose-700 transition"
+          className="text-slate-400 hover:text-blue-700 transition"
           title="Buka detail order"
         >
           <ExternalLink className="w-3.5 h-3.5" />
