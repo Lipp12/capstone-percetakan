@@ -78,7 +78,7 @@ export default function RegisterPage() {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
         {/* Logo & Header */}
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl border border-blue-200 bg-blue-50 text-blue-700 mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl border border-rose-200 bg-rose-50 text-rose-700 mb-4">
             <Printer className="w-8 h-8" />
           </div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">
@@ -121,7 +121,7 @@ export default function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Andi Pratama"
-                className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition"
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-600 focus:border-transparent outline-none transition"
               />
             </div>
           </div>
@@ -140,7 +140,7 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="nama@gmail.com"
-                className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition"
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-600 focus:border-transparent outline-none transition"
               />
             </div>
           </div>
@@ -160,7 +160,7 @@ export default function RegisterPage() {
                 value={phone}
                 onChange={(e) => handlePhoneChange(e.target.value)}
                 placeholder="081234567890"
-                className={`w-full pl-10 pr-4 py-2.5 text-sm border rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition ${
+                className={`w-full pl-10 pr-4 py-2.5 text-sm border rounded-xl focus:ring-2 focus:ring-rose-600 focus:border-transparent outline-none transition ${
                   phoneError
                     ? "border-rose-400 bg-rose-50/40"
                     : "border-slate-300"
@@ -190,7 +190,7 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition"
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-600 focus:border-transparent outline-none transition"
               />
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading || success}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-sm shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
+            className="w-full py-3 px-4 bg-rose-700 hover:bg-rose-800 text-white font-medium rounded-xl text-sm shadow-md shadow-rose-500/20 transition flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
           >
             {loading ? (
               <>
@@ -219,7 +219,7 @@ export default function RegisterPage() {
           Sudah memiliki akun?{" "}
           <Link
             href="/login"
-            className="font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+            className="font-semibold text-rose-700 hover:text-rose-800 hover:underline"
           >
             Masuk di sini
           </Link>
