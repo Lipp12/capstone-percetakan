@@ -51,31 +51,31 @@ interface Props {
 const COLUMNS = [
   {
     id: "DESIGN_APPROVED",
-    title: "To Do (ACC)",
-    desc: "Siap antre mesin",
+    title: "Siap dicetak",
+    desc: "Desain dan pembayaran beres",
     icon: Clock,
-    color: "border-teal-500 bg-teal-50/50 text-teal-800",
+    color: "border-cyan-600 bg-cyan-50/60 text-cyan-900",
   },
   {
     id: "IN_PRODUCTION",
-    title: "Printing",
-    desc: "Mesin mencetak",
+    title: "Proses cetak",
+    desc: "Sedang dikerjakan mesin",
     icon: Printer,
-    color: "border-orange-500 bg-orange-50/50 text-orange-800",
+    color: "border-orange-600 bg-orange-50/60 text-orange-900",
   },
   {
     id: "FINISHING",
     title: "Finishing",
     desc: "Potong, lem, mata ayam",
     icon: Scissors,
-    color: "border-purple-500 bg-purple-50/50 text-purple-800",
+    color: "border-pink-600 bg-pink-50/60 text-pink-900",
   },
   {
     id: "READY",
-    title: "Done / Siap",
-    desc: "Siap ambil / selesai",
+    title: "Siap diambil",
+    desc: "Finishing selesai",
     icon: CheckCircle2,
-    color: "border-emerald-500 bg-emerald-50/50 text-emerald-800",
+    color: "border-emerald-600 bg-emerald-50/60 text-emerald-900",
   },
 ];
 
@@ -97,8 +97,8 @@ function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col bg-slate-100/80 rounded-3xl p-4 min-h-[500px] border transition ${
-        isOver ? "border-blue-500 bg-blue-50/30" : "border-slate-200"
+      className={`flex flex-col bg-stone-100/80 rounded-lg p-3 sm:p-4 min-h-[420px] border transition snap-start ${
+        isOver ? "border-rose-600 bg-rose-50/50" : "border-stone-200"
       }`}
     >
       {/* Header Kolom */}
@@ -143,14 +143,14 @@ function KanbanCard({
   onMoveQuick: (orderId: string, targetStatus: string) => void;
 }) {
   return (
-    <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition space-y-2.5">
+    <div className="bg-white p-4 rounded-lg border border-stone-200 shadow-sm hover:shadow-md transition space-y-2.5">
       <div className="flex items-center justify-between">
         <span className="font-extrabold text-xs text-slate-900">
           {order.orderNumber}
         </span>
         <Link
           href={`/admin/orders/${order.id}`}
-          className="text-slate-400 hover:text-blue-600 transition"
+          className="text-slate-400 hover:text-rose-700 transition"
           title="Buka detail order"
         >
           <ExternalLink className="w-3.5 h-3.5" />
@@ -226,7 +226,7 @@ function KanbanCard({
           <button
             type="button"
             onClick={() => onMoveQuick(order.id, "FINISHING")}
-            className="px-2 py-1 text-[10px] font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg flex items-center gap-1 ml-auto"
+            className="px-2 py-1 text-[10px] font-bold text-pink-800 bg-pink-50 hover:bg-pink-100 rounded-md flex items-center gap-1 ml-auto"
           >
             <span>Ke Finishing</span>
             <ChevronRight className="w-3 h-3" />
@@ -364,36 +364,34 @@ export default function KanbanBoard({ initialOrders }: Props) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        {COLUMNS.map((col) => {
-          const colOrders = orders.filter((o) => {
-            if (col.id === "READY") {
-              return o.status === "READY" || o.status === "COMPLETED";
-            }
-            if (col.id === "DESIGN_APPROVED") {
-              // Kolom "To Do (ACC)" hanya untuk pesanan yang:
-              // 1. desainnya sudah disetujui, dan
-              // 2. pembayarannya sudah lunas.
-              // Status DESIGN_APPROVED bisa berasal dari board sebelum aturan ini,
-              // jadi tetap divalidasi lewat flag dari server.
-              return (
-                o.status === "DESIGN_APPROVED" &&
-                o.isDesignApproved !== false &&
-                o.isPaymentPaid !== false
-              );
-            }
-            return o.status === col.id;
-          });
-          return (
-            <KanbanColumn
-              key={col.id}
-              col={col}
-              orders={colOrders}
-              onMoveQuick={updateOrderStatus}
-            />
-          );
-        })}
-      </div>
+        <div className="overflow-x-auto pb-3 -mx-1 px-1">
+          <div className="grid grid-cols-4 gap-3 sm:gap-4 min-w-[960px] xl:min-w-0">
+            {COLUMNS.map((col) => {
+              const colOrders = orders.filter((o) => {
+                if (col.id === "READY") {
+                  return o.status === "READY" || o.status === "COMPLETED";
+                }
+                if (col.id === "DESIGN_APPROVED") {
+                  // Kolom "Siap dicetak" tetap dibatasi validasi desain dan pembayaran.
+                  return (
+                    o.status === "DESIGN_APPROVED" &&
+                    o.isDesignApproved !== false &&
+                    o.isPaymentPaid !== false
+                  );
+                }
+                return o.status === col.id;
+              });
+            return (
+                <KanbanColumn
+                  key={col.id}
+                  col={col}
+                  orders={colOrders}
+                  onMoveQuick={updateOrderStatus}
+                />
+            );
+          })}
+          </div>
+        </div>
 
       <DragOverlay>
         {activeOrder ? (

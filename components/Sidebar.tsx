@@ -20,6 +20,8 @@ import {
   ArrowLeft,
   Printer,
   Loader2,
+  Menu,
+  X,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -27,10 +29,12 @@ export default function Sidebar() {
   const { data: session } = useSession();
   const [lowStockCount, setLowStockCount] = useState(0);
   const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Reset status navigasi ketika halaman tujuan selesai dimuat
   useEffect(() => {
     setNavigatingTo(null);
+    setMobileMenuOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -90,7 +94,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0 min-h-screen border-r border-slate-800 relative">
+    <aside className="relative z-30 flex w-full shrink-0 flex-col border-b border-stone-200 bg-slate-900 text-slate-300 md:min-h-screen md:w-64 md:border-b-0 md:border-r md:border-slate-800">
       {/* Top Navigation Progress Bar */}
       {navigatingTo && (
         <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-slate-800 overflow-hidden pointer-events-none">
@@ -99,24 +103,33 @@ export default function Sidebar() {
       )}
 
       {/* Brand Header */}
-      <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+      <div className="p-3 sm:p-4 border-b border-slate-800 flex items-center justify-between">
         <Link href="/admin/dashboard" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/30">
+          <div className="w-9 h-9 rounded-md bg-rose-700 text-white flex items-center justify-center">
             <Printer className="w-5 h-5" />
           </div>
           <div>
             <span className="font-bold text-base text-white tracking-tight leading-none block">
-              CetakKilat
+              Faeyza Printing
             </span>
-            <span className="text-[10px] text-blue-400 font-medium tracking-wider uppercase">
-              Admin Copilot
+            <span className="text-[10px] text-rose-300 font-medium tracking-wider uppercase">
+              Sistem Manajemen
             </span>
           </div>
         </Link>
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen((open) => !open)}
+          aria-label={mobileMenuOpen ? "Tutup navigasi" : "Buka navigasi"}
+          aria-expanded={mobileMenuOpen}
+          className="p-2 text-slate-300 hover:text-white md:hidden"
+        >
+          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
       </div>
 
       {/* Navigation Links */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-6">
+      <div className={`${mobileMenuOpen ? "flex" : "hidden"} flex-1 flex-col gap-6 overflow-y-auto p-3 md:flex`}>
         {navGroups.map((group, idx) => (
           <div key={idx}>
             <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
@@ -134,6 +147,7 @@ export default function Sidebar() {
                     href={item.href}
                     prefetch={true}
                     onClick={() => {
+                      setMobileMenuOpen(false);
                       if (pathname !== item.href) {
                         setNavigatingTo(item.href);
                       }
@@ -170,7 +184,7 @@ export default function Sidebar() {
       </div>
 
       {/* Footer Info & Logout */}
-      <div className="p-3 border-t border-slate-800 space-y-2">
+      <div className={`${mobileMenuOpen ? "block" : "hidden"} space-y-2 border-t border-slate-800 p-3 md:block`}>
         <Link
           href="/dashboard"
           className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition"

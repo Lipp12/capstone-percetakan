@@ -3,7 +3,7 @@ import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
-  title: "Sistem Percetakan Online - Cetak Cepat & Berkualitas",
+  title: "Faeyza Printing | Sistem Percetakan",
   description:
     "Layanan cetak banner, poster, kartu nama, brosur, dan stiker secara online dengan estimasi harga real-time dan tracking pesanan.",
 };
@@ -15,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id">
-      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
+      <body className="min-h-screen bg-stone-50 text-slate-900 antialiased selection:bg-rose-700 selection:text-white">
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

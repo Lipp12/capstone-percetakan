@@ -51,14 +51,11 @@ export default async function AdminProductionPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
-            Lantai Produksi & Workshop
-          </span>
-          <h1 className="text-2xl font-black text-slate-900 mt-1">
-            Kanban Antrean Mesin Cetak
+          <h1 className="text-2xl font-bold text-slate-900">
+            Antrean produksi
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Geser kartu atau klik tombol panah untuk memindahkan status pengerjaan pesanan. Stok material otomatis terpotong saat pesanan masuk tahap 'Printing'.
+          <p className="text-sm text-slate-500 mt-1">
+            Pantau alur cetak, finishing, dan pesanan yang siap diambil.
           </p>
         </div>
       </div>

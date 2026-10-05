@@ -27,15 +27,15 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
+            <div className="w-10 h-10 rounded-md bg-rose-700 text-white flex items-center justify-center">
               <Printer className="w-6 h-6" />
             </div>
             <div>
               <span className="font-bold text-lg text-slate-900 tracking-tight leading-none block">
-                CetakKilat
+                Faeyza Printing
               </span>
-              <span className="text-[11px] text-blue-600 font-medium tracking-wide">
-                Percetakan Online
+              <span className="text-[11px] text-rose-700 font-medium tracking-wide">
+                Percetakan
               </span>
             </div>
           </Link>
@@ -52,7 +52,7 @@ export default function Navbar() {
                   href={link.href}
                   className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium transition ${
                     isActive
-                      ? "bg-blue-50 text-blue-600"
+                      ? "bg-rose-50 text-rose-800"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   }`}
                 >
@@ -72,7 +72,7 @@ export default function Navbar() {
                 {isAdminOrOperator && (
                   <Link
                     href="/admin/dashboard"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100 transition"
                   >
                     <LayoutDashboard className="w-3.5 h-3.5" />
                     Panel Admin
@@ -104,13 +104,13 @@ export default function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-blue-600 transition"
+                  className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-rose-700 transition"
                 >
                   Masuk
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm transition"
+                  className="px-4 py-2 text-sm font-medium bg-rose-700 hover:bg-rose-800 text-white rounded-md transition"
                 >
                   Daftar
                 </Link>
@@ -142,7 +142,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100"
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium ${pathname.startsWith(link.href) ? "bg-rose-50 text-rose-800" : "text-slate-700 hover:bg-slate-100"}`}
               >
                 <Icon className="w-5 h-5 text-slate-500" />
                 {link.label}
@@ -154,7 +154,7 @@ export default function Navbar() {
             <Link
               href="/admin/dashboard"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-purple-700 bg-purple-50"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-rose-800 bg-rose-50"
             >
               <LayoutDashboard className="w-5 h-5" />
               Panel Admin
@@ -182,14 +182,14 @@ export default function Navbar() {
                 <Link
                   href="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-center py-2 text-sm font-medium border border-slate-200 rounded-xl"
+                  className="text-center py-2 text-sm font-medium border border-slate-200 rounded-md"
                 >
                   Masuk
                 </Link>
                 <Link
                   href="/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-center py-2 text-sm font-medium bg-blue-600 text-white rounded-xl"
+                  className="text-center py-2 text-sm font-medium bg-rose-700 text-white rounded-md"
                 >
                   Daftar
                 </Link>
