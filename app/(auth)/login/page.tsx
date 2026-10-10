@@ -4,7 +4,7 @@ import { useState } from "react";
 import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Printer, Lock, Mail, ArrowRight, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Printer, Lock, Mail, ArrowRight, ArrowLeft, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -61,7 +61,16 @@ export default function LoginPage() {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4 py-12">
+      <div className="max-w-md w-full mb-5">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-rose-700 transition"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Kembali ke Beranda</span>
+        </Link>
+      </div>
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
         {/* Logo & Header */}
         <div className="text-center">
