@@ -46,7 +46,6 @@ export default function OrderDetailClient({ order: initialOrder }: Props) {
   const [newStatus, setNewStatus] = useState(initialOrder.status);
   const [notes, setNotes] = useState("");
   const [courier, setCourier] = useState("");
-  const [trackingNumber, setTrackingNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -64,7 +63,6 @@ export default function OrderDetailClient({ order: initialOrder }: Props) {
           status: targetStatus,
           notes: customNotes || notes,
           courier: courier || undefined,
-          trackingNumber: trackingNumber || undefined,
         }),
       });
 
@@ -280,7 +278,7 @@ export default function OrderDetailClient({ order: initialOrder }: Props) {
             <span>Perbarui Status & Pengiriman Pesanan</span>
           </h3>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
               <span className="text-slate-400 mb-1.5 block font-semibold">Ubah Status Ke:</span>
               <select
@@ -297,28 +295,16 @@ export default function OrderDetailClient({ order: initialOrder }: Props) {
             </div>
 
             {order.pickupMethod === "DELIVERY" && (
-              <>
-                <div>
-                  <span className="text-slate-400 mb-1.5 block font-semibold">Nama Kurir:</span>
-                  <input
-                    type="text"
-                    value={courier}
-                    onChange={(e) => setCourier(e.target.value)}
-                    placeholder="Contoh: JNE / SiCepat / Kurir Internal"
-                    className="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <span className="text-slate-400 mb-1.5 block font-semibold">Nomor Resi:</span>
-                  <input
-                    type="text"
-                    value={trackingNumber}
-                    onChange={(e) => setTrackingNumber(e.target.value)}
-                    placeholder="Contoh: JNE88291024"
-                    className="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </>
+              <div>
+                <span className="text-slate-400 mb-1.5 block font-semibold">Nama Kurir:</span>
+                <input
+                  type="text"
+                  value={courier}
+                  onChange={(e) => setCourier(e.target.value)}
+                  placeholder="Contoh: JNE / SiCepat / Kurir Internal"
+                  className="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             )}
           </div>
 

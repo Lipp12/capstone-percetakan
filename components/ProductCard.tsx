@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatRupiah } from "@/lib/utils";
-import { ArrowRight, Layers, Tag } from "lucide-react";
+import { ArrowRight, Layers } from "lucide-react";
+import ProductImage from "./ProductImage";
 
 interface ProductProps {
   product: {
@@ -26,15 +27,13 @@ export default function ProductCard({ product }: ProductProps) {
       {/* Gambar Produk */}
       <div className="relative h-44 sm:h-48 w-full bg-stone-100 overflow-hidden">
         {product.imageUrl ? (
-          <img
+          <ProductImage
             src={product.imageUrl}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-rose-700 bg-rose-50">
-            <Tag className="w-9 h-9" />
-          </div>
+          <ProductImage src={null} alt={product.name} />
         )}
         <span className="absolute top-3 left-3 px-2.5 py-1 text-[11px] font-semibold bg-white/95 text-slate-800 rounded-md shadow-sm">
           {product.category}

@@ -213,7 +213,7 @@ async function main() {
       category: "Indoor",
       basePrice: 12000,
       unit: "pcs",
-      imageUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=600&q=80",
+      imageUrl: "https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&w=600&q=80",
     },
   });
 

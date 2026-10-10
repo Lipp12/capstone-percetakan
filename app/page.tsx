@@ -32,29 +32,29 @@ export default async function HomePage() {
           className="absolute inset-0 h-full w-full object-cover object-center"
         />
         <div className="absolute inset-0 bg-rose-950/60" />
-        <div className="relative z-10 mx-auto w-full max-w-7xl">
-          <div className="max-w-3xl">
+        <div className="relative z-10 mx-auto w-full max-w-4xl text-center">
+          <div className="mx-auto max-w-3xl">
             <p className="mb-3 text-sm font-medium text-rose-100">Percetakan untuk usaha dan kebutuhan personal</p>
             <h1 className="font-serif text-4xl font-semibold leading-tight sm:text-6xl">
               Faeyza Printing
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/90 sm:text-lg">
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-white/90 sm:text-lg">
               Spanduk, poster, kartu nama, dan kebutuhan cetak lainnya. Atur ukuran, pilih bahan, lalu pantau pesanan sampai siap diambil.
             </p>
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-            <Link
-              href="/katalog"
-              className="flex items-center gap-2 rounded-md bg-rose-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-800"
-            >
-              <span>Pilih produk cetak</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/orders"
-              className="rounded-md border border-white/60 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Lacak pesanan
-            </Link>
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/katalog"
+                className="flex items-center gap-2 rounded-md bg-rose-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-800"
+              >
+                <span>Pilih produk cetak</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/orders"
+                className="rounded-md border border-white/60 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                Lacak pesanan
+              </Link>
             </div>
           </div>
         </div>

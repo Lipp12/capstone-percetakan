@@ -30,11 +30,10 @@ export async function POST(
 
     const orderId = params.id;
     const body = await req.json();
-    const { status, notes, courier, trackingNumber } = body as {
+    const { status, notes, courier } = body as {
       status: string;
       notes?: string;
       courier?: string;
-      trackingNumber?: string;
     };
 
     if (!status) {
@@ -127,8 +126,8 @@ export async function POST(
 
     // Susun catatan log status
     let statusNotes = notes || `Status diperbarui menjadi ${status}`;
-    if (courier || trackingNumber) {
-      statusNotes += ` [Kurir: ${courier || "-"}, No Resi: ${trackingNumber || "-"}]`;
+    if (courier) {
+      statusNotes += ` [Kurir: ${courier}]`;
     }
 
     // Update pesanan & buat history

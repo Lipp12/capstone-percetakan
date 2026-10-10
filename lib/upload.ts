@@ -7,6 +7,24 @@ const isCloudinaryConfigured =
   Boolean(process.env.CLOUDINARY_API_KEY) &&
   Boolean(process.env.CLOUDINARY_API_SECRET);
 
+// Fallback lokal hanya aman di development. Filesystem Railway/Heroku/Vercel
+// bersifat ephemeral: file di public/uploads/ hilang setiap restart/deploy.
+// Di production kita sengaja gagal cepat daripada diam-diam kehilangan file.
+const isProduction = process.env.NODE_ENV === "production";
+
+if (!isCloudinaryConfigured && isProduction) {
+  console.warn(
+    [
+      "",
+      "[upload] PERINGATAN: CLOUDINARY_CLOUD_NAME / API_KEY / API_SECRET belum di-set.",
+      "[upload] Semua upload akan ditulis ke public/uploads/ (filesystem lokal).",
+      "[upload] Di production file tersebut HILANG setiap kali app di-restart.",
+      "[upload] Fix: set ketiga variable Cloudinary di Railway dashboard.",
+      "",
+    ].join("\n")
+  );
+}
+
 if (isCloudinaryConfigured) {
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

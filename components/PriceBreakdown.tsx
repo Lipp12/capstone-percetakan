@@ -1,6 +1,6 @@
 import { PricingBreakdown } from "@/lib/pricing";
 import { formatRupiah } from "@/lib/utils";
-import { Calculator, CheckCircle2 } from "lucide-react";
+import { Calculator } from "lucide-react";
 
 interface Props {
   breakdown: PricingBreakdown;
@@ -19,8 +19,7 @@ export default function PriceBreakdown({
 
   return (
     <div className="bg-slate-900 text-white p-6 rounded-3xl shadow-xl space-y-4">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 pb-3 border-b border-slate-800">
           <div className="p-1.5 bg-blue-600/30 text-blue-400 rounded-lg">
             <Calculator className="w-4 h-4" />
           </div>
@@ -28,10 +27,6 @@ export default function PriceBreakdown({
             Estimasi Harga Real-Time
           </span>
         </div>
-        <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">
-          Auto-Quoting
-        </span>
-      </div>
 
       {/* Rincian Komponen Biaya */}
       <div className="space-y-2 text-xs text-slate-300">
@@ -85,19 +80,13 @@ export default function PriceBreakdown({
       </div>
 
       {/* Total Akhir */}
-      <div className="pt-4 border-t border-slate-800 flex items-baseline justify-between">
-        <div>
-          <span className="text-xs text-slate-400 block font-medium">
-            Total Estimasi
-          </span>
-          <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300">
-            {formatRupiah(breakdown.total)}
-          </span>
-        </div>
-        <div className="flex items-center gap-1 text-[11px] text-emerald-400">
-          <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>Harga Akurat</span>
-        </div>
+      <div className="pt-4 border-t border-slate-800">
+        <span className="text-xs text-slate-400 block font-medium">
+          Total Estimasi
+        </span>
+        <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300">
+          {formatRupiah(breakdown.total)}
+        </span>
       </div>
     </div>
   );
