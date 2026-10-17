@@ -12,16 +12,13 @@ import {
 type SidebarContextValue = {
   /** Sidebar dalam keadaan expanded (desktop >= xl). */
   isExpanded: boolean;
-  /** Sidebar sedang di-hover saat collapsed (desktop >= xl). */
-  isHovered: boolean;
   /** Drawer terbuka di layar kecil (< xl). */
   isMobileOpen: boolean;
-  /** Sidebar yangEffective terlihat: expanded, hovered, atau mobile drawer. */
+  /** Sidebar yang efektif terlihat: expanded atau mobile drawer. */
   isOpen: boolean;
   toggleSidebar: () => void;
   openMobile: () => void;
   closeMobile: () => void;
-  setIsHovered: (value: boolean) => void;
 };
 
 const SidebarContext = createContext<SidebarContextValue | null>(null);
@@ -33,7 +30,6 @@ export function SidebarProvider({
 }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
 
   const openMobile = useCallback(() => setIsMobileOpen(true), []);
   const closeMobile = useCallback(() => setIsMobileOpen(false), []);
@@ -68,22 +64,13 @@ export function SidebarProvider({
   const value = useMemo<SidebarContextValue>(
     () => ({
       isExpanded,
-      isHovered,
       isMobileOpen,
-      isOpen: isExpanded || isHovered || isMobileOpen,
+      isOpen: isExpanded || isMobileOpen,
       toggleSidebar,
       openMobile,
       closeMobile,
-      setIsHovered,
     }),
-    [
-      isExpanded,
-      isHovered,
-      isMobileOpen,
-      toggleSidebar,
-      openMobile,
-      closeMobile,
-    ],
+    [isExpanded, isMobileOpen, toggleSidebar, openMobile, closeMobile],
   );
 
   return (

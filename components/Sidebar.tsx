@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ArrowLeft,
   ChevronDown,
   LogOut,
   Printer,
@@ -18,8 +17,7 @@ import { useSidebar } from "@/components/SidebarContext";
 export default function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const { isExpanded, isHovered, isMobileOpen, isOpen, setIsHovered, closeMobile } =
-    useSidebar();
+  const { isMobileOpen, isOpen, closeMobile } = useSidebar();
 
   const [lowStockCount, setLowStockCount] = useState(0);
   const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
@@ -192,14 +190,11 @@ export default function Sidebar() {
             className={cn(
               "group menu-item",
               isActive ? "menu-item-active" : "menu-item-inactive",
-              !isOpen && "xl:justify-center xl:px-0",
             )}
           >
             {renderIcon(item.icon, isActive)}
-            <span className={cn("truncate", !isOpen && "xl:hidden")}>
-              {item.label}
-            </span>
-            {isPending && isOpen ? (
+            <span className="truncate">{item.label}</span>
+            {isPending ? (
               <span className="ms-auto h-2 w-2 animate-pulse rounded-full bg-brand-500" />
             ) : null}
           </Link>
@@ -221,41 +216,31 @@ export default function Sidebar() {
           className={cn(
             "group menu-item",
             isParentActive ? "menu-item-active" : "menu-item-inactive",
-            !isOpen && "xl:justify-center xl:px-0",
           )}
         >
           {renderIcon(item.icon, isParentActive)}
-          <span className={cn("truncate", !isOpen && "xl:hidden")}>
-            {item.label}
-          </span>
-          {/* Chevron disembunyikan saat collapsed supaya baris tidak
-              melebar dan memunculkan scrollbar horizontal. */}
+          <span className="truncate">{item.label}</span>
           <ChevronDown
             className={cn(
-              "menu-item-chevron hidden xl:block",
-              isOpenMenu
-                ? "menu-item-chevron-active"
-                : "menu-item-chevron-inactive",
-              !isOpen && "xl:hidden",
+              "menu-item-chevron ms-auto hidden xl:block",
+              isOpenMenu ? "menu-item-chevron-active" : "menu-item-chevron-inactive",
             )}
             aria-hidden
           />
         </button>
 
-        {isOpen ? (
-          <div
-            id={`submenu-${item.label}`}
-            ref={(el) => {
-              subMenuRefs.current[item.label] = el;
-            }}
-            className="no-scrollbar overflow-hidden transition-[height] duration-300 ease-in-out"
-            style={{ height: isOpenMenu ? `${height}px` : "0px" }}
-          >
-            <ul className="mt-1 space-y-1 ps-3 xl:ps-9">
-              {(item.children ?? []).map(renderChild)}
-            </ul>
-          </div>
-        ) : null}
+        <div
+          id={`submenu-${item.label}`}
+          ref={(el) => {
+            subMenuRefs.current[item.label] = el;
+          }}
+          className="no-scrollbar overflow-hidden transition-[height] duration-300 ease-in-out"
+          style={{ height: isOpenMenu ? `${height}px` : "0px" }}
+        >
+          <ul className="mt-1 space-y-1 ps-3 xl:ps-9">
+            {(item.children ?? []).map(renderChild)}
+          </ul>
+        </div>
       </li>
     );
   };
@@ -263,22 +248,19 @@ export default function Sidebar() {
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 start-0 z-50 flex h-screen flex-col border-e border-ink-200 bg-white transition-[width,transform] duration-300 ease-in-out dark:border-ink-800 dark:bg-ink-900",
-        isOpen ? "w-sidebar" : "w-sidebar-collapsed",
+        "fixed inset-y-0 start-0 z-50 flex h-screen flex-col overflow-hidden border-e border-ink-200 bg-white transition-[width,transform] duration-300 ease-in-out dark:border-ink-800 dark:bg-ink-900",
+        // Saat dipinjamkan di desktop, sidebar benar-benar hilang (bukan rail ikon).
+        isOpen ? "w-sidebar" : "w-0",
         isMobileOpen ? "translate-x-0" : "-translate-x-full",
         "xl:translate-x-0",
+        !isOpen && "xl:pointer-events-none border-e-0",
       )}
-      onMouseEnter={() => !isExpanded && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       aria-label="Navigasi admin"
+      // `inert` membuat link di dalam sidebar yang tersembunyi tidak bisa di-tab.
+      {...(!isOpen ? ({ inert: "" } as Record<string, string>) : {})}
     >
       {/* Brand */}
-      <div
-        className={cn(
-          "flex h-20 shrink-0 items-center border-b border-ink-200 px-5 dark:border-ink-800",
-          !isOpen && "xl:justify-center xl:px-0",
-        )}
-      >
+      <div className="flex h-20 shrink-0 items-center border-b border-ink-200 px-5 dark:border-ink-800">
         <Link
           href="/admin/dashboard"
           onClick={() => closeMobile()}
@@ -287,16 +269,14 @@ export default function Sidebar() {
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">
             <Printer className="h-5 w-5" aria-hidden />
           </span>
-          {isOpen ? (
-            <span className="min-w-0">
-              <span className="block truncate text-theme-sm font-semibold tracking-tight text-ink-900 dark:text-white">
-                Faeyza Printing
-              </span>
-              <span className="block truncate text-[10px] font-medium uppercase tracking-wider text-brand-600 dark:text-brand-400">
-                Sistem Manajemen
-              </span>
+          <span className="min-w-0">
+            <span className="block truncate text-theme-sm font-semibold tracking-tight text-ink-900 dark:text-white">
+              Faeyza Printing
             </span>
-          ) : null}
+            <span className="block truncate text-[10px] font-medium uppercase tracking-wider text-brand-600 dark:text-brand-400">
+              Sistem Manajemen
+            </span>
+          </span>
         </Link>
       </div>
 
@@ -305,14 +285,7 @@ export default function Sidebar() {
         <div className="flex flex-col gap-8">
           {adminNav.map((group) => (
             <div key={group.title}>
-              {isOpen ? (
-                <h2 className="menu-group-label">{group.title}</h2>
-              ) : (
-                <div
-                  className="mx-auto mb-4 h-px w-8 bg-ink-200 dark:bg-ink-700"
-                  aria-hidden
-                />
-              )}
+              <h2 className="menu-group-label">{group.title}</h2>
               <ul className="flex flex-col gap-1">
                 {group.items.map(renderItem)}
               </ul>
@@ -321,53 +294,27 @@ export default function Sidebar() {
         </div>
       </nav>
 
-      {/* Footer: portal pelanggan + user */}
-      <div className="shrink-0 space-y-2 border-t border-ink-200 p-4 dark:border-ink-800">
-        <Link
-          href="/dashboard"
-          onClick={() => closeMobile()}
-          className={cn(
-            "group menu-item text-ink-600 hover:text-ink-900 dark:text-ink-400 dark:hover:text-white",
-            !isOpen && "xl:justify-center xl:px-0",
-          )}
-        >
-          <ArrowLeft className="h-[18px] w-[18px] shrink-0" aria-hidden />
-          {isOpen ? (
-            <span className="truncate">Ke Portal Pelanggan</span>
-          ) : null}
-        </Link>
-
-        {isOpen ? (
-          <div className="flex items-center justify-between rounded-xl border border-ink-200 bg-ink-50 p-3 dark:border-ink-800 dark:bg-white/5">
-            <div className="min-w-0 text-start leading-tight">
-              <span className="block truncate text-theme-xs font-semibold text-ink-900 dark:text-white">
-                {session?.user?.name || "Admin"}
-              </span>
-              <span className="block truncate text-[10px] font-medium uppercase tracking-wider text-ink-400">
-                {(session?.user as { role?: string })?.role || "Admin"}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => signOut({ callbackUrl: "/login" })}
-              title="Keluar"
-              className="ms-2 shrink-0 rounded-lg p-1.5 text-ink-400 transition-colors hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-white/10"
-            >
-              <LogOut className="h-4 w-4" aria-hidden />
-              <span className="sr-only">Keluar</span>
-            </button>
+      {/* Footer: user aktif + keluar */}
+      <div className="shrink-0 border-t border-ink-200 p-4 dark:border-ink-800">
+        <div className="flex items-center justify-between rounded-xl border border-ink-200 bg-ink-50 p-3 dark:border-ink-800 dark:bg-white/5">
+          <div className="min-w-0 text-start leading-tight">
+            <span className="block truncate text-theme-xs font-semibold text-ink-900 dark:text-white">
+              {session?.user?.name || "Admin"}
+            </span>
+            <span className="block truncate text-[10px] font-medium uppercase tracking-wider text-ink-400">
+              {(session?.user as { role?: string })?.role || "Admin"}
+            </span>
           </div>
-        ) : (
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/login" })}
             title="Keluar"
-            className="mx-auto flex rounded-lg p-2 text-ink-400 transition-colors hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-white/10"
+            className="ms-2 shrink-0 rounded-lg p-1.5 text-ink-400 transition-colors hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-white/10"
           >
             <LogOut className="h-4 w-4" aria-hidden />
             <span className="sr-only">Keluar</span>
           </button>
-        )}
+        </div>
       </div>
     </aside>
   );

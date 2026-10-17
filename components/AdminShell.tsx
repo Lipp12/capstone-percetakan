@@ -6,8 +6,8 @@ import Sidebar from "@/components/Sidebar";
 import AdminHeader from "@/components/AdminHeader";
 
 /**
- * Shell admin: sidebar fixed + topbar, dengan konten yang bergeser mengikuti
- * lebar sidebar (expanded / collapsed / hover).
+ * Shell admin: sidebar fixed + topbar. Saat navigasi dipinjamkan, sidebar
+ * hilang sepenuhnya dan konten memakai lebar penuh layar.
  */
 export default function AdminShell({
   children,
@@ -35,7 +35,7 @@ export default function AdminShell({
       <div
         className={cn(
           "flex h-full flex-col transition-[padding] duration-300 ease-in-out",
-          isOpen ? "xl:ps-sidebar" : "xl:ps-sidebar-collapsed",
+          isOpen ? "xl:ps-sidebar" : "xl:ps-0",
         )}
       >
         <AdminHeader />

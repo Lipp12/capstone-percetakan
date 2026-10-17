@@ -105,7 +105,11 @@ export default function AdminHeader() {
           type="button"
           onClick={toggleSidebar}
           aria-label={
-            isMobileOpen ? "Tutup navigasi" : "Buka / ciutkan navigasi"
+            isMobileOpen
+              ? "Tutup navigasi"
+              : isExpanded
+                ? "Ciutkan navigasi"
+                : "Tampilkan navigasi"
           }
           className="flex h-10 w-10 items-center justify-center rounded-xl text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-900 dark:text-ink-400 dark:hover:bg-white/10 dark:hover:text-white"
         >
@@ -213,14 +217,6 @@ export default function AdminHeader() {
                 </p>
                 <p className="truncate text-[11px] text-ink-400">{userRole}</p>
               </div>
-              <Link
-                href="/dashboard"
-                onClick={() => setIsUserOpen(false)}
-                className="flex items-center gap-2.5 px-4 py-2.5 text-theme-sm text-ink-600 transition-colors hover:bg-ink-50 dark:text-ink-300 dark:hover:bg-white/5"
-              >
-                <UserRound className="h-4 w-4" aria-hidden />
-                Ke Portal Pelanggan
-              </Link>
               <button
                 type="button"
                 onClick={() => signOut({ callbackUrl: "/login" })}

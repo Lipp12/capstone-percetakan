@@ -5,7 +5,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
-import { ShoppingBag, Clock, CheckCircle2, ArrowRight, Printer, Sparkles, RefreshCw, AlertTriangle, Upload } from "lucide-react";
+import { ShoppingBag, Clock, CheckCircle2, ArrowRight, Printer, RefreshCw, AlertTriangle, Upload } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -83,7 +83,6 @@ export default async function CustomerDashboardPage() {
             href="/chat"
             className="flex items-center justify-center gap-2 rounded-md border border-stone-400 bg-transparent px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
           >
-            <Sparkles className="w-4 h-4 text-amber-300" />
             <span>AI Assistant</span>
           </Link>
         </div>
