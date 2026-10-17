@@ -93,7 +93,7 @@ export default function DesignCheckClient({ initialOrders }: Props) {
           className={`p-4 rounded-2xl text-xs flex items-center gap-2 border ${
             message.type === "success"
               ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-              : "bg-blue-50 text-blue-800 border-blue-200"
+              : "bg-brand-50 text-brand-800 border-brand-200"
           }`}
         >
           {message.type === "success" ? (
@@ -106,14 +106,14 @@ export default function DesignCheckClient({ initialOrders }: Props) {
       )}
 
       {orders.length === 0 ? (
-        <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center">
+        <div className="bg-white p-12 rounded-3xl border border-ink-200 text-center">
           <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-3">
             <CheckCircle2 className="w-6 h-6" />
           </div>
-          <h3 className="font-bold text-slate-800 text-base">
+          <h3 className="font-bold text-ink-800 text-base">
             Semua Desain Sudah Divalidasi!
           </h3>
-          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+          <p className="text-xs text-ink-400 mt-1 max-w-sm mx-auto">
             Tidak ada pesanan dengan status 'Cek Desain' saat ini. Semua file siap masuk ke antrean produksi.
           </p>
         </div>
@@ -121,7 +121,7 @@ export default function DesignCheckClient({ initialOrders }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* List Antrean di Kiri */}
           <div className="lg:col-span-4 space-y-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block px-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-ink-500 block px-1">
               Antrean Menunggu ACC ({orders.length})
             </span>
             <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
@@ -138,20 +138,20 @@ export default function DesignCheckClient({ initialOrders }: Props) {
                     }}
                     className={`w-full text-left p-4 rounded-2xl border transition ${
                       isSelected
-                        ? "bg-blue-50/80 border-blue-600 shadow-sm ring-2 ring-blue-600/20"
-                        : "bg-white border-slate-200 hover:border-slate-300"
+                        ? "bg-brand-50/80 border-brand-600 shadow-sm ring-2 ring-brand-600/20"
+                        : "bg-white border-ink-200 hover:border-ink-300"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-bold text-xs text-slate-900">
+                      <span className="font-bold text-xs text-ink-900">
                         {ord.orderNumber}
                       </span>
                       <OrderStatusBadge status={ord.status} size="sm" />
                     </div>
-                    <p className="text-xs font-semibold text-slate-700 truncate">
+                    <p className="text-xs font-semibold text-ink-700 truncate">
                       {ord.product.name}
                     </p>
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 mt-2">
+                    <div className="flex items-center justify-between text-[11px] text-ink-400 mt-2">
                       <span>{ord.user.name}</span>
                       <span>{formatRupiah(ord.totalPrice)}</span>
                     </div>
@@ -162,15 +162,15 @@ export default function DesignCheckClient({ initialOrders }: Props) {
           </div>
 
           {/* Detail & Aksi di Kanan */}
-          <div className="lg:col-span-8 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+          <div className="lg:col-span-8 bg-white p-6 sm:p-8 rounded-3xl border border-ink-200 shadow-sm space-y-6">
             {selectedOrder ? (
               <>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-ink-100">
                   <div>
-                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">
+                    <span className="text-[10px] font-bold text-brand-600 uppercase tracking-wider">
                       Detail Pemeriksaan
                     </span>
-                    <h2 className="text-xl font-bold text-slate-900">
+                    <h2 className="text-xl font-bold text-ink-900">
                       {selectedOrder.orderNumber}
                     </h2>
                   </div>
@@ -179,18 +179,18 @@ export default function DesignCheckClient({ initialOrders }: Props) {
 
                 {/* Info Spesifikasi */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div className="p-3.5 rounded-2xl bg-slate-50 space-y-1">
-                    <span className="text-slate-400 font-medium block">Pelanggan:</span>
-                    <p className="font-bold text-slate-900">{selectedOrder.user.name}</p>
-                    <p className="text-slate-500">{selectedOrder.user.phone || selectedOrder.user.email}</p>
+                  <div className="p-3.5 rounded-2xl bg-ink-50 space-y-1">
+                    <span className="text-ink-400 font-medium block">Pelanggan:</span>
+                    <p className="font-bold text-ink-900">{selectedOrder.user.name}</p>
+                    <p className="text-ink-500">{selectedOrder.user.phone || selectedOrder.user.email}</p>
                   </div>
-                  <div className="p-3.5 rounded-2xl bg-slate-50 space-y-1">
-                    <span className="text-slate-400 font-medium block">Spesifikasi Cetak:</span>
-                    <p className="font-bold text-slate-900">{selectedOrder.product.name}</p>
-                    <p className="text-slate-500">
-                      {selectedOrder.material ? `Bahan: ${selectedOrder.material.name} • ` : ""}
+                  <div className="p-3.5 rounded-2xl bg-ink-50 space-y-1">
+                    <span className="text-ink-400 font-medium block">Spesifikasi Cetak:</span>
+                    <p className="font-bold text-ink-900">{selectedOrder.product.name}</p>
+                    <p className="text-ink-500">
+                      {selectedOrder.material ? `Bahan: ${selectedOrder.material.name} â€¢ ` : ""}
                       {selectedOrder.width && selectedOrder.height
-                        ? `${selectedOrder.width}x${selectedOrder.height}m • `
+                        ? `${selectedOrder.width}x${selectedOrder.height}m â€¢ `
                         : ""}
                       Qty: {selectedOrder.quantity}
                     </p>
@@ -199,20 +199,20 @@ export default function DesignCheckClient({ initialOrders }: Props) {
 
                 {/* File Desain & Catatan Pelanggan */}
                 <div className="space-y-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                  <span className="text-xs font-bold uppercase tracking-wider text-ink-700 block">
                     File Desain yang Diunggah
                   </span>
                   {selectedOrder.designFileUrl ? (
-                    <div className="p-4 rounded-2xl border border-blue-200 bg-blue-50/50 flex items-center justify-between">
+                    <div className="p-4 rounded-2xl border border-brand-200 bg-brand-50/50 flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-blue-600 text-white rounded-xl">
+                        <div className="p-2.5 bg-brand-600 text-white rounded-xl">
                           <FileText className="w-5 h-5" />
                         </div>
                         <div>
-                          <p className="font-bold text-xs text-slate-900 truncate max-w-xs">
+                          <p className="font-bold text-xs text-ink-900 truncate max-w-xs">
                             {selectedOrder.designFileUrl.split("/").pop()}
                           </p>
-                          <span className="text-[11px] text-slate-500">
+                          <span className="text-[11px] text-ink-500">
                             Klik untuk membuka atau mendownload file asli
                           </span>
                         </div>
@@ -221,7 +221,7 @@ export default function DesignCheckClient({ initialOrders }: Props) {
                         href={selectedOrder.designFileUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3.5 py-2 bg-white text-blue-600 border border-blue-200 hover:bg-blue-50 text-xs font-semibold rounded-xl transition flex items-center gap-1.5 shadow-sm"
+                        className="px-3.5 py-2 bg-white text-brand-600 border border-brand-200 hover:bg-brand-50 text-xs font-semibold rounded-xl transition flex items-center gap-1.5 shadow-sm"
                       >
                         <span>Buka File</span>
                         <ExternalLink className="w-3.5 h-3.5" />
@@ -234,18 +234,18 @@ export default function DesignCheckClient({ initialOrders }: Props) {
                   )}
 
                   {selectedOrder.designNotes && (
-                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
-                      <span className="font-semibold text-slate-700 block mb-0.5">
+                    <div className="p-3.5 rounded-2xl bg-ink-50 border border-ink-200 text-xs">
+                      <span className="font-semibold text-ink-700 block mb-0.5">
                         Catatan dari Pelanggan:
                       </span>
-                      <p className="text-slate-600 italic">"{selectedOrder.designNotes}"</p>
+                      <p className="text-ink-600 italic">"{selectedOrder.designNotes}"</p>
                     </div>
                   )}
                 </div>
 
                 {/* Input Catatan Admin */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                  <label className="text-xs font-bold uppercase tracking-wider text-ink-700 block">
                     Catatan Pemeriksa / Instruksi Revisi
                   </label>
                   <textarea
@@ -253,7 +253,7 @@ export default function DesignCheckClient({ initialOrders }: Props) {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Contoh: Resolusi oke, siap cetak Roland. (Atau: Resolusi pecah, mohon kirim file vector / PDF 300 DPI)."
-                    className="w-full p-3 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
+                    className="w-full p-3 text-xs border border-ink-300 rounded-xl focus:ring-2 focus:ring-brand-600 outline-none"
                   />
                 </div>
 
@@ -279,7 +279,7 @@ export default function DesignCheckClient({ initialOrders }: Props) {
                     type="button"
                     disabled={loading}
                     onClick={() => handleAction("REJECT")}
-                    className="w-full sm:w-auto py-3 px-5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full sm:w-auto py-3 px-5 bg-brand-50 text-brand-700 hover:bg-brand-100 border border-brand-200 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <XCircle className="w-4 h-4" />
                     <span>Tolak Desain (Minta Revisi)</span>
@@ -287,7 +287,7 @@ export default function DesignCheckClient({ initialOrders }: Props) {
                 </div>
               </>
             ) : (
-              <div className="text-center py-12 text-slate-400 text-xs">
+              <div className="text-center py-12 text-ink-400 text-xs">
                 Pilih pesanan dari antrean di sebelah kiri untuk memeriksa file.
               </div>
             )}

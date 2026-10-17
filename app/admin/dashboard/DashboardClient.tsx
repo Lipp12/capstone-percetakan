@@ -98,10 +98,10 @@ export default function DashboardClient({
       {/* Header Dashboard */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold text-ink-900">
             Ringkasan operasional
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-ink-500 mt-1">
             Pantau transaksi, antrean cetak, dan persediaan bahan baku.
           </p>
         </div>
@@ -109,16 +109,16 @@ export default function DashboardClient({
 
       {/* Alert Jika Ada Stok Rendah */}
       {lowStockMaterials.length > 0 && (
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between gap-4">
+        <div className="p-4 bg-brand-50 border border-brand-200 rounded-lg flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-600 text-white rounded-xl">
+            <div className="p-2 bg-brand-600 text-white rounded-xl">
               <AlertTriangle className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-sm font-bold text-blue-900">
+              <p className="text-sm font-bold text-brand-900">
                 Persediaan perlu diperiksa
               </p>
-              <p className="text-[11px] text-blue-700">
+              <p className="text-[11px] text-brand-700">
                 Ada {lowStockMaterials.length} bahan baku di bawah batas aman:{" "}
                 {lowStockMaterials.map((m) => m.name).join(", ")}.
               </p>
@@ -126,7 +126,7 @@ export default function DashboardClient({
           </div>
           <Link
             href="/admin/materials/low-stock"
-            className="px-3 py-2 bg-blue-700 text-white text-xs font-bold rounded-md hover:bg-blue-800 shrink-0"
+            className="px-3 py-2 bg-brand-700 text-white text-xs font-bold rounded-md hover:bg-brand-800 shrink-0"
           >
             Cek Stok
           </Link>
@@ -134,8 +134,8 @@ export default function DashboardClient({
       )}
 
       {/* Filter Periode */}
-      <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-stone-200 w-full sm:w-fit overflow-x-auto">
-        <Calendar className="w-4 h-4 text-slate-400 ml-2" />
+      <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-ink-200 w-full sm:w-fit overflow-x-auto">
+        <Calendar className="w-4 h-4 text-ink-400 ml-2" />
         {(
           [
             { id: "all", label: "Semua Waktu" },
@@ -150,8 +150,8 @@ export default function DashboardClient({
             onClick={() => setPeriod(tab.id)}
             className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition ${
               period === tab.id
-                ? "bg-blue-700 text-white"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                ? "bg-brand-700 text-white"
+                : "text-ink-600 hover:text-ink-900 hover:bg-ink-100"
             }`}
           >
             {tab.label}
@@ -161,39 +161,39 @@ export default function DashboardClient({
 
       {/* 4 Cards Metrik Utama */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
-        <div className="p-4 sm:p-5 bg-white rounded-lg border border-stone-200 space-y-1">
+        <div className="p-4 sm:p-5 bg-white rounded-lg border border-ink-200 space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+            <span className="text-xs text-ink-400 font-semibold uppercase tracking-wider">
               Omzet tercatat
             </span>
-            <div className="p-2 bg-blue-50 text-blue-700 rounded-md">
+            <div className="p-2 bg-brand-50 text-brand-700 rounded-md">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-lg sm:text-2xl font-bold text-slate-900 break-words">
+          <p className="text-lg sm:text-2xl font-bold text-ink-900 break-words">
             {formatRupiah(totalRevenue)}
           </p>
-          <span className="text-[10px] text-slate-400">Pembayaran terkonfirmasi</span>
+          <span className="text-[10px] text-ink-400">Pembayaran terkonfirmasi</span>
         </div>
 
-        <div className="p-4 sm:p-5 bg-white rounded-lg border border-stone-200 space-y-1">
+        <div className="p-4 sm:p-5 bg-white rounded-lg border border-ink-200 space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+            <span className="text-xs text-ink-400 font-semibold uppercase tracking-wider">
               Total Pesanan
             </span>
             <div className="p-2 bg-cyan-50 text-cyan-700 rounded-md">
               <ShoppingBag className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-lg sm:text-2xl font-bold text-slate-900 break-words">
+          <p className="text-lg sm:text-2xl font-bold text-ink-900 break-words">
             {filteredOrders.length}
           </p>
-          <span className="text-[10px] text-slate-400">Pesanan masuk di periode ini</span>
+          <span className="text-[10px] text-ink-400">Pesanan masuk di periode ini</span>
         </div>
 
-        <div className="p-4 sm:p-5 bg-white rounded-lg border border-stone-200 space-y-1">
+        <div className="p-4 sm:p-5 bg-white rounded-lg border border-ink-200 space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+            <span className="text-xs text-ink-400 font-semibold uppercase tracking-wider">
               Pesanan Aktif
             </span>
             <div className="p-2 bg-amber-50 text-amber-700 rounded-md">
@@ -201,36 +201,36 @@ export default function DashboardClient({
             </div>
           </div>
           <p className="text-lg sm:text-2xl font-bold text-amber-700">{activeOrdersCount}</p>
-          <span className="text-[10px] text-slate-400">Sedang diproses / diproduksi</span>
+          <span className="text-[10px] text-ink-400">Sedang diproses / diproduksi</span>
         </div>
 
-        <div className="p-4 sm:p-5 bg-white rounded-lg border border-stone-200 space-y-1">
+        <div className="p-4 sm:p-5 bg-white rounded-lg border border-ink-200 space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+            <span className="text-xs text-ink-400 font-semibold uppercase tracking-wider">
               Pelanggan
             </span>
             <div className="p-2 bg-emerald-50 text-emerald-700 rounded-md">
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-lg sm:text-2xl font-bold text-slate-900">{totalCustomers}</p>
-          <span className="text-[10px] text-slate-400">Total customer terdaftar</span>
+          <p className="text-lg sm:text-2xl font-bold text-ink-900">{totalCustomers}</p>
+          <span className="text-[10px] text-ink-400">Total customer terdaftar</span>
         </div>
       </div>
 
       {/* Grafik Penjualan Harian (Lebar Penuh) */}
-      <div className="bg-white p-4 sm:p-6 rounded-lg border border-stone-200 space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-          <h3 className="font-bold text-sm text-slate-800 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-blue-700" />
+      <div className="bg-white p-4 sm:p-6 rounded-lg border border-ink-200 space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-ink-100">
+          <h3 className="font-bold text-sm text-ink-800 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-brand-700" />
             <span>Grafik Penjualan Harian</span>
           </h3>
-          <span className="text-xs text-slate-400">Nilai penjualan</span>
+          <span className="text-xs text-ink-400">Nilai penjualan</span>
         </div>
 
         <div className="h-64 sm:h-72 w-full pt-4">
           {chartData.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-xs text-slate-400">
+            <div className="h-full flex items-center justify-center text-xs text-ink-400">
               Belum ada data penjualan pada periode ini.
             </div>
           ) : (
@@ -265,19 +265,19 @@ export default function DashboardClient({
       </div>
 
       {/* Tabel Pesanan Masuk Terkini */}
-      <div className="bg-white rounded-lg border border-stone-200 overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+      <div className="bg-white rounded-lg border border-ink-200 overflow-hidden">
+        <div className="p-5 border-b border-ink-100 flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-sm text-slate-900">
+            <h3 className="font-bold text-sm text-ink-900">
               Pesanan Terkini
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-ink-400 mt-0.5">
               5 transaksi pesanan terakhir yang masuk
             </p>
           </div>
           <Link
             href="/admin/orders"
-            className="text-xs font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-1"
+            className="text-xs font-semibold text-brand-700 hover:text-brand-800 flex items-center gap-1"
           >
             <span>Kelola Semua Pesanan</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -285,8 +285,8 @@ export default function DashboardClient({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+          <table className="w-full text-left text-xs text-ink-700">
+            <thead className="bg-ink-50 border-b border-ink-200 text-ink-500 font-bold uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="py-3 px-4">No. Pesanan</th>
                 <th className="py-3 px-4">Pelanggan</th>
@@ -295,27 +295,27 @@ export default function DashboardClient({
                 <th className="py-3 px-4 text-right">Total</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-ink-100">
               {initialOrders.slice(0, 5).map((o) => (
-                <tr key={o.id} className="hover:bg-slate-50/80 transition">
-                  <td className="py-3 px-4 font-bold text-slate-900">
+                <tr key={o.id} className="hover:bg-ink-50/80 transition">
+                  <td className="py-3 px-4 font-bold text-ink-900">
                     <Link
                       href={`/admin/orders/${o.id}`}
-                      className="hover:text-blue-700 transition"
+                      className="hover:text-brand-700 transition"
                     >
                       {o.orderNumber}
                     </Link>
                   </td>
-                  <td className="py-3 px-4 font-medium text-slate-800">
+                  <td className="py-3 px-4 font-medium text-ink-800">
                     {o.user.name}
                   </td>
-                  <td className="py-3 px-4 text-slate-600">
+                  <td className="py-3 px-4 text-ink-600">
                     {o.product.name} ({o.quantity} {o.product.unit})
                   </td>
                   <td className="py-3 px-4">
                     <OrderStatusBadge status={o.status} size="sm" />
                   </td>
-                  <td className="py-3 px-4 text-right font-bold text-slate-900">
+                  <td className="py-3 px-4 text-right font-bold text-ink-900">
                     {formatRupiah(o.totalPrice)}
                   </td>
                 </tr>

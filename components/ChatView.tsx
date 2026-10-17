@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import ChatBox from "@/components/ChatBox";
 import type { Role } from "@/lib/ai";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ChatViewProps {
   role: Role;
@@ -23,6 +24,13 @@ interface ChatViewProps {
    * Default true. Set false untuk menghilangkan tombol tutup saja.
    */
   showCloseButton?: boolean;
+  /**
+   * Isi tinggi kontainer, bukan 100vh.
+   * Wajib true di dalam shell admin, karena shell sudah mengunci viewport
+   * (`h-screen` + scroll di <main>). Kalau false memakai `min-h-screen`
+   * supaya halaman mandiri (/chat) tetap penuh.
+   */
+  fill?: boolean;
 }
 
 /**
@@ -36,6 +44,7 @@ export default function ChatView({
   subtitle,
   showBackButton = true,
   showCloseButton = true,
+  fill = false,
 }: ChatViewProps) {
   const { status } = useSession();
   const router = useRouter();
@@ -48,8 +57,13 @@ export default function ChatView({
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div
+        className={cn(
+          "flex items-center justify-center bg-ink-50",
+          fill ? "h-full" : "min-h-screen",
+        )}
+      >
+        <Loader2 className="w-8 h-8 animate-spin text-brand-600" />
       </div>
     );
   }
@@ -59,13 +73,18 @@ export default function ChatView({
   };
 
   return (
-    <main className="min-h-screen bg-slate-50/60 flex flex-col items-center justify-center p-3 sm:p-6">
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center bg-ink-50/60 p-3 sm:p-6",
+        fill ? "h-full" : "min-h-screen",
+      )}
+    >
       <div className="w-full max-w-5xl mb-4 flex items-center justify-between">
         {showBackButton ? (
           <button
             type="button"
             onClick={handleClose}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-xl bg-white border border-slate-200 shadow-2xs hover:bg-slate-100 transition cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-xl border border-ink-200 bg-white px-3 py-1.5 text-xs font-semibold text-ink-600 shadow-theme-xs transition-colors hover:bg-ink-100 hover:text-ink-900"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Kembali</span>
@@ -74,7 +93,7 @@ export default function ChatView({
           <span />
         )}
 
-        <span className="text-xs font-medium text-slate-500">{subtitle}</span>
+        <span className="text-xs font-medium text-ink-500">{subtitle}</span>
       </div>
 
       {/* Tanpa onClose => tombol "Tutup" di header ChatBox tidak dirender */}
@@ -82,6 +101,6 @@ export default function ChatView({
         role={role}
         onClose={showCloseButton ? handleClose : undefined}
       />
-    </main>
+    </div>
   );
 }

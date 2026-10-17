@@ -15,6 +15,7 @@ export default function AdminChatPage() {
       homeHref="/admin/dashboard"
       subtitle="Admin Copilot • OpenRouter AI"
       showBackButton={false}
+      fill
     />
   );
 }

@@ -17,7 +17,7 @@ export default function AdminShell({
   const { isOpen, isMobileOpen, closeMobile } = useSidebar();
 
   return (
-    <div className="min-h-screen bg-ink-50">
+    <div className="h-screen overflow-hidden bg-ink-50">
       <Sidebar />
 
       {/* Backdrop untuk drawer mobile */}
@@ -34,12 +34,12 @@ export default function AdminShell({
 
       <div
         className={cn(
-          "flex min-h-screen flex-col transition-[padding] duration-300 ease-in-out",
+          "flex h-full flex-col transition-[padding] duration-300 ease-in-out",
           isOpen ? "xl:ps-sidebar" : "xl:ps-sidebar-collapsed",
         )}
       >
         <AdminHeader />
-        <main className="flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+        <main className="custom-scrollbar flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
           {children}
         </main>
       </div>

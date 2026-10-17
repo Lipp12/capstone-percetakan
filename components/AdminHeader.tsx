@@ -99,7 +99,7 @@ export default function AdminHeader() {
     .toUpperCase();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-ink-200 bg-white/85 backdrop-blur-md dark:border-ink-800 dark:bg-ink-900/85">
+    <header className="z-30 shrink-0 border-b border-ink-200 bg-white/85 backdrop-blur-md dark:border-ink-800 dark:bg-ink-900/85">
       <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
         <button
           type="button"

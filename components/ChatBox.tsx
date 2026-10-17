@@ -331,20 +331,20 @@ export default function ChatBox({
   const isAdmin = (activeSession?.role || role) === "admin";
 
   return (
-    <div className="relative flex flex-col md:flex-row w-full max-w-5xl h-[620px] bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
+    <div className="relative flex flex-col md:flex-row w-full max-w-5xl h-[620px] bg-white border border-ink-200 rounded-2xl shadow-xl overflow-hidden">
       {/* ===================== SIDEBAR RIWAYAT CHAT ===================== */}
       <aside
-        className={`absolute md:static inset-y-0 left-0 z-30 w-72 sm:w-80 bg-slate-50 border-r border-gray-200 flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`absolute md:static inset-y-0 left-0 z-30 w-72 sm:w-80 bg-ink-50 border-r border-ink-200 flex flex-col transition-transform duration-300 ease-in-out ${
           isSidebarOpen
             ? "translate-x-0 shadow-2xl md:shadow-none"
             : "-translate-x-full md:translate-x-0"
         }`}
       >
         {/* Header Sidebar: Judul & Tombol Chat Baru */}
-        <div className="p-4 border-b border-gray-200/80 bg-white">
+        <div className="p-4 border-b border-ink-200/80 bg-white">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <span className="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
+              <span className="p-1.5 bg-brand-100 text-brand-600 rounded-lg">
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -359,7 +359,7 @@ export default function ChatBox({
                   />
                 </svg>
               </span>
-              <h2 className="font-semibold text-gray-800 text-sm">
+              <h2 className="font-semibold text-ink-800 text-sm">
                 Riwayat Chat
               </h2>
             </div>
@@ -368,7 +368,7 @@ export default function ChatBox({
             <button
               type="button"
               onClick={() => setIsSidebarOpen(false)}
-              className="md:hidden p-1 text-gray-400 hover:text-gray-600 rounded-md"
+              className="md:hidden p-1 text-ink-400 hover:text-ink-600 rounded-md"
             >
               <svg
                 className="w-5 h-5"
@@ -390,7 +390,7 @@ export default function ChatBox({
           <button
             type="button"
             onClick={handleNewChat}
-            className="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-medium py-2 px-3 rounded-xl shadow-xs transition duration-150 flex items-center justify-center gap-2 text-sm"
+            className="w-full bg-brand-600 hover:bg-brand-700 active:scale-[0.99] text-white font-medium py-2 px-3 rounded-xl shadow-xs transition duration-150 flex items-center justify-center gap-2 text-sm"
           >
             <svg
               className="w-4 h-4"
@@ -410,9 +410,9 @@ export default function ChatBox({
         </div>
 
         {/* Search Bar untuk Cari History Chat */}
-        <div className="p-3 border-b border-gray-200/80 bg-slate-50">
+        <div className="p-3 border-b border-ink-200/80 bg-ink-50">
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-ink-400">
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -432,13 +432,13 @@ export default function ChatBox({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari history chat..."
-              className="w-full pl-9 pr-8 py-1.5 text-xs bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full pl-9 pr-8 py-1.5 text-xs bg-white border border-ink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-gray-400 hover:text-gray-600"
+                className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-ink-400 hover:text-ink-600"
               >
                 <svg
                   className="w-3.5 h-3.5"
@@ -457,7 +457,7 @@ export default function ChatBox({
             )}
           </div>
           {searchQuery && (
-            <div className="text-[11px] text-gray-500 mt-1.5 px-1">
+            <div className="text-[11px] text-ink-500 mt-1.5 px-1">
               Ditemukan {filteredSessions.length} percakapan
             </div>
           )}
@@ -466,9 +466,9 @@ export default function ChatBox({
         {/* Daftar Sesi Riwayat Chat */}
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {filteredSessions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 text-center text-gray-400 px-4">
+            <div className="flex flex-col items-center justify-center h-48 text-center text-ink-400 px-4">
               <svg
-                className="w-8 h-8 mb-2 text-gray-300"
+                className="w-8 h-8 mb-2 text-ink-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -497,8 +497,8 @@ export default function ChatBox({
                   onClick={() => handleSelectSession(session)}
                   className={`group relative flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition text-left border ${
                     isActive
-                      ? "bg-white border-blue-500 shadow-xs"
-                      : "bg-transparent border-transparent hover:bg-white/80 hover:border-gray-200 text-gray-700"
+                      ? "bg-white border-brand-500 shadow-xs"
+                      : "bg-transparent border-transparent hover:bg-white/80 hover:border-ink-200 text-ink-700"
                   }`}
                 >
                   <div className="flex-1 min-w-0 pr-2">
@@ -507,25 +507,25 @@ export default function ChatBox({
                         className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md uppercase tracking-wider ${
                           isCust
                             ? "bg-emerald-100 text-emerald-700"
-                            : "bg-purple-100 text-purple-700"
+                            : "bg-brand-100 text-brand-700"
                         }`}
                       >
                         {isCust ? "Customer" : "Admin"}
                       </span>
-                      <span className="text-[11px] text-gray-400">
+                      <span className="text-[11px] text-ink-400">
                         {formatTimestamp(session.updatedAt || session.createdAt)}
                       </span>
                     </div>
 
                     <p
                       className={`text-xs font-medium truncate mt-1 ${
-                        isActive ? "text-blue-900" : "text-gray-800"
+                        isActive ? "text-brand-900" : "text-ink-800"
                       }`}
                     >
                       {session.title}
                     </p>
 
-                    <p className="text-[11px] text-gray-400 truncate mt-0.5">
+                    <p className="text-[11px] text-ink-400 truncate mt-0.5">
                       {session.messages.length > 0
                         ? `${session.messages.length} pesan`
                         : "Percakapan kosong"}
@@ -537,7 +537,7 @@ export default function ChatBox({
                     type="button"
                     title="Hapus history chat ini"
                     onClick={(e) => handleOpenDeleteSingle(session, e)}
-                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition opacity-80 group-hover:opacity-100"
+                    className="p-1.5 rounded-lg text-ink-400 hover:text-red-600 hover:bg-red-50 transition opacity-80 group-hover:opacity-100"
                   >
                     <svg
                       className="w-4 h-4"
@@ -561,7 +561,7 @@ export default function ChatBox({
 
         {/* Footer Sidebar: Tombol Hapus Semua History */}
         {sessions.length > 0 && (
-          <div className="p-3 border-t border-gray-200/80 bg-white">
+          <div className="p-3 border-t border-ink-200/80 bg-white">
             <button
               type="button"
               onClick={handleOpenDeleteAll}
@@ -597,13 +597,13 @@ export default function ChatBox({
       {/* ===================== AREA UTAMA CHAT ===================== */}
       <section className="flex-1 flex flex-col h-full overflow-hidden bg-white">
         {/* Header Chat */}
-        <header className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+        <header className="flex items-center justify-between px-4 py-3 bg-white border-b border-ink-200">
           <div className="flex items-center gap-2.5">
             {/* Tombol buka drawer riwayat di mobile */}
             <button
               type="button"
               onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition"
+              className="md:hidden p-1.5 text-ink-500 hover:text-ink-800 hover:bg-ink-100 rounded-lg transition"
               title="Buka Riwayat Chat"
             >
               <svg
@@ -625,14 +625,14 @@ export default function ChatBox({
               <div className="flex items-center gap-2">
                 <span
                   className={`w-2.5 h-2.5 rounded-full ${
-                    isAdmin ? "bg-purple-600" : "bg-emerald-500 animate-pulse"
+                    isAdmin ? "bg-brand-600" : "bg-emerald-500 animate-pulse"
                   }`}
                 />
-                <h3 className="text-sm font-semibold text-gray-800 line-clamp-1">
+                <h3 className="text-sm font-semibold text-ink-800 line-clamp-1">
                   {activeSession?.title || "Percakapan Baru"}
                 </h3>
               </div>
-              <p className="text-[11px] text-gray-400">
+              <p className="text-[11px] text-ink-400">
                 {isAdmin ? "Mode Admin Copilot" : "Mode Customer Assistant"} • OpenRouter AI
               </p>
             </div>
@@ -643,7 +643,7 @@ export default function ChatBox({
             <button
               type="button"
               onClick={onClose}
-              className="px-2.5 py-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer border border-gray-200/80 shadow-2xs shrink-0"
+              className="px-2.5 py-1.5 text-ink-500 hover:text-ink-900 hover:bg-ink-100 rounded-xl transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer border border-ink-200/80 shadow-2xs shrink-0"
               title="Tutup Chat"
             >
               <span className="hidden sm:inline">Tutup</span>
@@ -665,10 +665,10 @@ export default function ChatBox({
         </header>
 
         {/* Area Pesan Chat */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 bg-gray-50/40">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 bg-ink-50/40">
           {(!activeSession || activeSession.messages.length === 0) && (
-            <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 px-4 py-8">
-              <div className="w-14 h-14 rounded-2xl bg-blue-100/70 text-blue-600 flex items-center justify-center mb-3 shadow-inner">
+            <div className="flex flex-col items-center justify-center h-full text-center text-ink-400 px-4 py-8">
+              <div className="w-14 h-14 rounded-2xl bg-brand-100/70 text-brand-600 flex items-center justify-center mb-3 shadow-inner">
                 <svg
                   className="w-7 h-7"
                   fill="none"
@@ -684,13 +684,13 @@ export default function ChatBox({
                 </svg>
               </div>
 
-              <h4 className="font-semibold text-gray-700 text-sm mb-1">
+              <h4 className="font-semibold text-ink-700 text-sm mb-1">
                 {isAdmin
                   ? "Admin Copilot Siap Membantu"
                   : "Halo! Butuh bantuan cetak apa hari ini?"}
               </h4>
 
-              <p className="text-xs text-gray-400 max-w-sm mb-4">
+              <p className="text-xs text-ink-400 max-w-sm mb-4">
                 {isAdmin
                   ? "Tanyakan ringkasan pesanan, draft balasan ke pelanggan, atau tips kelola stok cetak."
                   : "Tanyakan rekomendasi bahan spanduk/banner, estimasi pengerjaan, atau panduan ukuran cetak."}
@@ -715,7 +715,7 @@ export default function ChatBox({
                     onClick={() => {
                       setInput(prompt);
                     }}
-                    className="text-xs bg-white hover:bg-blue-50 text-gray-600 hover:text-blue-700 border border-gray-200/80 px-2.5 py-1.5 rounded-lg transition shadow-2xs text-left"
+                    className="text-xs bg-white hover:bg-brand-50 text-ink-600 hover:text-brand-700 border border-ink-200/80 px-2.5 py-1.5 rounded-lg transition shadow-2xs text-left"
                   >
                     💬 {prompt}
                   </button>
@@ -737,21 +737,21 @@ export default function ChatBox({
                 <div
                   className={`p-3.5 rounded-2xl text-sm leading-relaxed max-w-[88%] sm:max-w-[80%] break-words shadow-2xs ${
                     isUser
-                      ? "bg-blue-600 text-white rounded-br-xs"
-                      : "bg-white text-gray-800 border border-gray-200/80 rounded-bl-xs"
+                      ? "bg-brand-600 text-white rounded-br-xs"
+                      : "bg-white text-ink-800 border border-ink-200/80 rounded-bl-xs"
                   }`}
                 >
                   {isUser ? (
                     <p className="whitespace-pre-wrap">{m.content}</p>
                   ) : (
-                    <div className="prose prose-sm max-w-none text-gray-800 leading-relaxed">
+                    <div className="prose prose-sm max-w-none text-ink-800 leading-relaxed">
                       <ReactMarkdown
                         components={{
                           p: ({ children }) => (
                             <p className="mb-2 last:mb-0">{children}</p>
                           ),
                           strong: ({ children }) => (
-                            <strong className="font-semibold text-gray-900">
+                            <strong className="font-semibold text-ink-900">
                               {children}
                             </strong>
                           ),
@@ -769,7 +769,7 @@ export default function ChatBox({
                             <li className="leading-snug">{children}</li>
                           ),
                           code: ({ children }) => (
-                            <code className="bg-gray-100 text-blue-700 text-xs px-1 py-0.5 rounded font-mono">
+                            <code className="bg-ink-100 text-brand-700 text-xs px-1 py-0.5 rounded font-mono">
                               {children}
                             </code>
                           ),
@@ -784,7 +784,7 @@ export default function ChatBox({
                         if (exportMatch) {
                           const period = exportMatch[1];
                           return (
-                            <div className="mt-3 pt-2.5 border-t border-gray-100">
+                            <div className="mt-3 pt-2.5 border-t border-ink-100">
                               <a
                                 href={`/api/export/excel?period=${period}`}
                                 target="_blank"
@@ -809,11 +809,11 @@ export default function ChatBox({
           })}
 
           {loading && (
-            <div className="flex items-center gap-2 text-gray-400 text-xs italic py-1 px-2">
+            <div className="flex items-center gap-2 text-ink-400 text-xs italic py-1 px-2">
               <span className="inline-flex gap-1 items-center">
-                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" />
+                <span className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" />
               </span>
               <span>AI sedang mengetik...</span>
             </div>
@@ -823,7 +823,7 @@ export default function ChatBox({
         </div>
 
         {/* Input Pesan */}
-        <div className="p-3 sm:p-4 border-t border-gray-200 bg-white">
+        <div className="p-3 sm:p-4 border-t border-ink-200 bg-white">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -832,7 +832,7 @@ export default function ChatBox({
             className="flex items-center gap-2"
           >
             <input
-              className="flex-1 border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-gray-50/50"
+              className="flex-1 border border-ink-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition bg-ink-50/50"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={loading}
@@ -846,7 +846,7 @@ export default function ChatBox({
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-medium px-4 sm:px-5 py-2.5 rounded-xl text-sm transition shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+              className="bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white font-medium px-4 sm:px-5 py-2.5 rounded-xl text-sm transition shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
             >
               <span>Kirim</span>
               <svg
@@ -870,7 +870,7 @@ export default function ChatBox({
       {/* ===================== MODAL KONFIRMASI HAPUS ===================== */}
       {deleteModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-2xs animate-fade-in">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-gray-100 transform transition-all">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-ink-100 transform transition-all">
             {/* Icon Tempat Sampah / Alert */}
             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4 text-red-600">
               <svg
@@ -888,13 +888,13 @@ export default function ChatBox({
               </svg>
             </div>
 
-            <h3 className="text-base font-bold text-gray-900 text-center mb-1.5">
+            <h3 className="text-base font-bold text-ink-900 text-center mb-1.5">
               {deleteModal.mode === "all"
                 ? "Hapus Semua Riwayat Chat?"
                 : "Hapus Riwayat Chat?"}
             </h3>
 
-            <p className="text-xs text-gray-500 text-center mb-6 leading-relaxed">
+            <p className="text-xs text-ink-500 text-center mb-6 leading-relaxed">
               {deleteModal.mode === "all"
                 ? "Apakah Anda yakin ingin menghapus seluruh history chat? Semua riwayat percakapan akan dihapus secara permanen."
                 : `Apakah Anda yakin ingin menghapus history chat "${
@@ -906,7 +906,7 @@ export default function ChatBox({
               <button
                 type="button"
                 onClick={() => setDeleteModal({ isOpen: false, mode: "single" })}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 font-medium text-xs transition"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-ink-300 text-ink-700 hover:bg-ink-100 font-medium text-xs transition"
               >
                 Batal
               </button>

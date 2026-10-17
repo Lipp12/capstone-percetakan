@@ -97,24 +97,24 @@ function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col bg-stone-100/80 rounded-lg p-3 sm:p-4 min-h-[420px] border transition snap-start ${
-        isOver ? "border-blue-600 bg-blue-50/50" : "border-stone-200"
+      className={`flex flex-col bg-ink-100/80 rounded-lg p-3 sm:p-4 min-h-[420px] border transition snap-start ${
+        isOver ? "border-brand-600 bg-brand-50/50" : "border-ink-200"
       }`}
     >
       {/* Header Kolom */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3">
+      <div className="flex items-center justify-between pb-3 border-b border-ink-200/80 mb-3">
         <div className="flex items-center gap-2">
           <div className={`p-1.5 rounded-xl border ${col.color}`}>
             <Icon className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="font-bold text-xs text-slate-900 leading-tight">
+            <h3 className="font-bold text-xs text-ink-900 leading-tight">
               {col.title}
             </h3>
-            <span className="text-[10px] text-slate-400">{col.desc}</span>
+            <span className="text-[10px] text-ink-400">{col.desc}</span>
           </div>
         </div>
-        <span className="px-2 py-0.5 text-xs font-bold bg-white text-slate-700 rounded-full border border-slate-200 shadow-xs">
+        <span className="px-2 py-0.5 text-xs font-bold bg-white text-ink-700 rounded-full border border-ink-200 shadow-xs">
           {orders.length}
         </span>
       </div>
@@ -122,7 +122,7 @@ function KanbanColumn({
       {/* Kartu Order */}
       <div className="flex-1 space-y-3 overflow-y-auto">
         {orders.length === 0 ? (
-          <div className="h-32 flex items-center justify-center text-xs text-slate-400 italic">
+          <div className="h-32 flex items-center justify-center text-xs text-ink-400 italic">
             Kosong
           </div>
         ) : (
@@ -143,14 +143,14 @@ function KanbanCard({
   onMoveQuick: (orderId: string, targetStatus: string) => void;
 }) {
   return (
-    <div className="bg-white p-4 rounded-lg border border-stone-200 shadow-sm hover:shadow-md transition space-y-2.5">
+    <div className="bg-white p-4 rounded-lg border border-ink-200 shadow-sm hover:shadow-md transition space-y-2.5">
       <div className="flex items-center justify-between">
-        <span className="font-extrabold text-xs text-slate-900">
+        <span className="font-extrabold text-xs text-ink-900">
           {order.orderNumber}
         </span>
         <Link
           href={`/admin/orders/${order.id}`}
-          className="text-slate-400 hover:text-blue-700 transition"
+          className="text-ink-400 hover:text-brand-700 transition"
           title="Buka detail order"
         >
           <ExternalLink className="w-3.5 h-3.5" />
@@ -158,21 +158,21 @@ function KanbanCard({
       </div>
 
       <div>
-        <p className="font-bold text-xs text-slate-800 line-clamp-1">
+        <p className="font-bold text-xs text-ink-800 line-clamp-1">
           {order.product.name}
         </p>
-        <p className="text-[11px] text-slate-500">
-          {order.material ? `${order.material.name} • ` : ""}
-          {order.width && order.height ? `${order.width}x${order.height}m • ` : ""}
+        <p className="text-[11px] text-ink-500">
+          {order.material ? `${order.material.name} â€¢ ` : ""}
+          {order.width && order.height ? `${order.width}x${order.height}m â€¢ ` : ""}
           Qty: {order.quantity}
         </p>
       </div>
 
-      <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
-        <span className="text-slate-400 truncate max-w-[100px]">
+      <div className="flex items-center justify-between pt-2 border-t border-ink-100 text-[11px]">
+        <span className="text-ink-400 truncate max-w-[100px]">
           {order.user.name}
         </span>
-        <span className="font-bold text-slate-800">
+        <span className="font-bold text-ink-800">
           {formatRupiah(order.totalPrice)}
         </span>
       </div>
@@ -183,7 +183,7 @@ function KanbanCard({
           <button
             type="button"
             onClick={() => onMoveQuick(order.id, "DESIGN_APPROVED")}
-            className="p-1 text-[10px] text-slate-500 hover:text-slate-900 rounded bg-slate-100"
+            className="p-1 text-[10px] text-ink-500 hover:text-ink-900 rounded bg-ink-100"
             title="Kembalikan ke To Do"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
@@ -193,7 +193,7 @@ function KanbanCard({
           <button
             type="button"
             onClick={() => onMoveQuick(order.id, "IN_PRODUCTION")}
-            className="p-1 text-[10px] text-slate-500 hover:text-slate-900 rounded bg-slate-100"
+            className="p-1 text-[10px] text-ink-500 hover:text-ink-900 rounded bg-ink-100"
             title="Kembalikan ke Printing"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
@@ -203,7 +203,7 @@ function KanbanCard({
           <button
             type="button"
             onClick={() => onMoveQuick(order.id, "FINISHING")}
-            className="p-1 text-[10px] text-slate-500 hover:text-slate-900 rounded bg-slate-100"
+            className="p-1 text-[10px] text-ink-500 hover:text-ink-900 rounded bg-ink-100"
             title="Kembalikan ke Finishing"
           >
             <ChevronLeft className="w-3.5 h-3.5" />

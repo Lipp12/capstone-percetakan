@@ -23,10 +23,10 @@ export default async function AdminRevenuePage() {
           <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
             Analisis Revenue
           </span>
-          <h1 className="text-2xl font-black text-slate-900 mt-1">
+          <h1 className="text-2xl font-black text-ink-900 mt-1">
             Laporan Pendapatan Percetakan
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-ink-500 mt-0.5">
             Pantau performa penjualan, tren revenue, dan produk paling menguntungkan.
           </p>
         </div>

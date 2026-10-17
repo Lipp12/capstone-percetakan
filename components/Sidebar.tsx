@@ -192,6 +192,7 @@ export default function Sidebar() {
             className={cn(
               "group menu-item",
               isActive ? "menu-item-active" : "menu-item-inactive",
+              !isOpen && "xl:justify-center xl:px-0",
             )}
           >
             {renderIcon(item.icon, isActive)}
@@ -220,35 +221,41 @@ export default function Sidebar() {
           className={cn(
             "group menu-item",
             isParentActive ? "menu-item-active" : "menu-item-inactive",
+            !isOpen && "xl:justify-center xl:px-0",
           )}
         >
           {renderIcon(item.icon, isParentActive)}
           <span className={cn("truncate", !isOpen && "xl:hidden")}>
             {item.label}
           </span>
+          {/* Chevron disembunyikan saat collapsed supaya baris tidak
+              melebar dan memunculkan scrollbar horizontal. */}
           <ChevronDown
             className={cn(
-              "menu-item-chevron",
+              "menu-item-chevron hidden xl:block",
               isOpenMenu
                 ? "menu-item-chevron-active"
                 : "menu-item-chevron-inactive",
+              !isOpen && "xl:hidden",
             )}
             aria-hidden
           />
         </button>
 
-        <div
-          id={`submenu-${item.label}`}
-          ref={(el) => {
-            subMenuRefs.current[item.label] = el;
-          }}
-          className="no-scrollbar overflow-hidden transition-[height] duration-300 ease-in-out"
-          style={{ height: isOpenMenu ? `${height}px` : "0px" }}
-        >
-          <ul className="mt-1 space-y-1 ps-3 xl:ps-9">
-            {(item.children ?? []).map(renderChild)}
-          </ul>
-        </div>
+        {isOpen ? (
+          <div
+            id={`submenu-${item.label}`}
+            ref={(el) => {
+              subMenuRefs.current[item.label] = el;
+            }}
+            className="no-scrollbar overflow-hidden transition-[height] duration-300 ease-in-out"
+            style={{ height: isOpenMenu ? `${height}px` : "0px" }}
+          >
+            <ul className="mt-1 space-y-1 ps-3 xl:ps-9">
+              {(item.children ?? []).map(renderChild)}
+            </ul>
+          </div>
+        ) : null}
       </li>
     );
   };
@@ -294,7 +301,7 @@ export default function Sidebar() {
       </div>
 
       {/* Menu */}
-      <nav className="custom-scrollbar flex-1 overflow-y-auto px-5 py-6">
+      <nav className="no-scrollbar flex-1 overflow-y-auto overflow-x-hidden px-5 py-6">
         <div className="flex flex-col gap-8">
           {adminNav.map((group) => (
             <div key={group.title}>
