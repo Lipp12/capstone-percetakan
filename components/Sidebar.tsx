@@ -3,40 +3,80 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  LayoutDashboard,
-  ShoppingBag,
-  FileCheck,
-  Kanban,
-  Package,
-  Layers,
-  AlertTriangle,
-  Scissors,
-  TrendingUp,
-  BarChart3,
-  Bot,
-  LogOut,
   ArrowLeft,
+  ChevronDown,
+  LogOut,
   Printer,
-  Loader2,
-  Menu,
-  X,
+  type LucideIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { adminNav, type NavChild, type NavItem } from "@/components/nav-config";
+import { useSidebar } from "@/components/SidebarContext";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { isExpanded, isHovered, isMobileOpen, isOpen, setIsHovered, closeMobile } =
+    useSidebar();
+
   const [lowStockCount, setLowStockCount] = useState(0);
   const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openMenus, setOpenMenus] = useState<string[]>([]);
+  const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
+    {},
+  );
 
-  // Reset status navigasi ketika halaman tujuan selesai dimuat
+  const badgeValue = useCallback(
+    (key?: NavChild["badgeKey"]) => (key === "lowStock" ? lowStockCount : 0),
+    [lowStockCount],
+  );
+
+  const isActivePath = useCallback(
+    (href: string) => pathname === href,
+    [pathname],
+  );
+
+  const isItemActive = useCallback(
+    (item: NavItem) => {
+      if (item.href) return isActivePath(item.href);
+      return (item.children ?? []).some((child) => isActivePath(child.href));
+    },
+    [isActivePath],
+  );
+
+  // Tutup drawer mobile & reset indikator pending setiap kali route berubah.
   useEffect(() => {
     setNavigatingTo(null);
-    setMobileMenuOpen(false);
-  }, [pathname]);
+    closeMobile();
+  }, [pathname, closeMobile]);
 
+  // Buka submenu yang memuat route aktif.
+  useEffect(() => {
+    const activeParents = adminNav
+      .flatMap((group) => group.items)
+      .filter((item) => item.children?.some((child) => isActivePath(child.href)))
+      .map((item) => item.label);
+
+    setOpenMenus((prev) => {
+      const merged = Array.from(new Set([...prev, ...activeParents]));
+      return merged.length === prev.length ? prev : merged;
+    });
+  }, [pathname, isActivePath]);
+
+  // Hitung tinggi submenu untuk animasi buka/tutup.
+  useEffect(() => {
+    const heights: Record<string, number> = {};
+    openMenus.forEach((key) => {
+      const el = subMenuRefs.current[key];
+      if (el) heights[key] = el.scrollHeight || 0;
+    });
+    setSubMenuHeight((prev) => ({ ...prev, ...heights }));
+  }, [openMenus]);
+
+  // Jumlah material stok rendah ( polled, sama seperti sebelumnya).
   useEffect(() => {
     let isMounted = true;
     async function checkLowStock() {
@@ -46,12 +86,11 @@ export default function Sidebar() {
           const data = await res.json();
           setLowStockCount(data.materials?.length || 0);
         }
-      } catch (e) {
-        // Abaikan
+      } catch {
+        // Abaikan — kegagalan fetch tidak boleh menggagalkan render sidebar.
       }
     }
     checkLowStock();
-    // Cek berkala setiap 60 detik (bukan setiap kali klik menu)
     const timer = setInterval(checkLowStock, 60000);
     return () => {
       isMounted = false;
@@ -59,157 +98,269 @@ export default function Sidebar() {
     };
   }, []);
 
-  const navGroups = [
-    {
-      title: "Utama",
-      items: [
-        { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-        { href: "/admin/production", label: "Antrean Produksi", icon: Kanban },
-        { href: "/admin/analytics/products", label: "Produk Terlaris", icon: BarChart3 },
-        { href: "/admin/analytics/revenue", label: "Analisis Revenue", icon: TrendingUp },
-        { href: "/admin/chat", label: "AI Copilot", icon: Bot },
-      ],
-    },
-    {
-      title: "Pesanan & Desain",
-      items: [
-        { href: "/admin/orders", label: "Semua Pesanan", icon: ShoppingBag },
-        { href: "/admin/orders/design-check", label: "Validasi Desain", icon: FileCheck },
-      ],
-    },
-    {
-      title: "Inventaris & Master",
-      items: [
-        { href: "/admin/products", label: "Kelola Produk", icon: Package },
-        { href: "/admin/materials", label: "Kelola Material", icon: Layers },
-        {
-          href: "/admin/materials/low-stock",
-          label: "Stok Rendah",
-          icon: AlertTriangle,
-          badge: lowStockCount > 0 ? lowStockCount : undefined,
-        },
-        { href: "/admin/finishings", label: "Opsi Finishing", icon: Scissors },
-      ],
-    },
-  ];
+  const handleNavigate = (href: string) => {
+    closeMobile();
+    if (pathname !== href) setNavigatingTo(href);
+  };
 
-  return (
-    <aside className="relative z-30 flex w-full shrink-0 flex-col border-b border-stone-200 bg-slate-900 text-slate-300 md:min-h-screen md:w-64 md:border-b-0 md:border-r md:border-slate-800">
-      {/* Top Navigation Progress Bar */}
-      {navigatingTo && (
-        <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-slate-800 overflow-hidden pointer-events-none">
-          <div className="h-full w-full animate-pulse bg-rose-600" />
-        </div>
+  const toggleMenu = (label: string) => {
+    setOpenMenus((prev) =>
+      prev.includes(label)
+        ? prev.filter((key) => key !== label)
+        : [...prev, label],
+    );
+  };
+
+  const renderIcon = (
+    Icon: LucideIcon,
+    isActive: boolean,
+    className?: string,
+  ) => (
+    <span
+      className={cn(
+        "flex h-5 w-5 shrink-0 items-center justify-center",
+        isActive ? "menu-item-icon-active" : "menu-item-icon-inactive",
+        className,
       )}
+    >
+      <Icon className="h-[18px] w-[18px]" aria-hidden />
+    </span>
+  );
 
-      {/* Brand Header */}
-      <div className="p-3 sm:p-4 border-b border-slate-800 flex items-center justify-between">
-        <Link href="/admin/dashboard" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-md border border-rose-200 bg-rose-50 text-rose-700 flex items-center justify-center">
-            <Printer className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="font-bold text-base text-white tracking-tight leading-none block">
-              Faeyza Printing
+  const renderChild = (child: NavChild) => {
+    const isActive = isActivePath(child.href);
+    const isPending = navigatingTo === child.href;
+    const count = badgeValue(child.badgeKey);
+
+    return (
+      <li key={child.href}>
+        <Link
+          href={child.href}
+          onClick={() => handleNavigate(child.href)}
+          aria-current={isActive ? "page" : undefined}
+          className={cn(
+            "group menu-dropdown-item",
+            isActive
+              ? "menu-dropdown-item-active"
+              : "menu-dropdown-item-inactive",
+          )}
+        >
+          <span className="flex h-4 w-4 shrink-0 items-center justify-center">
+            <child.icon
+              className={cn(
+                "h-4 w-4",
+                isActive ? "text-brand-600" : "text-ink-400",
+              )}
+              aria-hidden
+            />
+          </span>
+          <span className="truncate">{child.label}</span>
+          {isPending ? (
+            <span className="ms-auto text-[10px] font-medium text-brand-500">
+              Memuat…
             </span>
-            <span className="text-[10px] text-rose-300 font-medium tracking-wider uppercase">
-              Sistem Manajemen
+          ) : count > 0 ? (
+            <span
+              className={cn(
+                "menu-dropdown-badge",
+                isActive
+                  ? "menu-dropdown-badge-active"
+                  : "menu-dropdown-badge-inactive",
+              )}
+            >
+              {count}
             </span>
-          </div>
+          ) : null}
         </Link>
+      </li>
+    );
+  };
+
+  const renderItem = (item: NavItem) => {
+    const hasChildren = Boolean(item.children?.length);
+
+    if (!hasChildren && item.href) {
+      const isActive = isActivePath(item.href);
+      const isPending = navigatingTo === item.href;
+
+      return (
+        <li key={item.href}>
+          <Link
+            href={item.href}
+            onClick={() => handleNavigate(item.href as string)}
+            aria-current={isActive ? "page" : undefined}
+            className={cn(
+              "group menu-item",
+              isActive ? "menu-item-active" : "menu-item-inactive",
+            )}
+          >
+            {renderIcon(item.icon, isActive)}
+            <span className={cn("truncate", !isOpen && "xl:hidden")}>
+              {item.label}
+            </span>
+            {isPending && isOpen ? (
+              <span className="ms-auto h-2 w-2 animate-pulse rounded-full bg-brand-500" />
+            ) : null}
+          </Link>
+        </li>
+      );
+    }
+
+    const isOpenMenu = openMenus.includes(item.label);
+    const isParentActive = isItemActive(item);
+    const height = subMenuHeight[item.label] ?? 0;
+
+    return (
+      <li key={item.label}>
         <button
           type="button"
-          onClick={() => setMobileMenuOpen((open) => !open)}
-          aria-label={mobileMenuOpen ? "Tutup navigasi" : "Buka navigasi"}
-          aria-expanded={mobileMenuOpen}
-          className="p-2 text-slate-300 hover:text-white md:hidden"
+          onClick={() => toggleMenu(item.label)}
+          aria-expanded={isOpenMenu}
+          aria-controls={`submenu-${item.label}`}
+          className={cn(
+            "group menu-item",
+            isParentActive ? "menu-item-active" : "menu-item-inactive",
+          )}
         >
-          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {renderIcon(item.icon, isParentActive)}
+          <span className={cn("truncate", !isOpen && "xl:hidden")}>
+            {item.label}
+          </span>
+          <ChevronDown
+            className={cn(
+              "menu-item-chevron",
+              isOpenMenu
+                ? "menu-item-chevron-active"
+                : "menu-item-chevron-inactive",
+            )}
+            aria-hidden
+          />
         </button>
+
+        <div
+          id={`submenu-${item.label}`}
+          ref={(el) => {
+            subMenuRefs.current[item.label] = el;
+          }}
+          className="no-scrollbar overflow-hidden transition-[height] duration-300 ease-in-out"
+          style={{ height: isOpenMenu ? `${height}px` : "0px" }}
+        >
+          <ul className="mt-1 space-y-1 ps-3 xl:ps-9">
+            {(item.children ?? []).map(renderChild)}
+          </ul>
+        </div>
+      </li>
+    );
+  };
+
+  return (
+    <aside
+      className={cn(
+        "fixed inset-y-0 start-0 z-50 flex h-screen flex-col border-e border-ink-200 bg-white transition-[width,transform] duration-300 ease-in-out dark:border-ink-800 dark:bg-ink-900",
+        isOpen ? "w-sidebar" : "w-sidebar-collapsed",
+        isMobileOpen ? "translate-x-0" : "-translate-x-full",
+        "xl:translate-x-0",
+      )}
+      onMouseEnter={() => !isExpanded && setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      aria-label="Navigasi admin"
+    >
+      {/* Brand */}
+      <div
+        className={cn(
+          "flex h-20 shrink-0 items-center border-b border-ink-200 px-5 dark:border-ink-800",
+          !isOpen && "xl:justify-center xl:px-0",
+        )}
+      >
+        <Link
+          href="/admin/dashboard"
+          onClick={() => closeMobile()}
+          className="flex items-center gap-3"
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">
+            <Printer className="h-5 w-5" aria-hidden />
+          </span>
+          {isOpen ? (
+            <span className="min-w-0">
+              <span className="block truncate text-theme-sm font-semibold tracking-tight text-ink-900 dark:text-white">
+                Faeyza Printing
+              </span>
+              <span className="block truncate text-[10px] font-medium uppercase tracking-wider text-brand-600 dark:text-brand-400">
+                Sistem Manajemen
+              </span>
+            </span>
+          ) : null}
+        </Link>
       </div>
 
-      {/* Navigation Links */}
-      <div className={`${mobileMenuOpen ? "flex" : "hidden"} flex-1 flex-col gap-6 overflow-y-auto p-3 md:flex`}>
-        {navGroups.map((group, idx) => (
-          <div key={idx}>
-            <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-              {group.title}
-            </p>
-            <div className="space-y-0.5">
-              {group.items.map((item) => {
-                const isCurrentActive = pathname === item.href;
-                const isPending = navigatingTo === item.href;
-                const isActive = isCurrentActive || isPending;
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    prefetch={true}
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      if (pathname !== item.href) {
-                        setNavigatingTo(item.href);
-                      }
-                    }}
-                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition duration-150 ${
-                      isActive
-                        ? "bg-rose-700 text-white shadow-sm font-semibold"
-                        : "text-slate-400 hover:text-white hover:bg-slate-800"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      {isPending ? (
-                        <Loader2 className="w-4 h-4 shrink-0 animate-spin text-white" />
-                      ) : (
-                        <Icon className="w-4 h-4 shrink-0" />
-                      )}
-                      <span>{item.label}</span>
-                    </div>
-                    {isPending ? (
-                      <span className="text-[10px] text-rose-200 animate-pulse font-normal">
-                        Memuat...
-                      </span>
-                    ) : item.badge !== undefined ? (
-                      <span className="px-1.5 py-0.5 text-[10px] font-bold bg-rose-500 text-white rounded-full">
-                        {item.badge}
-                      </span>
-                    ) : null}
-                  </Link>
-                );
-              })}
+      {/* Menu */}
+      <nav className="custom-scrollbar flex-1 overflow-y-auto px-5 py-6">
+        <div className="flex flex-col gap-8">
+          {adminNav.map((group) => (
+            <div key={group.title}>
+              {isOpen ? (
+                <h2 className="menu-group-label">{group.title}</h2>
+              ) : (
+                <div
+                  className="mx-auto mb-4 h-px w-8 bg-ink-200 dark:bg-ink-700"
+                  aria-hidden
+                />
+              )}
+              <ul className="flex flex-col gap-1">
+                {group.items.map(renderItem)}
+              </ul>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </nav>
 
-      {/* Footer Info & Logout */}
-      <div className={`${mobileMenuOpen ? "block" : "hidden"} space-y-2 border-t border-slate-800 p-3 md:block`}>
+      {/* Footer: portal pelanggan + user */}
+      <div className="shrink-0 space-y-2 border-t border-ink-200 p-4 dark:border-ink-800">
         <Link
           href="/dashboard"
-          className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition"
+          onClick={() => closeMobile()}
+          className={cn(
+            "group menu-item text-ink-600 hover:text-ink-900 dark:text-ink-400 dark:hover:text-white",
+            !isOpen && "xl:justify-center xl:px-0",
+          )}
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Ke Portal Pelanggan</span>
+          <ArrowLeft className="h-[18px] w-[18px] shrink-0" aria-hidden />
+          {isOpen ? (
+            <span className="truncate">Ke Portal Pelanggan</span>
+          ) : null}
         </Link>
 
-        <div className="p-2.5 rounded-xl bg-slate-800/60 border border-slate-800 flex items-center justify-between">
-          <div className="text-left text-xs leading-tight">
-            <span className="font-semibold text-white block">
-              {session?.user?.name || "Admin"}
-            </span>
-            <span className="text-[10px] text-slate-400">
-              {(session?.user as any)?.role || "ADMIN"}
-            </span>
+        {isOpen ? (
+          <div className="flex items-center justify-between rounded-xl border border-ink-200 bg-ink-50 p-3 dark:border-ink-800 dark:bg-white/5">
+            <div className="min-w-0 text-start leading-tight">
+              <span className="block truncate text-theme-xs font-semibold text-ink-900 dark:text-white">
+                {session?.user?.name || "Admin"}
+              </span>
+              <span className="block truncate text-[10px] font-medium uppercase tracking-wider text-ink-400">
+                {(session?.user as { role?: string })?.role || "Admin"}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              title="Keluar"
+              className="ms-2 shrink-0 rounded-lg p-1.5 text-ink-400 transition-colors hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-white/10"
+            >
+              <LogOut className="h-4 w-4" aria-hidden />
+              <span className="sr-only">Keluar</span>
+            </button>
           </div>
+        ) : (
           <button
+            type="button"
             onClick={() => signOut({ callbackUrl: "/login" })}
             title="Keluar"
-            className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition"
+            className="mx-auto flex rounded-lg p-2 text-ink-400 transition-colors hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-white/10"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="h-4 w-4" aria-hidden />
+            <span className="sr-only">Keluar</span>
           </button>
-        </div>
+        )}
       </div>
     </aside>
   );
