@@ -12,7 +12,11 @@ import { cn } from "@/lib/utils";
 interface ChatViewProps {
   role: Role;
   homeHref: string;
-  subtitle: string;
+  /**
+   * Label kecil di baris atas. Opsional — kalau baris ini kosong semua
+   * (tanpa tombol kembali DAN tanpa subtitle) barisnya tidak dirender sama sekali.
+   */
+  subtitle?: string;
   /**
    * Tampilkan tombol "Kembali" di kiri atas.
    * Default true (dipakai halaman pelanggan). Halaman admin sudah punya
@@ -75,32 +79,49 @@ export default function ChatView({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center bg-ink-50/60 p-3 sm:p-6",
-        fill ? "h-full" : "min-h-screen",
+        "flex flex-col bg-ink-50/60",
+        fill
+          ? "h-full w-full"
+          : "min-h-screen items-center justify-center p-3 sm:p-6",
       )}
     >
-      <div className="w-full max-w-5xl mb-4 flex items-center justify-between">
-        {showBackButton ? (
-          <button
-            type="button"
-            onClick={handleClose}
-            className="inline-flex items-center gap-2 rounded-xl border border-ink-200 bg-white px-3 py-1.5 text-xs font-semibold text-ink-600 shadow-theme-xs transition-colors hover:bg-ink-100 hover:text-ink-900"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Kembali</span>
-          </button>
-        ) : (
-          <span />
-        )}
+      {/* Baris ini hanya perlu kalau ada tombol kembali atau subtitle. */}
+      {(showBackButton || subtitle) && (
+        <div
+          className={cn(
+            "mb-4 flex w-full items-center justify-between",
+            !fill && "max-w-5xl",
+          )}
+        >
+          {showBackButton ? (
+            <button
+              type="button"
+              onClick={handleClose}
+              className="inline-flex items-center gap-2 rounded-xl border border-ink-200 bg-white px-3 py-1.5 text-xs font-semibold text-ink-600 shadow-theme-xs transition-colors hover:bg-ink-100 hover:text-ink-900"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Kembali</span>
+            </button>
+          ) : (
+            <span />
+          )}
 
-        <span className="text-xs font-medium text-ink-500">{subtitle}</span>
-      </div>
+          {subtitle ? (
+            <span className="text-xs font-medium text-ink-500">{subtitle}</span>
+          ) : (
+            <span />
+          )}
+        </div>
+      )}
 
       {/* Tanpa onClose => tombol "Tutup" di header ChatBox tidak dirender */}
-      <ChatBox
-        role={role}
-        onClose={showCloseButton ? handleClose : undefined}
-      />
+      <div className={cn(fill && "flex min-h-0 flex-1")}>
+        <ChatBox
+          role={role}
+          fill={fill}
+          onClose={showCloseButton ? handleClose : undefined}
+        />
+      </div>
     </div>
   );
 }

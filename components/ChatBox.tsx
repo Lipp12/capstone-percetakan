@@ -4,6 +4,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import type { Role } from "@/lib/ai";
+import { cn } from "@/lib/utils";
 
 export type Msg = {
   role: "user" | "assistant";
@@ -23,6 +24,11 @@ interface ChatBoxProps {
   role?: Role;
   onRoleChange?: (role: Role) => void;
   onClose?: () => void;
+  /**
+   * Isi penuh area induk (hanya tinggi & lebar), bukan kolom terpusat.
+   * Dipakai halaman admin yang berada di dalam shell `h-screen`.
+   */
+  fill?: boolean;
 }
 
 const getStorageKey = (r: Role) => `capstone_chat_sessions_${r}_v3`;
@@ -70,6 +76,7 @@ export default function ChatBox({
   role = "customer",
   onRoleChange,
   onClose,
+  fill = false,
 }: ChatBoxProps) {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string>("");
@@ -331,7 +338,14 @@ export default function ChatBox({
   const isAdmin = (activeSession?.role || role) === "admin";
 
   return (
-    <div className="relative flex flex-col md:flex-row w-full max-w-5xl h-[620px] bg-white border border-ink-200 rounded-2xl shadow-xl overflow-hidden">
+    <div
+      className={cn(
+        "relative flex flex-col overflow-hidden border border-ink-200 bg-white md:flex-row",
+        fill
+          ? "h-full w-full"
+          : "h-[620px] w-full max-w-5xl rounded-2xl shadow-xl",
+      )}
+    >
       {/* ===================== SIDEBAR RIWAYAT CHAT ===================== */}
       <aside
         className={`absolute md:static inset-y-0 left-0 z-30 w-72 sm:w-80 bg-ink-50 border-r border-ink-200 flex flex-col transition-transform duration-300 ease-in-out ${

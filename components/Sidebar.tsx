@@ -260,7 +260,7 @@ export default function Sidebar() {
       {...(!isOpen ? ({ inert: "" } as Record<string, string>) : {})}
     >
       {/* Brand */}
-      <div className="flex h-20 shrink-0 items-center border-b border-ink-200 px-5 dark:border-ink-800">
+      <div className="flex h-16 shrink-0 items-center border-b border-ink-200 px-5 dark:border-ink-800">
         <Link
           href="/admin/dashboard"
           onClick={() => closeMobile()}

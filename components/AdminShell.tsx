@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/components/SidebarContext";
 import Sidebar from "@/components/Sidebar";
@@ -15,6 +16,11 @@ export default function AdminShell({
   children: React.ReactNode;
 }) {
   const { isOpen, isMobileOpen, closeMobile } = useSidebar();
+  const pathname = usePathname();
+
+  // Halaman chat memakai seluruh area konten, jadi padding <main> dilepas
+  // supaya Kotak chat bisa menempel ke tepi shell.
+  const isChatRoute = pathname.startsWith("/admin/chat");
 
   return (
     <div className="h-screen overflow-hidden bg-ink-50">
@@ -39,7 +45,14 @@ export default function AdminShell({
         )}
       >
         <AdminHeader />
-        <main className="custom-scrollbar flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+        <main
+          className={cn(
+            "custom-scrollbar flex-1 overflow-y-auto overflow-x-hidden",
+            isChatRoute
+              ? ""
+              : "px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7",
+          )}
+        >
           {children}
         </main>
       </div>
