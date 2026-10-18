@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildMessages, type ChatMessage, type Role } from "@/lib/ai";
+import { buildMessages, isOutOfScope, OUT_OF_SCOPE_REPLY, type ChatMessage, type Role } from "@/lib/ai";
 
 // Pastikan route ini dinamis dan tidak di-cache oleh Next.js
 export const dynamic = "force-dynamic";
@@ -43,7 +43,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Validasi API Key di environment server (aman, tidak bocor ke client)
+    // 2. Guard topik: tolak permintaan yang jelas di luar percetakan sebelum
+    //    memanggil model. Menghemat token dan menjamin penolakan tetap berlaku
+    //    walau model kecil mengabaikan system prompt.
+    if (isOutOfScope(messages)) {
+      return NextResponse.json({ reply: OUT_OF_SCOPE_REPLY });
+    }
+
+    // 3. Validasi API Key di environment server (aman, tidak bocor ke client)
     const apiKey = process.env.AI_API_KEY;
     if (!apiKey) {
       console.error("[Chat Route Error]: AI_API_KEY belum diset di .env.local");
@@ -56,7 +63,7 @@ export async function POST(req: NextRequest) {
     const baseUrl = process.env.AI_BASE_URL || "https://openrouter.ai/api/v1";
     const model = process.env.AI_MODEL || "meta-llama/llama-3.1-8b-instruct:free";
 
-    // 3. Sisipkan system prompt sesuai role (customer atau admin)
+    // 4. Sisipkan system prompt sesuai role (customer atau admin)
     const validatedRole: Role = role === "admin" ? "admin" : "customer";
     const finalMessages = buildMessages(validatedRole, messages);
 
