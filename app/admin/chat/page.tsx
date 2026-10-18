@@ -13,8 +13,9 @@ export default function AdminChatPage() {
     <ChatView
       role="admin"
       homeHref="/admin/dashboard"
-      subtitle="Admin Copilot • OpenRouter AI"
+      subtitle="Admin Copilot"
       showBackButton={false}
+      showCloseButton={false}
       fill
     />
   );

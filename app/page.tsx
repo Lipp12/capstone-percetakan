@@ -3,6 +3,10 @@ import Navbar from "@/components/Navbar";
 import { Printer, ShieldCheck, Zap, ArrowRight, Clock } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import ProductCard from "@/components/ProductCard";
+import PriceCalculator, {
+  type CalculatorFinishing,
+  type CalculatorProduct,
+} from "@/components/PriceCalculator";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +20,40 @@ export default async function HomePage() {
       },
     },
   });
+
+  const calculatorData = await prisma.product.findMany({
+    orderBy: { name: "asc" },
+    include: {
+      materials: {
+        include: { material: true },
+      },
+    },
+  });
+
+  const finishingData = await prisma.finishing.findMany({
+    orderBy: { name: "asc" },
+  });
+
+  const calculatorProducts: CalculatorProduct[] = calculatorData.map((item) => ({
+    id: item.id,
+    name: item.name,
+    unit: item.unit,
+    basePrice: item.basePrice,
+    materials: item.materials.map((link) => ({
+      name: link.material.name,
+      additionalPrice: link.additionalPrice,
+    })),
+  }));
+
+  const calculatorFinishings: CalculatorFinishing[] = finishingData.map(
+    (item) => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      unit: item.unit,
+    }),
+  );
+
   const heroImage =
     featuredProducts.find((product) => product.imageUrl)?.imageUrl ??
     "/uploads/products/1790264199799-shopping.webp";
@@ -86,6 +124,14 @@ export default async function HomePage() {
           </article>
         </div>
       </section>
+
+      {/* Kalkulator Biaya Cetak */}
+      {calculatorProducts.length > 0 ? (
+        <PriceCalculator
+          products={calculatorProducts}
+          finishings={calculatorFinishings}
+        />
+      ) : null}
 
       {/* Featured Products */}
       <section className="mx-auto w-full max-w-7xl flex-1 px-5 py-10 sm:px-8 sm:py-12">

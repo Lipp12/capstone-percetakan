@@ -633,7 +633,7 @@ export default function ChatBox({
                 </h3>
               </div>
               <p className="text-[11px] text-ink-400">
-                {isAdmin ? "Mode Admin Copilot" : "Mode Customer Assistant"} • OpenRouter AI
+                {isAdmin ? "Mode Admin Copilot" : "Mode Customer Assistant"}
               </p>
             </div>
           </div>
