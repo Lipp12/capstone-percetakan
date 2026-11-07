@@ -15,6 +15,7 @@ model User {
   phone     String?
   role      String   @default("CUSTOMER") // CUSTOMER | ADMIN | OPERATOR
   orders    Order[]
+  reviews   Review[]
   createdAt DateTime @default(now())
 }
 
@@ -29,6 +30,7 @@ model Product {
   imageUrl    String?
   materials   ProductMaterial[]
   orders      Order[]
+  reviews     Review[]
   createdAt   DateTime          @default(now())
 }
 
@@ -87,6 +89,7 @@ model Order {
   material        Material?            @relation(fields: [materialId], references: [id])
   finishings      OrderFinishing[]
   statusHistory   OrderStatusHistory[]
+  reviews         Review[]
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
 }
@@ -131,4 +134,18 @@ model Transaction {
   date      DateTime
   notes     String?
   createdAt DateTime @default(now())
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  orderId   String?
+  rating    Int      // 1-5
+  comment   String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order     Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
