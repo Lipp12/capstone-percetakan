@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Printer, Lock, Mail, User, Phone, ArrowRight, ArrowLeft, Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import Image from "next/image";
+import { Lock, Mail, User, Phone, ArrowRight, ArrowLeft, Loader2, AlertCircle, CheckCircle } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -87,8 +88,15 @@ export default function RegisterPage() {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
         {/* Logo & Header */}
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl border border-rose-200 bg-rose-50 text-rose-700 mb-4">
-            <Printer className="w-8 h-8" />
+          <div className="mb-5 flex justify-center">
+            <Image
+              src="/logo.png"
+              alt="Faeyza Digital Printing"
+              width={280}
+              height={150}
+              className="h-14 w-auto"
+              priority
+            />
           </div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">
             Daftar Akun Baru

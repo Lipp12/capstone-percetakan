@@ -32,12 +32,30 @@ type Props = {
 };
 
 /**
- * Nomor WhatsApp tujuan. Set lewat .env (lihat .env.example):
- * NEXT_PUBLIC_WHATSAPP_NUMBER=628xxxxxxxxxx
- * Nilai di bawah hanya fallback supaya tautan tetap valid saat env belum diisi.
+ * Normalisasi nomor WhatsApp ke format yang dibutuhkan wa.me:
+ * hanya digit, format internasional tanpa "+" dan tanpa spasi/strip.
+ *
+ * Penting: kalau env diisi "0821-1901-042", sekadar menghapus karakter non-digit
+ * akan menyisakan angka 0 di depan dan tautannya rusak. Karena itu angka 0
+ * depan dibuang lalu prefiks 62 ditambahkan.
  */
-const WHATSAPP_NUMBER =
-  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") || "6281234567890";
+function normalizeWaNumber(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.startsWith("62")) return digits;
+  if (digits.startsWith("0")) return `62${digits.slice(1)}`;
+  return `62${digits}`;
+}
+
+/**
+ * Nomor WhatsApp tujuan. Set lewat .env (lihat .env.example):
+ * NEXT_PUBLIC_WHATSAPP_NUMBER=628211901042
+ * Boleh ditulis dengan format apa pun (0812-3456-7890 / +62 812 ...),
+ * dinormalisasi di atas. Nilai bawaan dipakai supaya tautan tetap valid
+ * saat env belum diisi.
+ */
+const WHATSAPP_NUMBER = normalizeWaNumber(
+  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "628211901042",
+);
 
 const inputClass =
   "w-full rounded-md border border-stone-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-600/30";
