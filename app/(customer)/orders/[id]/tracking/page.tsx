@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { formatRupiah, formatDateTime, formatDate } from "@/lib/utils";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
+import OrderReviewCard from "@/components/OrderReviewCard";
 import Link from "next/link";
 import {
   CreditCard,
@@ -227,6 +228,16 @@ export default async function OrderTrackingPage({ params }: Props) {
           </div>
         </div>
       </div>
+
+      {/* Fitur Ulasan Khusus Pelanggan pada Pesanan yang Sudah Selesai */}
+      {order.status === "COMPLETED" && (
+        <OrderReviewCard
+          orderId={order.id}
+          orderNumber={order.orderNumber}
+          productName={order.product.name}
+          orderStatus={order.status}
+        />
+      )}
 
       {/* Rincian Spesifikasi & File Desain */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
