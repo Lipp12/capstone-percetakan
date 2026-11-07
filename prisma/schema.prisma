@@ -89,7 +89,7 @@ model Order {
   material        Material?            @relation(fields: [materialId], references: [id])
   finishings      OrderFinishing[]
   statusHistory   OrderStatusHistory[]
-  reviews         Review[]
+  review          Review?
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
 }
@@ -138,14 +138,14 @@ model Transaction {
 
 model Review {
   id        String   @id @default(cuid())
+  orderId   String   @unique
   userId    String
   productId String
-  orderId   String?
-  rating    Int      // 1-5
+  rating    Int
   comment   String?
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  order     Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

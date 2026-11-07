@@ -9,6 +9,7 @@ import {
   Package,
   Scissors,
   ShoppingBag,
+  Star,
   TriangleAlert,
   TrendingUp,
 } from "lucide-react";
@@ -88,6 +89,11 @@ export const adminNav: NavGroup[] = [
         href: "/admin/chat",
         label: "AI Copilot",
         icon: Bot,
+      },
+      {
+        href: "/admin/reviews",
+        label: "Ulasan Pelanggan",
+        icon: Star,
       },
     ],
   },
