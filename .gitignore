@@ -45,3 +45,10 @@ yarn-error.log*
 *.db-journal
 cloudflared.exe
 _backup_percetakan_system/
+
+# Dokumentasi & diagram tugas (tidak perlu di-push)
+/docs/
+/docs/diagrams/
+*.docx
+*.doc
+*.pdf

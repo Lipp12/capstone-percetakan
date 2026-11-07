@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Printer, ShoppingBag, Clock, Sparkles, LogOut, LayoutDashboard, Menu, X, User } from "lucide-react";
+import { ShoppingBag, Clock, Sparkles, LogOut, LayoutDashboard, Menu, X, User } from "lucide-react";
 import { useState } from "react";
 import NotificationBell from "@/components/NotificationBell";
 
@@ -26,18 +27,15 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-md border border-rose-200 bg-rose-50 text-rose-700 flex items-center justify-center">
-              <Printer className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="font-bold text-lg text-slate-900 tracking-tight leading-none block">
-                Faeyza Printing
-              </span>
-              <span className="text-[11px] text-rose-700 font-medium tracking-wide">
-                Percetakan
-              </span>
-            </div>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo.png"
+              alt="Faeyza Digital Printing"
+              width={160}
+              height={86}
+              className="h-10 w-auto"
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation Links */}
