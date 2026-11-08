@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -164,9 +164,9 @@ export default function OrderFormClient({
 
         {/* 1. Pilih Material */}
         {product.materials.length > 0 && (
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-              <Layers className="w-4 h-4 text-blue-600" />
+          <div className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant shadow-sm space-y-3">
+            <label className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+              <Layers className="w-4 h-4 text-primary" />
               1. Pilih Jenis Bahan / Material
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -179,25 +179,25 @@ export default function OrderFormClient({
                     onClick={() => setMaterialId(pm.materialId)}
                     className={`p-3.5 rounded-2xl border text-left transition ${
                       isSelected
-                        ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20"
-                        : "border-slate-200 hover:border-slate-300 bg-white"
+                        ? "border-primary bg-primary-container/20/50 ring-2 ring-primary/20"
+                        : "border-outline-variant hover:border-outline-variant bg-surface-container-lowest"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold text-xs text-slate-900">
+                      <span className="font-semibold text-xs text-on-surface">
                         {pm.material.name}
                       </span>
                       <span
                         className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
                           isSelected
-                            ? "border-blue-600 bg-blue-600"
-                            : "border-slate-300"
+                            ? "border-primary bg-primary"
+                            : "border-outline-variant"
                         }`}
                       >
-                        {isSelected && <span className="w-1.5 h-1.5 bg-white rounded-full" />}
+                        {isSelected && <span className="w-1.5 h-1.5 bg-surface-container-lowest rounded-full" />}
                       </span>
                     </div>
-                    <span className="text-[11px] text-slate-500 block">
+                    <span className="text-[11px] text-on-surface-variant block">
                       {pm.additionalPrice > 0
                         ? `+${formatRupiah(pm.additionalPrice)} / ${product.unit}`
                         : "Standar"}
@@ -211,14 +211,14 @@ export default function OrderFormClient({
 
         {/* 2. Ukuran Cetak (Jika unit m2) */}
         {isM2 && (
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-              <Maximize2 className="w-4 h-4 text-blue-600" />
+          <div className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant shadow-sm space-y-3">
+            <label className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+              <Maximize2 className="w-4 h-4 text-primary" />
               2. Dimensi Ukuran Cetak (Meter)
             </label>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <span className="text-xs text-slate-500 mb-1 block">Lebar (Meter)</span>
+                <span className="text-xs text-on-surface-variant mb-1 block">Lebar (Meter)</span>
                 <input
                   type="number"
                   min="0.1"
@@ -226,11 +226,11 @@ export default function OrderFormClient({
                   required
                   value={width}
                   onChange={(e) => setWidth(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
+                  className="w-full px-3.5 py-2.5 text-sm border border-outline-variant rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
                 />
               </div>
               <div>
-                <span className="text-xs text-slate-500 mb-1 block">Tinggi / Panjang (Meter)</span>
+                <span className="text-xs text-on-surface-variant mb-1 block">Tinggi / Panjang (Meter)</span>
                 <input
                   type="number"
                   min="0.1"
@@ -238,32 +238,32 @@ export default function OrderFormClient({
                   required
                   value={height}
                   onChange={(e) => setHeight(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
+                  className="w-full px-3.5 py-2.5 text-sm border border-outline-variant rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
                 />
               </div>
             </div>
 
             {/* Shortcut Ukuran Populer */}
             <div className="flex items-center gap-2 pt-1">
-              <span className="text-[11px] text-slate-400">Preset cepat:</span>
+              <span className="text-[11px] text-outline">Preset cepat:</span>
               <button
                 type="button"
                 onClick={() => { setWidth(2); setHeight(1); }}
-                className="text-[11px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md"
+                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-slate-200 text-on-surface-variant rounded-md"
               >
                 2 x 1 m
               </button>
               <button
                 type="button"
                 onClick={() => { setWidth(3); setHeight(1); }}
-                className="text-[11px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md"
+                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-slate-200 text-on-surface-variant rounded-md"
               >
                 3 x 1 m
               </button>
               <button
                 type="button"
                 onClick={() => { setWidth(4); setHeight(2); }}
-                className="text-[11px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md"
+                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-slate-200 text-on-surface-variant rounded-md"
               >
                 4 x 2 m
               </button>
@@ -272,16 +272,16 @@ export default function OrderFormClient({
         )}
 
         {/* 3. Jumlah Cetak (Quantity) */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-            <Package className="w-4 h-4 text-blue-600" />
+        <div className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant shadow-sm space-y-3">
+          <label className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+            <Package className="w-4 h-4 text-primary" />
             3. Jumlah Cetak ({product.unit})
           </label>
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-10 h-10 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-100 transition flex items-center justify-center text-lg"
+              className="w-10 h-10 rounded-xl border border-outline-variant text-on-surface-variant font-bold hover:bg-surface-container transition flex items-center justify-center text-lg"
             >
               -
             </button>
@@ -291,12 +291,12 @@ export default function OrderFormClient({
               required
               value={quantity}
               onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-              className="w-24 text-center py-2 text-base font-bold border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
+              className="w-24 text-center py-2 text-base font-bold border border-outline-variant rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
             />
             <button
               type="button"
               onClick={() => setQuantity(quantity + 1)}
-              className="w-10 h-10 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-100 transition flex items-center justify-center text-lg"
+              className="w-10 h-10 rounded-xl border border-outline-variant text-on-surface-variant font-bold hover:bg-surface-container transition flex items-center justify-center text-lg"
             >
               +
             </button>
@@ -305,9 +305,9 @@ export default function OrderFormClient({
 
         {/* 4. Opsi Finishing (Opsional) */}
         {finishings.length > 0 && (
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-              <Scissors className="w-4 h-4 text-blue-600" />
+          <div className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant shadow-sm space-y-3">
+            <label className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+              <Scissors className="w-4 h-4 text-primary" />
               4. Opsi Finishing Tambahan (Opsional)
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -318,8 +318,8 @@ export default function OrderFormClient({
                     key={fin.id}
                     className={`p-3 rounded-2xl border flex items-center justify-between cursor-pointer transition ${
                       isChecked
-                        ? "border-blue-600 bg-blue-50/40"
-                        : "border-slate-200 hover:border-slate-300"
+                        ? "border-primary bg-primary-container/20/40"
+                        : "border-outline-variant hover:border-outline-variant"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -327,13 +327,13 @@ export default function OrderFormClient({
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => toggleFinishing(fin.id)}
-                        className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
+                        className="w-4 h-4 rounded text-primary focus:ring-blue-500"
                       />
-                      <span className="text-xs font-medium text-slate-800">
+                      <span className="text-xs font-medium text-on-surface">
                         {fin.name}
                       </span>
                     </div>
-                    <span className="text-[11px] font-semibold text-blue-600">
+                    <span className="text-[11px] font-semibold text-primary">
                       +{formatRupiah(fin.price)}/{fin.unit}
                     </span>
                   </label>
@@ -344,9 +344,9 @@ export default function OrderFormClient({
         )}
 
         {/* 5. Metode Pengambilan & Alamat */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-            <Truck className="w-4 h-4 text-blue-600" />
+        <div className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant shadow-sm space-y-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+            <Truck className="w-4 h-4 text-primary" />
             5. Metode Pengambilan & Pengiriman
           </label>
           <div className="grid grid-cols-2 gap-3">
@@ -355,16 +355,16 @@ export default function OrderFormClient({
               onClick={() => setPickupMethod("PICKUP")}
               className={`p-4 rounded-2xl border text-left transition flex items-start gap-3 ${
                 pickupMethod === "PICKUP"
-                  ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20"
-                  : "border-slate-200 hover:border-slate-300"
+                  ? "border-primary bg-primary-container/20/50 ring-2 ring-primary/20"
+                  : "border-outline-variant hover:border-outline-variant"
               }`}
             >
-              <Store className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+              <Store className="w-5 h-5 text-primary shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-xs text-slate-900 block">
+                <span className="font-bold text-xs text-on-surface block">
                   Ambil di Toko (Pickup)
                 </span>
-                <span className="text-[11px] text-slate-500">
+                <span className="text-[11px] text-on-surface-variant">
                   Gratis. Ambil langsung saat selesai.
                 </span>
               </div>
@@ -375,16 +375,16 @@ export default function OrderFormClient({
               onClick={() => setPickupMethod("DELIVERY")}
               className={`p-4 rounded-2xl border text-left transition flex items-start gap-3 ${
                 pickupMethod === "DELIVERY"
-                  ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20"
-                  : "border-slate-200 hover:border-slate-300"
+                  ? "border-primary bg-primary-container/20/50 ring-2 ring-primary/20"
+                  : "border-outline-variant hover:border-outline-variant"
               }`}
             >
-              <Truck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+              <Truck className="w-5 h-5 text-primary shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-xs text-slate-900 block">
+                <span className="font-bold text-xs text-on-surface block">
                   Kirim ke Alamat (Delivery)
                 </span>
-                <span className="text-[11px] text-slate-500">
+                <span className="text-[11px] text-on-surface-variant">
                   Dikirim via kurir.
                 </span>
               </div>
@@ -393,7 +393,7 @@ export default function OrderFormClient({
 
           {pickupMethod === "DELIVERY" && (
             <div className="space-y-1.5 pt-2">
-              <span className="text-xs font-semibold text-slate-700 block">
+              <span className="text-xs font-semibold text-on-surface-variant block">
                 Alamat Lengkap Pengiriman *
               </span>
               <textarea
@@ -402,16 +402,16 @@ export default function OrderFormClient({
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Jl. Sukajadi No. 123, RT 01/02, Kel. Pasteur, Kec. Sukajadi, Kota Bandung 40161"
-                className="w-full p-3 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
+                className="w-full p-3 text-xs border border-outline-variant rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
               />
             </div>
           )}
         </div>
 
         {/* 6. Catatan Tambahan */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-2">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-            <FileText className="w-4 h-4 text-blue-600" />
+        <div className="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant shadow-sm space-y-2">
+          <label className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+            <FileText className="w-4 h-4 text-primary" />
             6. Catatan Khusus untuk Operator (Opsional)
           </label>
           <textarea
@@ -419,7 +419,7 @@ export default function OrderFormClient({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Contoh: Tolong lubang mata ayam di perbanyak di bagian atas..."
-            className="w-full p-3 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
+            className="w-full p-3 text-xs border border-outline-variant rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
           />
         </div>
       </div>
@@ -437,7 +437,7 @@ export default function OrderFormClient({
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-xl shadow-blue-500/30 transition flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-4 px-6 rounded-2xl bg-primary hover:bg-blue-700 text-white font-bold text-sm shadow-xl shadow-blue-500/30 transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -451,7 +451,7 @@ export default function OrderFormClient({
               </>
             )}
           </button>
-          <p className="text-[11px] text-slate-400 text-center leading-tight">
+          <p className="text-[11px] text-outline text-center leading-tight">
             Setelah ini Anda akan diminta mengunggah file desain (PDF/JPG/PNG) untuk divalidasi tim pra-cetak.
           </p>
         </div>
