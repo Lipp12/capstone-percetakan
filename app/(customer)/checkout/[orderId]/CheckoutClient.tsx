@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -120,11 +120,11 @@ export default function CheckoutClient({ order }: Props) {
         )}
 
         {isAlreadyPaid && (
-          <div className="p-4 bg-blue-50 border border-blue-200 text-blue-700 text-xs rounded-2xl flex items-center justify-between">
+          <div className="p-4 bg-primary-container/20 border border-blue-200 text-primary text-xs rounded-2xl flex items-center justify-between">
             <span>Pesanan ini sudah dalam status {order.status}.</span>
             <button
               onClick={() => router.push(`/orders/${order.id}/tracking`)}
-              className="px-3 py-1 bg-blue-600 text-white rounded-lg font-semibold"
+              className="px-3 py-1 bg-primary text-white rounded-lg font-semibold"
             >
               Lihat Tracking
             </button>
@@ -132,8 +132,8 @@ export default function CheckoutClient({ order }: Props) {
         )}
 
         {/* Pilihan Metode Bayar */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-800 block">
+        <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm space-y-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-on-surface block">
             Pilih Saluran Pembayaran
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -147,21 +147,21 @@ export default function CheckoutClient({ order }: Props) {
                   onClick={() => setPaymentMethod(opt.id)}
                   className={`p-4 rounded-2xl border text-left transition flex items-start gap-3 ${
                     isSelected
-                      ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20"
-                      : "border-slate-200 hover:border-slate-300"
+                      ? "border-primary bg-primary-container/20/50 ring-2 ring-primary/20"
+                      : "border-outline-variant hover:border-outline-variant"
                   }`}
                 >
-                  <div className="p-2 bg-blue-100/60 text-blue-600 rounded-xl shrink-0 mt-0.5">
+                  <div className="p-2 bg-primary-container/40 text-primary rounded-xl shrink-0 mt-0.5">
                     <Icon className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="font-bold text-xs text-slate-900 block truncate">
+                    <span className="font-bold text-xs text-on-surface block truncate">
                       {opt.name}
                     </span>
-                    <span className="text-[11px] font-mono text-blue-700 font-semibold block mt-0.5">
+                    <span className="text-[11px] font-mono text-primary font-semibold block mt-0.5">
                       {opt.account}
                     </span>
-                    <span className="text-[10px] text-slate-400 block">
+                    <span className="text-[10px] text-outline block">
                       {opt.holder}
                     </span>
                   </div>
@@ -173,11 +173,11 @@ export default function CheckoutClient({ order }: Props) {
 
         {/* Upload Bukti Pembayaran */}
         {paymentMethod !== "CASH" && (
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-800 block">
+          <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm space-y-4">
+            <label className="text-xs font-bold uppercase tracking-wider text-on-surface block">
               Unggah Bukti Transfer / Resi Struk
             </label>
-            <div className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-6 text-center bg-slate-50 relative cursor-pointer">
+            <div className="border-2 border-dashed border-outline-variant hover:border-primary rounded-2xl p-6 text-center bg-surface-container-low relative cursor-pointer">
               <input
                 type="file"
                 accept="image/*,.pdf"
@@ -189,11 +189,11 @@ export default function CheckoutClient({ order }: Props) {
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
               <div className="flex flex-col items-center justify-center space-y-2">
-                <Upload className="w-8 h-8 text-slate-400" />
-                <p className="text-xs font-semibold text-slate-700">
+                <Upload className="w-8 h-8 text-outline" />
+                <p className="text-xs font-semibold text-on-surface-variant">
                   {proofFile ? proofFile.name : "Pilih foto screenshot struk atau bukti transfer"}
                 </p>
-                <p className="text-[10px] text-slate-400">JPG, PNG, atau PDF (Maksimal 5MB)</p>
+                <p className="text-[10px] text-outline">JPG, PNG, atau PDF (Maksimal 5MB)</p>
               </div>
             </div>
           </div>
@@ -202,56 +202,56 @@ export default function CheckoutClient({ order }: Props) {
 
       {/* Kolom Kanan: Ringkasan Lengkap & CTA Bayar */}
       <div className="space-y-4">
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-          <h3 className="font-bold text-sm text-slate-900 pb-3 border-b border-slate-100 flex items-center justify-between">
+        <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm space-y-4">
+          <h3 className="font-bold text-sm text-on-surface pb-3 border-b border-surface-container-low flex items-center justify-between">
             <span>Ringkasan Pesanan</span>
-            <span className="text-xs text-blue-600 font-semibold">#{order.orderNumber}</span>
+            <span className="text-xs text-primary font-semibold">#{order.orderNumber}</span>
           </h3>
 
-          <div className="space-y-2 text-xs text-slate-600">
+          <div className="space-y-2 text-xs text-on-surface-variant">
             <div className="flex justify-between">
-              <span className="text-slate-400">Produk:</span>
-              <span className="font-semibold text-slate-800">{order.product.name}</span>
+              <span className="text-outline">Produk:</span>
+              <span className="font-semibold text-on-surface">{order.product.name}</span>
             </div>
 
             {order.material && (
               <div className="flex justify-between">
-                <span className="text-slate-400">Bahan:</span>
-                <span className="font-medium text-slate-800">{order.material.name}</span>
+                <span className="text-outline">Bahan:</span>
+                <span className="font-medium text-on-surface">{order.material.name}</span>
               </div>
             )}
 
             {order.width && order.height && (
               <div className="flex justify-between">
-                <span className="text-slate-400">Ukuran:</span>
-                <span className="font-medium text-slate-800">
-                  {order.width} x {order.height} meter ({order.width * order.height} m²)
+                <span className="text-outline">Ukuran:</span>
+                <span className="font-medium text-on-surface">
+                  {order.width} x {order.height} meter ({order.width * order.height} mÂ²)
                 </span>
               </div>
             )}
 
             <div className="flex justify-between">
-              <span className="text-slate-400">Jumlah:</span>
-              <span className="font-medium text-slate-800">
+              <span className="text-outline">Jumlah:</span>
+              <span className="font-medium text-on-surface">
                 {order.quantity} {order.product.unit}
               </span>
             </div>
 
             <div className="flex justify-between">
-              <span className="text-slate-400">Pengiriman:</span>
-              <span className="font-medium text-slate-800">
+              <span className="text-outline">Pengiriman:</span>
+              <span className="font-medium text-on-surface">
                 {order.pickupMethod === "DELIVERY" ? "Kurir Delivery" : "Ambil di Toko"}
               </span>
             </div>
 
             {order.finishings.length > 0 && (
-              <div className="pt-2 border-t border-slate-100">
-                <span className="text-[11px] font-semibold text-slate-500 block mb-1">
+              <div className="pt-2 border-t border-surface-container-low">
+                <span className="text-[11px] font-semibold text-on-surface-variant block mb-1">
                   Finishing:
                 </span>
                 {order.finishings.map((f: any) => (
-                  <div key={f.id} className="flex justify-between text-[11px] text-slate-500">
-                    <span>• {f.finishing.name}</span>
+                  <div key={f.id} className="flex justify-between text-[11px] text-on-surface-variant">
+                    <span>â€¢ {f.finishing.name}</span>
                     <span>{formatRupiah(f.price)}</span>
                   </div>
                 ))}
@@ -259,9 +259,9 @@ export default function CheckoutClient({ order }: Props) {
             )}
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex items-baseline justify-between">
-            <span className="text-xs font-semibold text-slate-500">Total Tagihan</span>
-            <span className="text-2xl font-black text-blue-600">
+          <div className="pt-4 border-t border-surface-container-low flex items-baseline justify-between">
+            <span className="text-xs font-semibold text-on-surface-variant">Total Tagihan</span>
+            <span className="text-2xl font-black text-primary">
               {formatRupiah(order.totalPrice)}
             </span>
           </div>
@@ -270,7 +270,7 @@ export default function CheckoutClient({ order }: Props) {
             type="button"
             onClick={handleConfirmPayment}
             disabled={loading || success || isAlreadyPaid}
-            className="w-full py-4 px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-xl shadow-blue-500/25 transition flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-4 px-6 rounded-2xl bg-primary hover:bg-blue-700 text-white font-bold text-sm shadow-xl shadow-blue-500/25 transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -285,7 +285,7 @@ export default function CheckoutClient({ order }: Props) {
             )}
           </button>
 
-          <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
+          <div className="flex items-center justify-center gap-1.5 text-[11px] text-outline">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
             <span>Verifikasi aman dan data terenkripsi</span>
           </div>
