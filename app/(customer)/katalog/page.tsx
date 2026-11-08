@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import ProductCard from "@/components/ProductCard";
+import KatalogFilters from "@/components/katalog/KatalogFilters";
 import Link from "next/link";
-import { Search } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -9,12 +9,14 @@ interface Props {
   searchParams: {
     category?: string;
     search?: string;
+    sort?: string;
   };
 }
 
 export default async function KatalogPage({ searchParams }: Props) {
   const selectedCategory = searchParams.category || "all";
   const searchQuery = searchParams.search || "";
+  const sort = searchParams.sort || "newest";
 
   // Ambil semua kategori yang ada
   const allCategories = await prisma.product.findMany({
@@ -36,9 +38,15 @@ export default async function KatalogPage({ searchParams }: Props) {
     ];
   }
 
+  let orderBy: any = { createdAt: "desc" };
+  if (sort === "price-asc") orderBy = { basePrice: "asc" };
+  else if (sort === "price-desc") orderBy = { basePrice: "desc" };
+  else if (sort === "name-asc") orderBy = { name: "asc" };
+  else if (sort === "name-desc") orderBy = { name: "desc" };
+
   const products = await prisma.product.findMany({
     where: whereClause,
-    orderBy: { createdAt: "desc" },
+    orderBy,
     include: {
       materials: {
         include: { material: true },
@@ -63,38 +71,13 @@ export default async function KatalogPage({ searchParams }: Props) {
         </p>
       </div>
 
-      {/* Filter Kategori & Search */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-white p-3 sm:p-4 rounded-lg border border-stone-200">
-        {/* Kategori Tabs */}
-        <div className="flex items-center gap-1.5 w-full overflow-x-auto pb-1 sm:w-auto sm:flex-1">
-          {categories.map((cat) => (
-            <Link
-              key={cat}
-              href={`/katalog?category=${cat}${searchQuery ? `&search=${searchQuery}` : ""}`}
-              className={`px-3.5 py-2 rounded-md text-xs font-semibold capitalize whitespace-nowrap shrink-0 transition ${
-                selectedCategory === cat
-                  ? "bg-rose-700 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
-            >
-              {cat === "all" ? "Semua Kategori" : cat}
-            </Link>
-          ))}
-        </div>
-
-        {/* Search Bar */}
-        <form method="GET" action="/katalog" className="relative w-full sm:w-64 sm:shrink-0">
-          <input type="hidden" name="category" value={selectedCategory} />
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            name="search"
-            defaultValue={searchQuery}
-            placeholder="Cari produk cetak..."
-            className="w-full pl-9 pr-3 py-2.5 text-sm border border-stone-300 rounded-md focus:ring-2 focus:ring-rose-600 focus:border-rose-600 outline-none"
-          />
-        </form>
-      </div>
+      {/* Filter Kategori, Search & Sort (client component) */}
+      <KatalogFilters
+        categories={categories}
+        selectedCategory={selectedCategory}
+        searchQuery={searchQuery}
+        sort={sort}
+      />
 
       {/* Grid Produk */}
       {products.length === 0 ? (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Tag } from "lucide-react";
 
 interface Props {
@@ -38,12 +39,14 @@ export default function ProductImage({
   }
 
   return (
-    <img
+    <Image
       src={src}
       alt={alt}
-      loading="lazy"
+      fill
+      sizes="(max-width: 768px) 100vw, 33vw"
       onError={() => setFailed(true)}
       className={className}
+      unoptimized
     />
   );
 }

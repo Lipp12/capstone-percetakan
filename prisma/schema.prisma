@@ -82,6 +82,8 @@ model Order {
   paymentProofUrl String?
   paymentMethod   String?
   notes           String?
+  alifSyncStatus  String   @default("PENDING") // PENDING | SYNCED | FAILED
+  alifSyncError   String?
   user            User                 @relation(fields: [userId], references: [id])
   product         Product              @relation(fields: [productId], references: [id])
   material        Material?            @relation(fields: [materialId], references: [id])

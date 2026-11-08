@@ -1,10 +1,20 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import ProductImage from "@/components/ProductImage";
 import { formatRupiah } from "@/lib/utils";
 import { ArrowLeft, ArrowRight, Check, Layers, ShieldCheck, Tag } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const product = await prisma.product.findUnique({ where: { slug: params.slug } });
+  if (!product) return { title: "Produk tidak ditemukan" };
+  return {
+    title: `${product.name} | Katalog Percetakan`,
+    description: product.description,
+  };
+}
 
 interface Props {
   params: {
@@ -43,7 +53,7 @@ export default async function ProductDetailPage({ params }: Props) {
         {/* Gambar Produk */}
         <div className="relative h-72 md:h-full min-h-[360px] bg-slate-100">
           {product.imageUrl ? (
-            <img
+            <ProductImage
               src={product.imageUrl}
               alt={product.name}
               className="w-full h-full object-cover"

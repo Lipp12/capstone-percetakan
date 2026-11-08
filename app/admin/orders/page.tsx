@@ -2,20 +2,24 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
-import { Search, ShoppingBag, Eye, ExternalLink } from "lucide-react";
+import { Search, ShoppingBag, Eye, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 20;
 
 interface Props {
   searchParams: {
     status?: string;
     search?: string;
+    page?: string;
   };
 }
 
 export default async function AdminOrdersListPage({ searchParams }: Props) {
   const statusFilter = searchParams.status || "ALL";
   const searchQuery = searchParams.search || "";
+  const page = Math.max(1, Number(searchParams.page) || 1);
 
   const where: any = {};
   if (statusFilter !== "ALL") {
@@ -29,15 +33,22 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
     ];
   }
 
-  const orders = await prisma.order.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    include: {
-      user: { select: { name: true, phone: true } },
-      product: true,
-      material: true,
-    },
-  });
+  const [orders, total] = await Promise.all([
+    prisma.order.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+      include: {
+        user: { select: { name: true, phone: true, email: true } },
+        product: true,
+        material: true,
+      },
+    }),
+    prisma.order.count({ where }),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const statuses = [
     { label: "Semua", value: "ALL" },
@@ -50,7 +61,16 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
     { label: "Siap Diambil", value: "READY" },
     { label: "Dikirim", value: "SHIPPING" },
     { label: "Selesai", value: "COMPLETED" },
+    { label: "Ditolak/Batal", value: "CANCELLED" },
   ];
+
+  function pageHref(p: number) {
+    const params = new URLSearchParams();
+    if (statusFilter !== "ALL") params.set("status", statusFilter);
+    if (searchQuery) params.set("search", searchQuery);
+    params.set("page", String(p));
+    return `/admin/orders?${params.toString()}`;
+  }
 
   return (
     <div className="space-y-6">
@@ -113,6 +133,7 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
                   <th className="py-3.5 px-4">No. Pesanan</th>
                   <th className="py-3.5 px-4">Pelanggan</th>
                   <th className="py-3.5 px-4">Produk & Spesifikasi</th>
+                  <th className="py-3.5 px-4">File</th>
                   <th className="py-3.5 px-4">Status</th>
                   <th className="py-3.5 px-4 text-right">Total Tagihan</th>
                   <th className="py-3.5 px-4 text-center">Aksi</th>
@@ -132,7 +153,7 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
                         {o.user.name}
                       </span>
                       <span className="text-[10px] text-ink-400">
-                        {o.user.phone || "-"}
+                        {o.user.phone || o.user.email || "-"}
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
@@ -140,13 +161,33 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
                         {o.product.name}
                       </span>
                       <span className="text-[11px] text-ink-500">
-                        {o.material ? `${o.material.name} â€¢ ` : ""}
-                        {o.width && o.height ? `${o.width}x${o.height}m â€¢ ` : ""}
+                        {o.material ? `${o.material.name} • ` : ""}
+                        {o.width && o.height ? `${o.width}x${o.height}m • ` : ""}
                         {o.quantity} {o.product.unit}
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
+                      {o.designFileUrl ? (
+                        <a
+                          href={o.designFileUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 text-brand-600 hover:underline font-semibold"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Lihat</span>
+                        </a>
+                      ) : (
+                        <span className="text-ink-400">-</span>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4">
                       <OrderStatusBadge status={o.status} size="sm" />
+                      {o.alifSyncStatus === "FAILED" && (
+                        <span className="block text-[10px] text-rose-600 mt-1">
+                          Sync Alif gagal
+                        </span>
+                      )}
                     </td>
                     <td className="py-3.5 px-4 text-right font-extrabold text-ink-900">
                       {formatRupiah(o.totalPrice)}
@@ -164,6 +205,35 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-ink-100 text-xs">
+            <span className="text-ink-400">
+              Halaman {page} dari {totalPages} ({total} pesanan)
+            </span>
+            <div className="flex items-center gap-2">
+              {page > 1 ? (
+                <Link href={pageHref(page - 1)} className="p-1.5 rounded-lg bg-ink-100 hover:bg-ink-200">
+                  <ChevronLeft className="w-4 h-4" />
+                </Link>
+              ) : (
+                <span className="p-1.5 rounded-lg bg-ink-50 text-ink-300">
+                  <ChevronLeft className="w-4 h-4" />
+                </span>
+              )}
+              {page < totalPages ? (
+                <Link href={pageHref(page + 1)} className="p-1.5 rounded-lg bg-ink-100 hover:bg-ink-200">
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              ) : (
+                <span className="p-1.5 rounded-lg bg-ink-50 text-ink-300">
+                  <ChevronRight className="w-4 h-4" />
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>

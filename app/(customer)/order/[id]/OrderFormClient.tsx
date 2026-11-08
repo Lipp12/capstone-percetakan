@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { calculatePricing } from "../../../../lib/pricing";
+import { validateFile, formatFileSize } from "../../../../lib/validations";
 import PriceBreakdown from "../../../../components/PriceBreakdown";
 import { formatRupiah } from "../../../../lib/utils";
 import {
@@ -16,6 +17,9 @@ import {
   ArrowRight,
   Loader2,
   AlertCircle,
+  Upload,
+  X,
+  CheckCircle2,
 } from "lucide-react";
 
 interface Props {
@@ -24,6 +28,8 @@ interface Props {
   initialData?: any;
 }
 
+type SubmitState = "idle" | "loading" | "success" | "error";
+
 export default function OrderFormClient({
   product,
   finishings,
@@ -31,6 +37,9 @@ export default function OrderFormClient({
 }: Props) {
   const router = useRouter();
   const isM2 = product.unit.toLowerCase() === "m2";
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // State Form
   const [materialId, setMaterialId] = useState<string>(
@@ -48,17 +57,22 @@ export default function OrderFormClient({
   const [address, setAddress] = useState<string>(initialData?.address || "");
   const [notes, setNotes] = useState<string>(initialData?.notes || "");
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  // Berkas desain
+  const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string>("");
 
-  // Temukan material yang dipilih
+  // State submit
+  const [submitState, setSubmitState] = useState<SubmitState>("idle");
+  const [submitError, setSubmitError] = useState<string>("");
+  const [createdOrderNumber, setCreatedOrderNumber] = useState<string>("");
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+
   const selectedProdMat = product.materials.find(
     (pm: any) => pm.materialId === materialId
   );
   const materialAdditionalPrice = selectedProdMat?.additionalPrice || 0;
   const materialName = selectedProdMat?.material?.name;
 
-  // Siapkan finishing yang dipilih
   const selectedFinishingObjects = useMemo(() => {
     return finishings
       .filter((f) => selectedFinishingIds.includes(f.id))
@@ -70,7 +84,6 @@ export default function OrderFormClient({
       }));
   }, [finishings, selectedFinishingIds]);
 
-  // Perhitungan Real-Time
   const breakdown = useMemo(() => {
     return calculatePricing({
       basePrice: product.basePrice,
@@ -92,7 +105,6 @@ export default function OrderFormClient({
     selectedFinishingObjects,
   ]);
 
-  // Handle Toggle Finishing
   function toggleFinishing(id: string) {
     if (selectedFinishingIds.includes(id)) {
       setSelectedFinishingIds(selectedFinishingIds.filter((item) => item !== id));
@@ -101,71 +113,160 @@ export default function OrderFormClient({
     }
   }
 
-  // Handle Submit Order
+  function handleFileSelect(selected: File | null) {
+    if (!selected) return;
+    const err = validateFile(selected);
+    if (err) {
+      setFileError(err);
+      setFile(null);
+      return;
+    }
+    setFileError("");
+    setFile(selected);
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(true);
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(false);
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(false);
+    const dropped = e.dataTransfer.files?.[0];
+    handleFileSelect(dropped || null);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    if (submitState === "loading") return;
+
+    setSubmitError("");
 
     if (pickupMethod === "DELIVERY" && !address.trim()) {
-      setError("Alamat pengiriman wajib diisi jika memilih kurir delivery");
+      setSubmitError("Alamat pengiriman wajib diisi jika memilih kurir delivery");
+      setSubmitState("error");
       return;
     }
 
     if (quantity < 1) {
-      setError("Jumlah pemesanan minimal 1");
+      setSubmitError("Jumlah pemesanan minimal 1");
+      setSubmitState("error");
       return;
     }
 
-    setLoading(true);
+    const fileErr = validateFile(file);
+    if (fileErr) {
+      setFileError(fileErr);
+      setSubmitError(fileErr);
+      setSubmitState("error");
+      return;
+    }
+
+    setSubmitState("loading");
+    setUploadProgress(0);
 
     try {
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: product.id,
-          materialId: materialId || undefined,
-          width: isM2 ? Number(width) : undefined,
-          height: isM2 ? Number(height) : undefined,
-          quantity: Number(quantity),
-          pickupMethod,
-          address: pickupMethod === "DELIVERY" ? address : undefined,
-          finishingIds: selectedFinishingIds,
-          notes: notes.trim() || undefined,
-        }),
+      const formData = new FormData();
+      formData.append("productId", product.id);
+      if (materialId) formData.append("materialId", materialId);
+      if (isM2) {
+        formData.append("width", String(width));
+        formData.append("height", String(height));
+      }
+      formData.append("quantity", String(quantity));
+      formData.append("pickupMethod", pickupMethod);
+      if (pickupMethod === "DELIVERY") formData.append("address", address);
+      formData.append("finishingIds", JSON.stringify(selectedFinishingIds));
+      if (notes.trim()) formData.append("notes", notes.trim());
+      if (file) formData.append("file", file, file.name);
+
+      const xhr = new XMLHttpRequest();
+      const result = await new Promise<{ ok: boolean; data: any }>((resolve) => {
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            setUploadProgress(Math.round((event.loaded / event.total) * 100));
+          }
+        };
+        xhr.onload = () => {
+          let data: any = {};
+          try {
+            data = JSON.parse(xhr.responseText);
+          } catch {
+            data = {};
+          }
+          resolve({ ok: xhr.status >= 200 && xhr.status < 300, data });
+        };
+        xhr.onerror = () => resolve({ ok: false, data: {} });
+        xhr.open("POST", "/api/orders");
+        xhr.send(formData);
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Gagal membuat pesanan");
-        setLoading(false);
+      if (!result.ok) {
+        setSubmitError(result.data?.error || "Gagal membuat pesanan");
+        setSubmitState("error");
         return;
       }
 
-      // Berhasil dibuat -> arahkan ke halaman upload desain
-      router.push(`/order/${data.orderId}/upload`);
+      setCreatedOrderNumber(result.data?.orderNumber || "");
+      setSubmitState("success");
     } catch (err) {
-      setError("Terjadi kesalahan koneksi. Silakan coba lagi.");
-      setLoading(false);
+      setSubmitError("Terjadi kesalahan koneksi. Silakan coba lagi.");
+      setSubmitState("error");
     }
   }
+
+  if (submitState === "success") {
+    return (
+      <div className="max-w-xl mx-auto bg-white p-8 rounded-3xl border border-ink-200 shadow-sm text-center space-y-4">
+        <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
+        <h2 className="text-xl font-black text-ink-900">Pesanan Berhasil Dibuat</h2>
+        <p className="text-sm text-ink-500">
+          Kode pesanan Anda:{" "}
+          <span className="font-bold text-ink-900">{createdOrderNumber}</span>
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+          <button
+            type="button"
+            onClick={() => router.push("/katalog")}
+            className="px-5 py-2.5 rounded-xl bg-brand-600 text-white font-semibold text-sm hover:bg-brand-700 transition"
+          >
+            Buat Pesanan Baru
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/orders")}
+            className="px-5 py-2.5 rounded-xl bg-ink-100 text-ink-700 font-semibold text-sm hover:bg-ink-200 transition"
+          >
+            Lihat Pesanan Saya
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const isLoading = submitState === "loading";
 
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Kolom Kiri: Input Form Spesifikasi */}
       <div className="lg:col-span-2 space-y-6">
-        {error && (
+        {(submitState === "error" || submitError) && (
           <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl flex items-center gap-2">
             <AlertCircle className="w-5 h-5 shrink-0" />
-            <span>{error}</span>
+            <span>{submitError}</span>
           </div>
         )}
 
         {/* 1. Pilih Material */}
         {product.materials.length > 0 && (
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+          <div className="bg-white p-6 rounded-3xl border border-ink-200 shadow-sm space-y-3">
+            <label className="text-xs font-bold uppercase tracking-wider text-ink-800 flex items-center gap-1.5">
               <Layers className="w-4 h-4 text-blue-600" />
               1. Pilih Jenis Bahan / Material
             </label>
@@ -242,31 +343,11 @@ export default function OrderFormClient({
                 />
               </div>
             </div>
-
-            {/* Shortcut Ukuran Populer */}
             <div className="flex items-center gap-2 pt-1">
               <span className="text-[11px] text-slate-400">Preset cepat:</span>
-              <button
-                type="button"
-                onClick={() => { setWidth(2); setHeight(1); }}
-                className="text-[11px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md"
-              >
-                2 x 1 m
-              </button>
-              <button
-                type="button"
-                onClick={() => { setWidth(3); setHeight(1); }}
-                className="text-[11px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md"
-              >
-                3 x 1 m
-              </button>
-              <button
-                type="button"
-                onClick={() => { setWidth(4); setHeight(2); }}
-                className="text-[11px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md"
-              >
-                4 x 2 m
-              </button>
+              <button type="button" onClick={() => { setWidth(2); setHeight(1); }} className="text-[11px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md">2 x 1 m</button>
+              <button type="button" onClick={() => { setWidth(3); setHeight(1); }} className="text-[11px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md">3 x 1 m</button>
+              <button type="button" onClick={() => { setWidth(4); setHeight(2); }} className="text-[11px] px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md">4 x 2 m</button>
             </div>
           </div>
         )}
@@ -278,13 +359,7 @@ export default function OrderFormClient({
             3. Jumlah Cetak ({product.unit})
           </label>
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-10 h-10 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-100 transition flex items-center justify-center text-lg"
-            >
-              -
-            </button>
+            <button type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-10 h-10 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-100 transition flex items-center justify-center text-lg">-</button>
             <input
               type="number"
               min="1"
@@ -293,13 +368,7 @@ export default function OrderFormClient({
               onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
               className="w-24 text-center py-2 text-base font-bold border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
             />
-            <button
-              type="button"
-              onClick={() => setQuantity(quantity + 1)}
-              className="w-10 h-10 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-100 transition flex items-center justify-center text-lg"
-            >
-              +
-            </button>
+            <button type="button" onClick={() => setQuantity(quantity + 1)} className="w-10 h-10 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-100 transition flex items-center justify-center text-lg">+</button>
           </div>
         </div>
 
@@ -314,28 +383,12 @@ export default function OrderFormClient({
               {finishings.map((fin) => {
                 const isChecked = selectedFinishingIds.includes(fin.id);
                 return (
-                  <label
-                    key={fin.id}
-                    className={`p-3 rounded-2xl border flex items-center justify-between cursor-pointer transition ${
-                      isChecked
-                        ? "border-blue-600 bg-blue-50/40"
-                        : "border-slate-200 hover:border-slate-300"
-                    }`}
-                  >
+                  <label key={fin.id} className={`p-3 rounded-2xl border flex items-center justify-between cursor-pointer transition ${isChecked ? "border-blue-600 bg-blue-50/40" : "border-slate-200 hover:border-slate-300"}`}>
                     <div className="flex items-center gap-2.5">
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => toggleFinishing(fin.id)}
-                        className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-xs font-medium text-slate-800">
-                        {fin.name}
-                      </span>
+                      <input type="checkbox" checked={isChecked} onChange={() => toggleFinishing(fin.id)} className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" />
+                      <span className="text-xs font-medium text-slate-800">{fin.name}</span>
                     </div>
-                    <span className="text-[11px] font-semibold text-blue-600">
-                      +{formatRupiah(fin.price)}/{fin.unit}
-                    </span>
+                    <span className="text-[11px] font-semibold text-blue-600">+{formatRupiah(fin.price)}/{fin.unit}</span>
                   </label>
                 );
               })}
@@ -350,69 +403,94 @@ export default function OrderFormClient({
             5. Metode Pengambilan & Pengiriman
           </label>
           <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setPickupMethod("PICKUP")}
-              className={`p-4 rounded-2xl border text-left transition flex items-start gap-3 ${
-                pickupMethod === "PICKUP"
-                  ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20"
-                  : "border-slate-200 hover:border-slate-300"
-              }`}
-            >
+            <button type="button" onClick={() => setPickupMethod("PICKUP")} className={`p-4 rounded-2xl border text-left transition flex items-start gap-3 ${pickupMethod === "PICKUP" ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20" : "border-slate-200 hover:border-slate-300"}`}>
               <Store className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-xs text-slate-900 block">
-                  Ambil di Toko (Pickup)
-                </span>
-                <span className="text-[11px] text-slate-500">
-                  Gratis. Ambil langsung saat selesai.
-                </span>
+                <span className="font-bold text-xs text-slate-900 block">Ambil di Toko (Pickup)</span>
+                <span className="text-[11px] text-slate-500">Gratis. Ambil langsung saat selesai.</span>
               </div>
             </button>
-
-            <button
-              type="button"
-              onClick={() => setPickupMethod("DELIVERY")}
-              className={`p-4 rounded-2xl border text-left transition flex items-start gap-3 ${
-                pickupMethod === "DELIVERY"
-                  ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20"
-                  : "border-slate-200 hover:border-slate-300"
-              }`}
-            >
+            <button type="button" onClick={() => setPickupMethod("DELIVERY")} className={`p-4 rounded-2xl border text-left transition flex items-start gap-3 ${pickupMethod === "DELIVERY" ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20" : "border-slate-200 hover:border-slate-300"}`}>
               <Truck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-xs text-slate-900 block">
-                  Kirim ke Alamat (Delivery)
-                </span>
-                <span className="text-[11px] text-slate-500">
-                  Dikirim via kurir.
-                </span>
+                <span className="font-bold text-xs text-slate-900 block">Kirim ke Alamat (Delivery)</span>
+                <span className="text-[11px] text-slate-500">Dikirim via kurir.</span>
               </div>
             </button>
           </div>
-
           {pickupMethod === "DELIVERY" && (
             <div className="space-y-1.5 pt-2">
-              <span className="text-xs font-semibold text-slate-700 block">
-                Alamat Lengkap Pengiriman *
-              </span>
-              <textarea
-                required
-                rows={3}
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Jl. Sukajadi No. 123, RT 01/02, Kel. Pasteur, Kec. Sukajadi, Kota Bandung 40161"
-                className="w-full p-3 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
-              />
+              <span className="text-xs font-semibold text-slate-700 block">Alamat Lengkap Pengiriman *</span>
+              <textarea required rows={3} value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Jl. Sukajadi No. 123, RT 01/02, Kel. Pasteur, Kec. Sukajadi, Kota Bandung 40161" className="w-full p-3 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" />
             </div>
           )}
         </div>
 
-        {/* 6. Catatan Tambahan */}
+        {/* 6. Unggah Berkas Desain */}
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+          <label className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+            <Upload className="w-4 h-4 text-blue-600" />
+            6. Unggah Berkas Desain (PDF/AI/PSD/PNG/JPG, maks 25 MB)
+          </label>
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition ${
+              isDragging
+                ? "border-blue-600 bg-blue-50/50"
+                : "border-slate-300 hover:border-slate-400 bg-slate-50/40"
+            }`}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.ai,.psd,.png,.jpg,.jpeg"
+              className="hidden"
+              onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
+            />
+            {file ? (
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-slate-900 truncate">{file.name}</p>
+                  <p className="text-[11px] text-slate-500">{formatFileSize(file.size)}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFile(null);
+                    setFileError("");
+                  }}
+                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 transition"
+                  aria-label="Hapus berkas"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <Upload className="w-6 h-6 text-slate-400 mx-auto" />
+                <p className="text-xs font-medium text-slate-600">
+                  Seret & letakkan berkas di sini, atau klik untuk memilih
+                </p>
+                <p className="text-[11px] text-slate-400">
+                  Format: PDF, AI, PSD, PNG, JPG (maks 25 MB)
+                </p>
+              </div>
+            )}
+          </div>
+          {fileError && (
+            <p className="text-xs text-rose-600 font-medium">{fileError}</p>
+          )}
+        </div>
+
+        {/* 7. Catatan Tambahan */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-2">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
             <FileText className="w-4 h-4 text-blue-600" />
-            6. Catatan Khusus untuk Operator (Opsional)
+            7. Catatan Khusus untuk Operator (Opsional)
           </label>
           <textarea
             rows={2}
@@ -436,23 +514,27 @@ export default function OrderFormClient({
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isLoading}
             className="w-full py-4 px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-xl shadow-blue-500/30 transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            {loading ? (
+            {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Menyimpan Pesanan...</span>
+                <span>
+                  {uploadProgress > 0
+                    ? `Mengunggah... ${uploadProgress}%`
+                    : "Menyimpan Pesanan..."}
+                </span>
               </>
             ) : (
               <>
-                <span>Lanjut ke Upload Desain</span>
+                <span>Buat Pesanan</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
           <p className="text-[11px] text-slate-400 text-center leading-tight">
-            Setelah ini Anda akan diminta mengunggah file desain (PDF/JPG/PNG) untuk divalidasi tim pra-cetak.
+            Setelah submit, pesanan akan disimpan dan diteruskan ke sistem Alif.
           </p>
         </div>
       </div>
