@@ -23,11 +23,15 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-ink-50 text-ink-900 antialiased selection:bg-brand-700 selection:text-white">
+      <body className="min-h-screen bg-surface text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed">
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
