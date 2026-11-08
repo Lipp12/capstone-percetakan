@@ -188,9 +188,9 @@ export default function DesignCheckClient({ initialOrders }: Props) {
                     <span className="text-ink-400 font-medium block">Spesifikasi Cetak:</span>
                     <p className="font-bold text-ink-900">{selectedOrder.product.name}</p>
                     <p className="text-ink-500">
-                      {selectedOrder.material ? `Bahan: ${selectedOrder.material.name} â€¢ ` : ""}
+                      {selectedOrder.material ? `Bahan: ${selectedOrder.material.name} \u2022 ` : ""}
                       {selectedOrder.width && selectedOrder.height
-                        ? `${selectedOrder.width}x${selectedOrder.height}m â€¢ `
+                        ? `${selectedOrder.width}x${selectedOrder.height}m \u2022 `
                         : ""}
                       Qty: {selectedOrder.quantity}
                     </p>

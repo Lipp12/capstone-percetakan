@@ -91,7 +91,7 @@ export default async function AdminBestSellingProductsPage() {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-ink-500">
-                    {product.orderCount} pesanan Â· {formatRupiah(product.revenue)}
+                    {product.orderCount} pesanan \u00b7 {formatRupiah(product.revenue)}
                   </p>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-100 sm:hidden">
                     <div

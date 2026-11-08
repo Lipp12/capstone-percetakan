@@ -162,8 +162,8 @@ function KanbanCard({
           {order.product.name}
         </p>
         <p className="text-[11px] text-ink-500">
-          {order.material ? `${order.material.name} â€¢ ` : ""}
-          {order.width && order.height ? `${order.width}x${order.height}m â€¢ ` : ""}
+          {order.material ? `${order.material.name} \u2022 ` : ""}
+          {order.width && order.height ? `${order.width}x${order.height}m \u2022 ` : ""}
           Qty: {order.quantity}
         </p>
       </div>

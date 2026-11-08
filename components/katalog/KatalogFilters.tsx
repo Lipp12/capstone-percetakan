@@ -64,7 +64,7 @@ export default function KatalogFilters({
   }, [search]);
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-white p-3 sm:p-4 rounded-lg border border-stone-200">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-container-lowest p-2 rounded-2xl shadow-[0_4px_16px_rgba(188,148,120,0.06)] mb-8">
       {/* Kategori Tabs */}
       <div className="flex items-center gap-1.5 w-full overflow-x-auto pb-1 sm:w-auto sm:flex-1">
         {categories.map((cat) => (
@@ -80,10 +80,10 @@ export default function KatalogFilters({
               if (sort) next.set("sort", sort);
               router.replace(`${pathname}?${next.toString()}`);
             }}
-            className={`px-3.5 py-2 rounded-md text-xs font-semibold capitalize whitespace-nowrap shrink-0 transition ${
+            className={`px-4 py-2.5 rounded-full font-label-lg text-label-lg transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               selectedCategory === cat
-                ? "bg-rose-700 text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-primary-container text-on-primary-container shadow-[2px_2px_0px_#1c1c19]"
+                : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
             }`}
           >
             {cat === "all" ? "Semua Kategori" : cat}
@@ -92,14 +92,14 @@ export default function KatalogFilters({
       </div>
 
       {/* Search Bar */}
-      <div className="relative w-full sm:w-64 sm:shrink-0">
-        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+      <div className="flex items-center gap-2 px-3 py-2 bg-surface-container rounded-xl flex-1 md:w-64">
+        <Search className="w-4 h-4 text-on-surface-variant" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Cari produk cetak..."
-          className="w-full pl-9 pr-3 py-2.5 text-sm border border-stone-300 rounded-md focus:ring-2 focus:ring-rose-600 focus:border-rose-600 outline-none"
+          className="w-full pl-9 pr-3 py-2 text-sm bg-transparent border-none focus:ring-0 outline-none font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60"
         />
       </div>
 
@@ -116,7 +116,7 @@ export default function KatalogFilters({
             else next.delete("category");
             router.replace(`${pathname}?${next.toString()}`);
           }}
-          className="w-full px-3 py-2.5 text-sm border border-stone-300 rounded-md focus:ring-2 focus:ring-rose-600 focus:border-rose-600 outline-none"
+          className="px-3 py-2 bg-surface-container text-on-surface-variant rounded-xl font-label-lg text-label-lg border-none focus:ring-0 outline-none cursor-pointer"
         >
           <option value="newest">Terbaru</option>
           <option value="name-asc">Nama A-Z</option>

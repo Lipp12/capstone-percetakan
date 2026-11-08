@@ -73,7 +73,20 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-[1280px] mx-auto px-4 lg:px-10 pt-8 pb-8 bg-background min-h-screen">
+      {/* Badge row */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps tracking-widest uppercase shadow-[2px_2px_0px_#1c1c19]">
+          Katalog Standar Studio
+        </span>
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps tracking-widest uppercase">
+          Terkalibrasi CMYK
+        </span>
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps tracking-widest uppercase">
+          Presisi Lipat &amp; Potong
+        </span>
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-xs font-bold text-brand-600 uppercase tracking-wider">
@@ -89,7 +102,7 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
       </div>
 
       {/* Filter Status & Search Bar */}
-      <div className="bg-white p-4 rounded-3xl border border-ink-200 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
+      <div className="bg-surface-container-lowest p-4 rounded-3xl border border-outline-variant/50 shadow-[0_4px_16px_rgba(188,148,120,0.06)] flex flex-col lg:flex-row items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-1.5 w-full lg:w-auto">
           {statuses.map((st) => (
             <Link
@@ -120,7 +133,7 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
       </div>
 
       {/* Tabel Pesanan */}
-      <div className="bg-white rounded-3xl border border-ink-200 shadow-sm overflow-hidden">
+      <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/50 shadow-[0_4px_16px_rgba(188,148,120,0.06)] overflow-hidden">
         {orders.length === 0 ? (
           <div className="p-12 text-center text-ink-400 text-xs">
             Tidak ada pesanan yang sesuai kriteria pencarian.
@@ -128,7 +141,7 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-ink-700">
-              <thead className="bg-ink-50 border-b border-ink-200 text-ink-500 font-bold uppercase tracking-wider text-[10px]">
+              <thead className="bg-surface-container border-b border-outline-variant/50 text-on-surface-variant font-bold uppercase tracking-wider text-[10px]">
                 <tr>
                   <th className="py-3.5 px-4">No. Pesanan</th>
                   <th className="py-3.5 px-4">Pelanggan</th>
@@ -141,26 +154,26 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
               </thead>
               <tbody className="divide-y divide-ink-100">
                 {orders.map((o) => (
-                  <tr key={o.id} className="hover:bg-ink-50/80 transition">
-                    <td className="py-3.5 px-4 font-bold text-ink-900">
+                  <tr key={o.id} className="hover:bg-surface-container-low transition">
+                    <td className="py-3.5 px-4 font-bold text-on-surface">
                       {o.orderNumber}
-                      <span className="block text-[10px] text-ink-400 font-normal">
+                      <span className="block text-[10px] text-on-surface-variant/60 font-normal">
                         {formatDate(o.createdAt)}
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="font-semibold text-ink-900 block">
+                      <span className="font-semibold text-on-surface block">
                         {o.user.name}
                       </span>
-                      <span className="text-[10px] text-ink-400">
+                      <span className="text-[10px] text-on-surface-variant/60">
                         {o.user.phone || o.user.email || "-"}
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="font-medium text-ink-800 block">
+                      <span className="font-medium text-on-surface block">
                         {o.product.name}
                       </span>
-                      <span className="text-[11px] text-ink-500">
+                      <span className="text-[11px] text-on-surface-variant">
                         {o.material ? `${o.material.name} • ` : ""}
                         {o.width && o.height ? `${o.width}x${o.height}m • ` : ""}
                         {o.quantity} {o.product.unit}
@@ -189,7 +202,7 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
                         </span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-right font-extrabold text-ink-900">
+                    <td className="py-3.5 px-4 text-right font-extrabold text-primary">
                       {formatRupiah(o.totalPrice)}
                     </td>
                     <td className="py-3.5 px-4 text-center">
