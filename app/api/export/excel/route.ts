@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import ExcelJS from "exceljs";
 import { getTransactions } from "@/lib/transactions";
 
@@ -6,6 +8,13 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
+    // Guard: hanya Admin/Operator yang boleh mengekspor laporan transaksi
+    const session = await getServerSession(authOptions);
+    const role = (session?.user as any)?.role;
+    if (role !== "ADMIN" && role !== "OPERATOR") {
+      return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
+    }
+
     const { searchParams } = new URL(req.url);
     const period = searchParams.get("period") || new Date().toISOString().slice(0, 7);
 

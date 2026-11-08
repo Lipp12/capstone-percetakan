@@ -46,4 +46,12 @@ yarn-error.log*
 cloudflared.exe
 _backup_percetakan_system/
 
+# Referensi desain (hanya dibaca, tidak perlu di-push)
 stitch_web_desain_percetakan_online/
+
+# Dokumentasi & diagram tugas (tidak perlu di-push)
+/docs/
+/docs/diagrams/
+*.docx
+*.doc
+*.pdf

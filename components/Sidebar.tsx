@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ChevronDown,
   LogOut,
-  Printer,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -266,8 +266,15 @@ export default function Sidebar() {
           onClick={() => closeMobile()}
           className="flex items-center gap-3"
         >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">
-            <Printer className="h-5 w-5" aria-hidden />
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+            <Image
+              src="/logo-icon.png"
+              alt="Logo Faeyza"
+              width={36}
+              height={40}
+              className="h-8 w-auto"
+              priority
+            />
           </span>
           <span className="min-w-0">
             <span className="block truncate text-theme-sm font-semibold tracking-tight text-ink-900 dark:text-white">
