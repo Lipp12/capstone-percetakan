@@ -127,4 +127,65 @@
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply rounded-full bg-ink-300 dark:bg-ink-700;
   }
+
+  /* ===== Custom CSS dari HTML asli ===== */
+
+  /* Hard shadow styles (4px 4px 0px) */
+  .hard-shadow {
+    box-shadow: 4px 4px 0px rgba(44, 53, 57, 0.15);
+  }
+
+  .hard-shadow-sm {
+    box-shadow: 2px 2px 0px rgba(44, 53, 57, 0.12);
+  }
+
+  .hard-shadow-coral {
+    box-shadow: 4px 4px 0px #F27059;
+  }
+
+  .hard-shadow-navy {
+    box-shadow: 4px 4px 0px #2C3539;
+  }
+
+  .hard-shadow-pink {
+    box-shadow: 4px 4px 0px #F9C6D1;
+  }
+
+  /* Scallop bottom - lavender */
+  .scallop-bottom-lavender {
+    background: radial-gradient(circle at 10px 0, transparent 0, transparent 10px, #E2CEF1 11px);
+    background-size: 20px 20px;
+    height: 12px;
+    width: 100%;
+  }
+
+  /* Scallop top - lavender */
+  .scallop-top-lavender {
+    background: radial-gradient(circle at 10px 12px, transparent 0, transparent 10px, #E2CEF1 11px);
+    background-size: 20px 20px;
+    height: 12px;
+    width: 100%;
+  }
+
+  /* Marquee animation */
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .animate-marquee-infinite {
+    display: flex;
+    width: 200%;
+    animation: marquee 26s linear infinite;
+  }
+
+  /* Hide scrollbar */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
