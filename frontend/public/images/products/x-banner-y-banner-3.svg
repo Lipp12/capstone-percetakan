@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="X-Banner dan Y-Banner - Faeyza Digital Printing Studio">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fdf9f0"/>
+      <stop offset="0.55" stop-color="#f8f2e6"/>
+      <stop offset="1" stop-color="#f3ebdc"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#efe5d3" stop-opacity="0"/>
+      <stop offset="1" stop-color="#e8dcc7" stop-opacity="0.85"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#8a6a52" flood-opacity="0.16"/>
+    </filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.045"/></feComponentTransfer>
+    </filter>
+    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.6" fill="#2b2723" opacity="0.12"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <rect y="640" width="1200" height="260" fill="url(#floor)"/>
+  <circle cx="1032" cy="112" r="236" fill="#fed9e1" opacity="0.42"/>
+  <circle cx="1064" cy="146" r="304" fill="none" stroke="#2b2723" stroke-width="1.6" opacity="0.1"/>
+  <circle cx="84" cy="824" r="228" fill="#b2dfee" opacity="0.34"/>
+  <rect x="36" y="40" width="220" height="130" fill="url(#dots)"/>
+
+  
+  <ellipse cx="600" cy="730" rx="270" ry="26" fill="#8a6a52" opacity="0.18"/>
+  <g transform="translate(600 430) rotate(0)">
+    <g stroke="#2b2723" stroke-width="9" stroke-linecap="round">
+      <path d="M-180 -300 L-150 300"/>
+      <path d="M180 -300 L150 300"/>
+      <path d="M-180 -300 L150 300"/>
+      <path d="M180 -300 L-150 300"/>
+    </g>
+    <ellipse cx="0" cy="312" rx="230" ry="18" fill="#2b2723" opacity="0.5"/>
+    <g filter="url(#soft)">
+      <rect x="-164" y="-286" width="328" height="520" rx="8" fill="#fed9e1" stroke="#2b2723" stroke-width="3"/>
+      <rect x="-142" y="-264" width="284" height="476" rx="4" fill="#fffdf7"/>
+      <circle cx="0" cy="-150" r="74" fill="#fbe38d" stroke="#2b2723" stroke-width="2.5"/>
+      <circle cx="0.0" cy="-178.5" r="23.9" fill="#b2dfee" stroke="#2b2723" stroke-width="2.5"/><circle cx="27.1" cy="-158.8" r="23.9" fill="#b2dfee" stroke="#2b2723" stroke-width="2.5"/><circle cx="16.8" cy="-126.9" r="23.9" fill="#b2dfee" stroke="#2b2723" stroke-width="2.5"/><circle cx="-16.8" cy="-126.9" r="23.9" fill="#b2dfee" stroke="#2b2723" stroke-width="2.5"/><circle cx="-27.1" cy="-158.8" r="23.9" fill="#b2dfee" stroke="#2b2723" stroke-width="2.5"/><circle cx="0" cy="-150" r="13.8" fill="#fffdf7" stroke="#2b2723" stroke-width="2.5"/>
+      <text x="0" y="-24" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="42" font-weight="800" fill="#2b2723" text-anchor="middle">X-BANNER</text>
+      <text x="0" y="10" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="12" font-weight="800" fill="#72575e" text-anchor="middle" letter-spacing="3">DISPLAY PROMOSI</text>
+      <rect x="-108" y="42" width="177.11999999999998" height="5" rx="2.5" fill="#2b2723" opacity="0.42"/><rect x="-108" y="64" width="205.2" height="5" rx="2.5" fill="#2b2723" opacity="0.42"/><rect x="-108" y="86" width="194.39999999999998" height="5" rx="2.5" fill="#2b2723" opacity="0.42"/><rect x="-108" y="108" width="133.92" height="5" rx="2.5" fill="#2b2723" opacity="0.42"/>
+      <rect x="-108" y="150" width="216" height="38" rx="19" fill="#72575e"/>
+      <text x="0" y="175" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="11" font-weight="800" fill="#fffdf7" text-anchor="middle" letter-spacing="2">PESAN SEKARANG</text>
+      <circle cx="-140" cy="-262" r="8" fill="#fffdf7" stroke="#2b2723" stroke-width="2"/>
+      <circle cx="140" cy="-262" r="8" fill="#fffdf7" stroke="#2b2723" stroke-width="2"/>
+      <circle cx="-140" cy="212" r="8" fill="#fffdf7" stroke="#2b2723" stroke-width="2"/>
+      <circle cx="140" cy="212" r="8" fill="#fffdf7" stroke="#2b2723" stroke-width="2"/>
+    </g>
+  </g>
+
+  <rect width="1200" height="900" filter="url(#grain)" opacity="0.7"/>
+
+  <g>
+    <rect x="64" y="826" width="42" height="3" rx="1.5" fill="#2b2723"/>
+    <text x="64" y="856" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="14" font-weight="800" fill="#2b2723" letter-spacing="3">FAEYZA STUDIO</text>
+    <text x="64" y="876" font-family="'Plus Jakarta Sans','Trebuchet MS',sans-serif" font-size="10" font-weight="700" fill="#7d7566" letter-spacing="2.4">DIGITAL PRINTING - BANDUNG</text>
+  </g>
+  <g text-anchor="end">
+    <text x="1136" y="846" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="11" font-weight="800" fill="#7d7566" letter-spacing="2.4">X-BANNER DAN Y-BANNER</text>
+    <text x="1136" y="868" font-family="'Plus Jakarta Sans','Trebuchet MS',sans-serif" font-size="10" font-weight="700" fill="#9a9283" letter-spacing="2">SERI 03</text>
+  </g>
+</svg>

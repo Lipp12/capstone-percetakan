@@ -45,3 +45,5 @@ yarn-error.log*
 *.db-journal
 cloudflared.exe
 _backup_percetakan_system/
+
+stitch_web_desain_percetakan_online/

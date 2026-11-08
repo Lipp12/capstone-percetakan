@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Cetak Blueprint A0 A1 A2 - Faeyza Digital Printing Studio">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fdf9f0"/>
+      <stop offset="0.55" stop-color="#f8f2e6"/>
+      <stop offset="1" stop-color="#f3ebdc"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#efe5d3" stop-opacity="0"/>
+      <stop offset="1" stop-color="#e8dcc7" stop-opacity="0.85"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#8a6a52" flood-opacity="0.16"/>
+    </filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.045"/></feComponentTransfer>
+    </filter>
+    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.6" fill="#2b2723" opacity="0.12"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <rect y="640" width="1200" height="260" fill="url(#floor)"/>
+  <circle cx="1032" cy="112" r="236" fill="#fed9e1" opacity="0.42"/>
+  <circle cx="1064" cy="146" r="304" fill="none" stroke="#2b2723" stroke-width="1.6" opacity="0.1"/>
+  <circle cx="84" cy="824" r="228" fill="#b2dfee" opacity="0.34"/>
+  <rect x="36" y="40" width="220" height="130" fill="url(#dots)"/>
+
+  
+  <ellipse cx="600" cy="726" rx="380" ry="28" fill="#8a6a52" opacity="0.15"/>
+  <g transform="translate(600 448) rotate(-1)">
+    <rect x="-380" y="-300" width="700" height="560" rx="4" fill="#e8e3d8" stroke="#2b2723" stroke-width="2" transform="translate(28 22) rotate(3)"/>
+    <g filter="url(#soft)">
+      <rect x="-390" y="-310" width="720" height="580" rx="4" fill="#eef2f4" stroke="#2b2723" stroke-width="3"/>
+      <rect x="-366" y="-286" width="672" height="532" fill="none" stroke="#72575e" stroke-width="1.6" opacity="0.55"/>
+      <rect x="-350" y="-270" width="640" height="500" fill="none" stroke="#72575e" stroke-width="1" opacity="0.35"/>
+      <g fill="none" stroke="#72575e" stroke-width="2.4">
+        <rect x="-280" y="-186" width="300" height="220"/>
+        <path d="M-280 -66 L-130 -186 L20 -66 L20 34 L-280 34 Z"/>
+        <path d="M-210 34 L-210 120 L-110 120 L-110 34"/>
+        <path d="M-40 34 L-40 150 L90 150 L90 34"/>
+        <circle cx="40" cy="60" r="24"/>
+      </g>
+      <g fill="none" stroke="#72575e" stroke-width="1.2" opacity="0.6">
+        <path d="M-350 -270 V 230"/><path d="M-270 -270 V 230"/><path d="M-190 -270 V 230"/><path d="M-110 -270 V 230"/><path d="M-30 -270 V 230"/><path d="M50 -270 V 230"/><path d="M130 -270 V 230"/><path d="M210 -270 V 230"/><path d="M290 -270 V 230"/>
+        <path d="M-350 -270 H 290"/><path d="M-350 -190 H 290"/><path d="M-350 -110 H 290"/><path d="M-350 -30 H 290"/><path d="M-350 50 H 290"/><path d="M-350 130 H 290"/><path d="M-350 210 H 290"/>
+      </g>
+      <rect x="60" y="70" width="220" height="150" fill="none" stroke="#72575e" stroke-width="2"/>
+      <rect x="78" y="98" width="147.6" height="5" rx="2.5" fill="#72575e" opacity="0.5"/><rect x="78" y="122" width="171" height="5" rx="2.5" fill="#72575e" opacity="0.5"/><rect x="78" y="146" width="161.99999999999997" height="5" rx="2.5" fill="#72575e" opacity="0.5"/><rect x="78" y="170" width="111.6" height="5" rx="2.5" fill="#72575e" opacity="0.5"/>
+      <text x="-350" y="258" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="13" font-weight="800" fill="#72575e" letter-spacing="2">DENAH LANTAI - SKALA 1:100</text>
+      <text x="280" y="258" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="11" font-weight="700" fill="#72575e" text-anchor="end" letter-spacing="2">A1 - 2026</text>
+    </g>
+  </g>
+
+  <rect width="1200" height="900" filter="url(#grain)" opacity="0.7"/>
+
+  <g>
+    <rect x="64" y="826" width="42" height="3" rx="1.5" fill="#2b2723"/>
+    <text x="64" y="856" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="14" font-weight="800" fill="#2b2723" letter-spacing="3">FAEYZA STUDIO</text>
+    <text x="64" y="876" font-family="'Plus Jakarta Sans','Trebuchet MS',sans-serif" font-size="10" font-weight="700" fill="#7d7566" letter-spacing="2.4">DIGITAL PRINTING - BANDUNG</text>
+  </g>
+  <g text-anchor="end">
+    <text x="1136" y="846" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="11" font-weight="800" fill="#7d7566" letter-spacing="2.4">CETAK BLUEPRINT A0 A1 A2</text>
+    <text x="1136" y="868" font-family="'Plus Jakarta Sans','Trebuchet MS',sans-serif" font-size="10" font-weight="700" fill="#9a9283" letter-spacing="2">SERI 03</text>
+  </g>
+</svg>

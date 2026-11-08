@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Kalender Meja - Faeyza Digital Printing Studio">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fdf9f0"/>
+      <stop offset="0.55" stop-color="#f8f2e6"/>
+      <stop offset="1" stop-color="#f3ebdc"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#efe5d3" stop-opacity="0"/>
+      <stop offset="1" stop-color="#e8dcc7" stop-opacity="0.85"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#8a6a52" flood-opacity="0.16"/>
+    </filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.045"/></feComponentTransfer>
+    </filter>
+    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.6" fill="#2b2723" opacity="0.12"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <rect y="640" width="1200" height="260" fill="url(#floor)"/>
+  <circle cx="1032" cy="112" r="236" fill="#fed9e1" opacity="0.42"/>
+  <circle cx="1064" cy="146" r="304" fill="none" stroke="#2b2723" stroke-width="1.6" opacity="0.1"/>
+  <circle cx="84" cy="824" r="228" fill="#b2dfee" opacity="0.34"/>
+  <rect x="36" y="40" width="220" height="130" fill="url(#dots)"/>
+
+  
+      <ellipse cx="600" cy="724" rx="310" ry="28" fill="#8a6a52" opacity="0.18"/>
+      <g transform="translate(600 446)">
+        <polygon points="-250,-120 250,-210 250,190 30,290 -250,200" fill="#b2dfee" stroke="#2b2723" stroke-width="3" opacity="0.9"/>
+        <path d="M-250 -120 L30 -10 L250 -210" fill="none" stroke="#2b2723" stroke-width="2.5"/>
+        <g filter="url(#soft)">
+          <rect x="-260" y="-80" width="520" height="360" rx="10" fill="#fffdf7" stroke="#2b2723" stroke-width="3"/>
+          <rect x="-260" y="-80" width="520" height="92" fill="#72575e"/>
+          <text x="-228" y="-28" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="16" font-weight="800" fill="#fffdf7" letter-spacing="3">FAEYZA STUDIO</text>
+          <text x="228" y="-28" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="11" font-weight="700" fill="#fed9e1" text-anchor="end" letter-spacing="2">KALENDER 2027</text>
+          <text x="-228" y="34" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="26" font-weight="800" fill="#2b2723">JANUARI</text>
+          <text x="228" y="34" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="46" font-weight="800" fill="#fbe38d" text-anchor="end">27</text>
+          <g transform="translate(-228 62)">
+            <rect x="0" y="0" width="38" height="10" rx="5" fill="#72575e" opacity="0.5"/><rect x="62" y="0" width="38" height="10" rx="5" fill="#72575e" opacity="0.5"/><rect x="124" y="0" width="38" height="10" rx="5" fill="#72575e" opacity="0.5"/><rect x="186" y="0" width="38" height="10" rx="5" fill="#72575e" opacity="0.5"/><rect x="248" y="0" width="38" height="10" rx="5" fill="#72575e" opacity="0.5"/><rect x="310" y="0" width="38" height="10" rx="5" fill="#72575e" opacity="0.5"/><rect x="372" y="0" width="38" height="10" rx="5" fill="#72575e" opacity="0.5"/>
+            <rect x="0" y="26" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="62" y="26" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="124" y="26" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="186" y="26" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="248" y="26" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="310" y="26" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="372" y="26" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="0" y="60" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="62" y="60" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="124" y="60" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="186" y="60" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="248" y="60" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="310" y="60" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="372" y="60" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="0" y="94" width="38" height="24" rx="5" fill="#fed9e1" stroke="#2b2723" stroke-width="2"/><rect x="62" y="94" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="124" y="94" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="186" y="94" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="248" y="94" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="310" y="94" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="372" y="94" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="0" y="128" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="62" y="128" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="124" y="128" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="186" y="128" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="248" y="128" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="310" y="128" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="372" y="128" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="0" y="162" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="62" y="162" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="124" y="162" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="186" y="162" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="248" y="162" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="310" y="162" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/><rect x="372" y="162" width="38" height="24" rx="5" fill="#f1ece2" stroke="none" stroke-width="0"/>
+          </g>
+          <rect x="-260" y="246" width="520" height="34" rx="0" fill="#fed9e1" stroke="#2b2723" stroke-width="2"/>
+          <text x="0" y="269" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="11" font-weight="800" fill="#2b2723" text-anchor="middle" letter-spacing="2">CETAK CUSTOM - HADIAH AKHIR TAHUN</text>
+        </g>
+        <g fill="#fffdf7" stroke="#2b2723" stroke-width="2.5">
+          <circle cx="-220" cy="-80" r="11"/><circle cx="-176" cy="-80" r="11"/><circle cx="-132" cy="-80" r="11"/><circle cx="-88" cy="-80" r="11"/><circle cx="-44" cy="-80" r="11"/><circle cx="0" cy="-80" r="11"/><circle cx="44" cy="-80" r="11"/><circle cx="88" cy="-80" r="11"/><circle cx="132" cy="-80" r="11"/><circle cx="176" cy="-80" r="11"/><circle cx="220" cy="-80" r="11"/>
+        </g>
+      </g>
+
+  <rect width="1200" height="900" filter="url(#grain)" opacity="0.7"/>
+
+  <g>
+    <rect x="64" y="826" width="42" height="3" rx="1.5" fill="#2b2723"/>
+    <text x="64" y="856" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="14" font-weight="800" fill="#2b2723" letter-spacing="3">FAEYZA STUDIO</text>
+    <text x="64" y="876" font-family="'Plus Jakarta Sans','Trebuchet MS',sans-serif" font-size="10" font-weight="700" fill="#7d7566" letter-spacing="2.4">DIGITAL PRINTING - BANDUNG</text>
+  </g>
+  <g text-anchor="end">
+    <text x="1136" y="846" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="11" font-weight="800" fill="#7d7566" letter-spacing="2.4">KALENDER MEJA</text>
+    <text x="1136" y="868" font-family="'Plus Jakarta Sans','Trebuchet MS',sans-serif" font-size="10" font-weight="700" fill="#9a9283" letter-spacing="2">SERI 03</text>
+  </g>
+</svg>

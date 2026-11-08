@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Spanduk Flexi - Faeyza Digital Printing Studio">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fdf9f0"/>
+      <stop offset="0.55" stop-color="#f8f2e6"/>
+      <stop offset="1" stop-color="#f3ebdc"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#efe5d3" stop-opacity="0"/>
+      <stop offset="1" stop-color="#e8dcc7" stop-opacity="0.85"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#8a6a52" flood-opacity="0.16"/>
+    </filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.045"/></feComponentTransfer>
+    </filter>
+    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.6" fill="#2b2723" opacity="0.12"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <rect y="640" width="1200" height="260" fill="url(#floor)"/>
+  <circle cx="1032" cy="112" r="236" fill="#fed9e1" opacity="0.42"/>
+  <circle cx="1064" cy="146" r="304" fill="none" stroke="#2b2723" stroke-width="1.6" opacity="0.1"/>
+  <circle cx="84" cy="824" r="228" fill="#b2dfee" opacity="0.34"/>
+  <rect x="36" y="40" width="220" height="130" fill="url(#dots)"/>
+
+  
+      <g>
+        <path d="M310 172 Q 210 96 150 190" fill="none" stroke="#2b2723" stroke-width="3"/>
+        <path d="M890 172 Q 990 96 1050 190" fill="none" stroke="#2b2723" stroke-width="3"/>
+        <circle cx="150" cy="190" r="8" fill="#2b2723"/>
+        <circle cx="1050" cy="190" r="8" fill="#2b2723"/>
+        <ellipse cx="600" cy="712" rx="380" ry="26" fill="#8a6a52" opacity="0.18"/>
+        <g filter="url(#soft)">
+          <rect x="280" y="166" width="640" height="430" rx="8" fill="#72575e" stroke="#2b2723" stroke-width="3"/>
+          <rect x="300" y="186" width="600" height="390" fill="#fed9e1" opacity="0.94"/>
+          <circle cx="760" cy="294" r="104" fill="#fbe38d" stroke="#2b2723" stroke-width="2.5"/>
+          <circle cx="760" cy="294" r="58" fill="#fffdf7" stroke="#2b2723" stroke-width="2"/>
+          <text x="760" y="314"  font-size="42" font-weight="800" fill="#72575e" text-anchor="middle" font-family="Georgia,serif">F</text>
+          <text x="340" y="360" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="92" font-weight="800" fill="#2b2723" letter-spacing="2">OPEN</text>
+          <text x="344" y="398" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="17" font-weight="800" fill="#72575e" letter-spacing="2">SERBA DISKON SAMPAI 40%</text>
+          <rect x="344" y="432" width="278.8" height="6" rx="3" fill="#2b2723" opacity="0.5"/><rect x="344" y="454" width="323" height="6" rx="3" fill="#2b2723" opacity="0.5"/><rect x="344" y="476" width="210.8" height="6" rx="3" fill="#2b2723" opacity="0.5"/>
+          <rect x="344" y="510" width="212" height="38" rx="19" fill="#72575e"/>
+          <text x="450" y="535" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="11" font-weight="800" fill="#fffdf7" text-anchor="middle" letter-spacing="2">FAEYZA PRINTING</text>
+          <circle cx="880.0" cy="449.4" r="15.6" fill="#b2dfee" stroke="#2b2723" stroke-width="2.5"/><circle cx="897.7" cy="462.3" r="15.6" fill="#b2dfee" stroke="#2b2723" stroke-width="2.5"/><circle cx="890.9" cy="483.0" r="15.6" fill="#b2dfee" stroke="#2b2723" stroke-width="2.5"/><circle cx="869.1" cy="483.0" r="15.6" fill="#b2dfee" stroke="#2b2723" stroke-width="2.5"/><circle cx="862.3" cy="462.3" r="15.6" fill="#b2dfee" stroke="#2b2723" stroke-width="2.5"/><circle cx="880" cy="468" r="9.0" fill="#fffdf7" stroke="#2b2723" stroke-width="2.5"/>
+          <circle cx="312" cy="198" r="8" fill="#fffdf7" stroke="#2b2723" stroke-width="2"/>
+          <circle cx="888" cy="198" r="8" fill="#fffdf7" stroke="#2b2723" stroke-width="2"/>
+          <circle cx="312" cy="564" r="8" fill="#fffdf7" stroke="#2b2723" stroke-width="2"/>
+          <circle cx="888" cy="564" r="8" fill="#fffdf7" stroke="#2b2723" stroke-width="2"/>
+        </g>
+      </g>
+
+  <rect width="1200" height="900" filter="url(#grain)" opacity="0.7"/>
+
+  <g>
+    <rect x="64" y="826" width="42" height="3" rx="1.5" fill="#2b2723"/>
+    <text x="64" y="856" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="14" font-weight="800" fill="#2b2723" letter-spacing="3">FAEYZA STUDIO</text>
+    <text x="64" y="876" font-family="'Plus Jakarta Sans','Trebuchet MS',sans-serif" font-size="10" font-weight="700" fill="#7d7566" letter-spacing="2.4">DIGITAL PRINTING - BANDUNG</text>
+  </g>
+  <g text-anchor="end">
+    <text x="1136" y="846" font-family="'Epilogue','Trebuchet MS',sans-serif" font-size="11" font-weight="800" fill="#7d7566" letter-spacing="2.4">SPANDUK FLEXI</text>
+    <text x="1136" y="868" font-family="'Plus Jakarta Sans','Trebuchet MS',sans-serif" font-size="10" font-weight="700" fill="#9a9283" letter-spacing="2">SERI 03</text>
+  </g>
+</svg>
