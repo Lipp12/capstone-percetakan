@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#fed9e1"/>
+  <circle cx="200" cy="150" r="80" fill="#faf8f5" stroke="#72575e" stroke-width="2"/>
+  <circle cx="200" cy="150" r="50" fill="#c6edcf" opacity="0.5"/>
+  <rect x="170" y="135" width="60" height="30" rx="4" fill="#b54a24" opacity="0.7"/>
+  <text x="200" y="270" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="14" font-weight="700" fill="#72575e">Stiker &amp; Label</text>
+</svg>

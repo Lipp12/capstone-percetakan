@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#e3edf7"/>
+  <rect x="130" y="50" width="140" height="200" rx="4" fill="#faf8f5" stroke="#43664e" stroke-width="2"/>
+  <rect x="145" y="70" width="110" height="4" rx="2" fill="#43664e" opacity="0.6"/>
+  <rect x="145" y="85" width="110" height="4" rx="2" fill="#43664e" opacity="0.4"/>
+  <rect x="145" y="100" width="90" height="4" rx="2" fill="#43664e" opacity="0.3"/>
+  <rect x="145" y="115" width="100" height="4" rx="2" fill="#43664e" opacity="0.2"/>
+  <rect x="145" y="130" width="80" height="4" rx="2" fill="#43664e" opacity="0.2"/>
+  <text x="200" y="280" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="14" font-weight="700" fill="#2c4e38">Cetak Dokumen</text>
+</svg>

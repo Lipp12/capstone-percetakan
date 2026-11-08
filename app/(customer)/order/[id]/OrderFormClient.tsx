@@ -65,6 +65,7 @@ export default function OrderFormClient({
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [submitError, setSubmitError] = useState<string>("");
   const [createdOrderNumber, setCreatedOrderNumber] = useState<string>("");
+  const [createdOrderId, setCreatedOrderId] = useState<string>("");
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const selectedProdMat = product.materials.find(
@@ -160,60 +161,91 @@ export default function OrderFormClient({
       return;
     }
 
-    const fileErr = validateFile(file);
-    if (fileErr) {
-      setFileError(fileErr);
-      setSubmitError(fileErr);
-      setSubmitState("error");
-      return;
+    if (file) {
+      const fileErr = validateFile(file);
+      if (fileErr) {
+        setFileError(fileErr);
+        setSubmitError(fileErr);
+        setSubmitState("error");
+        return;
+      }
     }
 
     setSubmitState("loading");
     setUploadProgress(0);
 
     try {
-      const formData = new FormData();
-      formData.append("productId", product.id);
-      if (materialId) formData.append("materialId", materialId);
-      if (isM2) {
-        formData.append("width", String(width));
-        formData.append("height", String(height));
-      }
-      formData.append("quantity", String(quantity));
-      formData.append("pickupMethod", pickupMethod);
-      if (pickupMethod === "DELIVERY") formData.append("address", address);
-      formData.append("finishingIds", JSON.stringify(selectedFinishingIds));
-      if (notes.trim()) formData.append("notes", notes.trim());
-      if (file) formData.append("file", file, file.name);
-
-      const xhr = new XMLHttpRequest();
-      const result = await new Promise<{ ok: boolean; data: any }>((resolve) => {
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            setUploadProgress(Math.round((event.loaded / event.total) * 100));
-          }
-        };
-        xhr.onload = () => {
-          let data: any = {};
-          try {
-            data = JSON.parse(xhr.responseText);
-          } catch {
-            data = {};
-          }
-          resolve({ ok: xhr.status >= 200 && xhr.status < 300, data });
-        };
-        xhr.onerror = () => resolve({ ok: false, data: {} });
-        xhr.open("POST", "/api/orders");
-        xhr.send(formData);
+      // 1) Buat pesanan (JSON) — total dihitung di server
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: product.id,
+          materialId: materialId || undefined,
+          width: isM2 ? Number(width) : undefined,
+          height: isM2 ? Number(height) : undefined,
+          quantity: Number(quantity),
+          pickupMethod,
+          address: pickupMethod === "DELIVERY" ? address : undefined,
+          finishingIds: selectedFinishingIds,
+          notes: notes.trim() || undefined,
+        }),
       });
 
-      if (!result.ok) {
-        setSubmitError(result.data?.error || "Gagal membuat pesanan");
+      const data = await res.json();
+      if (!res.ok) {
+        setSubmitError(data.error || "Gagal membuat pesanan");
         setSubmitState("error");
         return;
       }
 
-      setCreatedOrderNumber(result.data?.orderNumber || "");
+      const orderId = data.orderId;
+      setCreatedOrderNumber(data.orderNumber || "");
+      setCreatedOrderId(data.orderId || "");
+
+      // 2) Unggah berkas (opsional) ke route upload-design
+      if (file && orderId) {
+        const formData = new FormData();
+        formData.append("file", file, file.name);
+        if (notes.trim()) formData.append("designNotes", notes.trim());
+
+        const upRes = await fetch(`/api/orders/${orderId}/upload-design`, {
+          method: "POST",
+          body: formData,
+        });
+        const upData = await upRes.json();
+        if (!upRes.ok) {
+          setSubmitError(upData.error || "Pesanan dibuat, tetapi unggah desain gagal. Coba unggah lagi.");
+          setSubmitState("error");
+          return;
+        }
+      }
+
+      setSubmitState("success");
+    } catch (err) {
+      setSubmitError("Terjadi kesalahan koneksi. Silakan coba lagi.");
+      setSubmitState("error");
+    }
+  }
+
+  async function handleRetryUpload() {
+    if (!file || !createdOrderId) return;
+    setSubmitState("loading");
+    setSubmitError("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file, file.name);
+      if (notes.trim()) formData.append("designNotes", notes.trim());
+      const upRes = await fetch(`/api/orders/${createdOrderId}/upload-design`, {
+        method: "POST",
+        body: formData,
+      });
+      const upData = await upRes.json();
+      if (!upRes.ok) {
+        setSubmitError(upData.error || "Gagal mengunggah desain. Coba lagi.");
+        setSubmitState("error");
+        return;
+      }
       setSubmitState("success");
     } catch (err) {
       setSubmitError("Terjadi kesalahan koneksi. Silakan coba lagi.");
@@ -231,6 +263,15 @@ export default function OrderFormClient({
           <span className="font-bold text-ink-900">{createdOrderNumber}</span>
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+          {!file && createdOrderId && (
+            <button
+              type="button"
+              onClick={() => router.push(`/order/${createdOrderId}/upload`)}
+              className="px-5 py-2.5 rounded-xl bg-ink-100 text-ink-700 font-semibold text-sm hover:bg-ink-200 transition"
+            >
+              Unggah desain sekarang
+            </button>
+          )}
           <button
             type="button"
             onClick={() => router.push("/katalog")}
@@ -261,6 +302,15 @@ export default function OrderFormClient({
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span>{submitError}</span>
           </div>
+        )}
+        {submitState === "error" && createdOrderId && file && (
+          <button
+            type="button"
+            onClick={handleRetryUpload}
+            className="px-4 py-2 bg-ink-100 text-ink-700 rounded-xl text-xs font-semibold hover:bg-ink-200 transition"
+          >
+            Coba unggah lagi
+          </button>
         )}
 
         {/* 1. Pilih Material */}

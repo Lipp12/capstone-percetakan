@@ -21,6 +21,17 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
   { slug: "apparel-sablon", label: "Apparel & Sablon", description: "Kaos sablon DTF, tote bag, merchandise tekstil.", category: null },
 ];
 
+// Urutan tab katalog sesuai layar stitch (7 kategori produk).
+export const KATALOG_CATEGORIES = [
+  "Cetak Dokumen",
+  "Banner & Spanduk",
+  "Brosur & Flyer",
+  "Stiker & Label",
+  "Undangan & Kartu Pos",
+  "ID Card & Lanyard",
+  "Poster & Cetak Foto",
+];
+
 export function categoryHref(cat: ServiceCategory): string {
   if (cat.category) {
     return `/katalog?category=${encodeURIComponent(cat.category)}`;

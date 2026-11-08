@@ -44,7 +44,6 @@ export default function OrderDetailClient({ order: initialOrder }: Props) {
   const router = useRouter();
   const [order, setOrder] = useState(initialOrder);
   const [newStatus, setNewStatus] = useState(initialOrder.status);
-  const [syncLoading, setSyncLoading] = useState(false);
   const [notes, setNotes] = useState("");
   const [courier, setCourier] = useState("");
   const [loading, setLoading] = useState(false);
@@ -84,28 +83,6 @@ export default function OrderDetailClient({ order: initialOrder }: Props) {
       setFeedback({ type: "error", text: "Terjadi kesalahan koneksi" });
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function handleRetrySync() {
-    setSyncLoading(true);
-    setFeedback(null);
-    try {
-      const res = await fetch(`/api/orders/${order.id}/sync-alif`, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) {
-        setFeedback({ type: "error", text: data.error || "Gagal sinkron ke API Alif" });
-      } else {
-        setFeedback({
-          type: data.ok ? "success" : "error",
-          text: data.ok ? "Sinkron ke API Alif berhasil." : data.error || "Gagal sinkron",
-        });
-        setOrder({ ...order, alifSyncStatus: data.alifSyncStatus, alifSyncError: data.error });
-      }
-    } catch (err) {
-      setFeedback({ type: "error", text: "Terjadi kesalahan koneksi" });
-    } finally {
-      setSyncLoading(false);
     }
   }
 
@@ -294,38 +271,7 @@ export default function OrderDetailClient({ order: initialOrder }: Props) {
           </div>
         </div>
 
-        {/* Status Sinkronisasi API Alif */}
-        <div className="p-4 border border-outline-variant/50 rounded-2xl space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant block">
-            Sinkronisasi API Alif
-          </span>
-          <div className="flex items-center justify-between gap-3">
-            <span
-              className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                order.alifSyncStatus === "SYNCED"
-                  ? "bg-emerald-100 text-emerald-700"
-                  : order.alifSyncStatus === "FAILED"
-                  ? "bg-rose-100 text-rose-700"
-                  : "bg-amber-100 text-amber-700"
-              }`}
-            >
-              {order.alifSyncStatus || "PENDING"}
-            </span>
-            {order.alifSyncStatus === "FAILED" && (
-              <button
-                type="button"
-                disabled={syncLoading}
-                onClick={handleRetrySync}
-                className="px-3 py-1.5 bg-primary hover:bg-primary text-white rounded-lg font-semibold text-[11px] disabled:opacity-50"
-              >
-                {syncLoading ? "Mengirim..." : "Kirim Ulang"}
-              </button>
-            )}
-          </div>
-          {order.alifSyncError && (
-            <p className="text-xs text-rose-600">{order.alifSyncError}</p>
-          )}
-        </div>
+
 
         {/* Panel Update Status & Pengiriman */}
         <div className="p-6 bg-surface-container text-white rounded-3xl space-y-4">

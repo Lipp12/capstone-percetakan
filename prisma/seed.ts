@@ -157,6 +157,58 @@ async function main() {
     },
   });
 
+  // Material usulan (nilai CONTOH, wajar dibanding material yang ada)
+  const matCanvas = await upsertMaterial({
+    data: {
+      name: "Canvas / Albatros (poster)",
+      description: "Bahan poster canvas/albatros (CONTOH harga, ubah sesuai usaha)",
+      pricePerUnit: 30000, // CONTOH
+      unit: "m2",
+      stock: 100,
+      minStock: 10,
+    },
+  });
+  const matThermal = await upsertMaterial({
+    data: {
+      name: "Thermal Paper Roll",
+      description: "Kertas thermal untuk label roll (CONTOH harga, ubah sesuai usaha)",
+      pricePerUnit: 35000, // CONTOH
+      unit: "roll",
+      stock: 100,
+      minStock: 10,
+    },
+  });
+  const matFoil = await upsertMaterial({
+    data: {
+      name: "Foil Paper (Gold/Silver)",
+      description: "Kertas foil emas/perak (CONTOH harga, ubah sesuai usaha)",
+      pricePerUnit: 15000, // CONTOH
+      unit: "pcs",
+      stock: 100,
+      minStock: 10,
+    },
+  });
+  const matLanyard = await upsertMaterial({
+    data: {
+      name: "Polyester Lanyard Tape",
+      description: "Pita lanyard polyester (CONTOH harga, ubah sesuai usaha)",
+      pricePerUnit: 5000, // CONTOH
+      unit: "pcs",
+      stock: 100,
+      minStock: 10,
+    },
+  });
+  const matUndangan = await upsertMaterial({
+    data: {
+      name: "Undangan Paper (art paper tebal)",
+      description: "Kertas art paper tebal untuk undangan (CONTOH harga, ubah sesuai usaha)",
+      pricePerUnit: 2000, // CONTOH
+      unit: "pcs",
+      stock: 100,
+      minStock: 10,
+    },
+  });
+
   console.log("Membuat Finishings...");
   const finMataAyam = await upsertFinishing({
     data: {
@@ -291,7 +343,7 @@ async function main() {
       name: "Flyer Ringkas",
       slug: "flyer-ringkas",
       description: "Flyer ringkas full color, cocok untuk promosi cepat.",
-      category: "Stationery",
+      category: "Brosur & Flyer",
       basePrice: 120,
       unit: "pcs",
       imageUrl: "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?auto=format&fit=crop&w=600&q=80",
@@ -305,7 +357,7 @@ async function main() {
       name: "Brosur Lipat (Bi-Fold / Tri-Fold)",
       slug: "brosur-lipat-bifold-trifold",
       description: "Brosur lipat 2 atau 3 dengan finishing rapi.",
-      category: "Stationery",
+      category: "Brosur & Flyer",
       basePrice: 970,
       unit: "pcs",
       imageUrl: "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?auto=format&fit=crop&w=600&q=80",
@@ -375,6 +427,33 @@ async function main() {
     { productId: prodBrosurLipat.id, materialId: matArtPaper.id, additionalPrice: 0 },
     { productId: prodBrosurLipat.id, materialId: matArtCarton.id, additionalPrice: 300 },
     { productId: prodUndangan.id, materialId: matArtCarton.id, additionalPrice: 0 },
+    { productId: prodUndangan.id, materialId: matUndangan.id, additionalPrice: 0 },
+    { productId: prodXBanner.id, materialId: matFlexiChina.id, additionalPrice: 0 },
+    { productId: prodTripod.id, materialId: matFlexiKorea.id, additionalPrice: 0 },
+    { productId: prodBackdrop.id, materialId: matFlexiChina.id, additionalPrice: 0 },
+    { productId: prodMiniBanner.id, materialId: matArtCarton.id, additionalPrice: 0 },
+    { productId: prodFlyerNew.id, materialId: matArtPaper.id, additionalPrice: 0 },
+    { productId: prodBrosurLipatNew.id, materialId: matArtPaper.id, additionalPrice: 0 },
+    { productId: prodBrosurLipatNew.id, materialId: matArtCarton.id, additionalPrice: 300 },
+    { productId: prodPrintDokumen.id, materialId: matHvs.id, additionalPrice: 0 },
+    { productId: prodJilidHardcover.id, materialId: matArtCarton.id, additionalPrice: 0 },
+    { productId: prodJilidSpiral.id, materialId: matArtCarton.id, additionalPrice: 0 },
+    { productId: prodJilidLem.id, materialId: matArtCarton.id, additionalPrice: 0 },
+    { productId: prodJilidJahit.id, materialId: matArtCarton.id, additionalPrice: 0 },
+    { productId: prodPrintBesar.id, materialId: matArtPaper.id, additionalPrice: 0 },
+    { productId: prodStikerKromo.id, materialId: matVinylGlossy.id, additionalPrice: 0 },
+    { productId: prodStikerTransparan.id, materialId: matVinylGlossy.id, additionalPrice: 0 },
+    { productId: prodStikerKraft.id, materialId: matVinylDoff.id, additionalPrice: 0 },
+    { productId: prodStikerHologram.id, materialId: matVinylGlossy.id, additionalPrice: 0 },
+    { productId: prodLabelRoll.id, materialId: matThermal.id, additionalPrice: 0 },
+    { productId: prodStikerFoil.id, materialId: matFoil.id, additionalPrice: 0 },
+    { productId: prodKartuPos.id, materialId: matArtCarton.id, additionalPrice: 0 },
+    { productId: prodKartuUcapan.id, materialId: matArtCarton.id, additionalPrice: 0 },
+    { productId: prodTaliLanyard.id, materialId: matLanyard.id, additionalPrice: 0 },
+    { productId: prodPaketBundling.id, materialId: matArtCarton.id, additionalPrice: 0 },
+    { productId: prodPaketBundling.id, materialId: matLanyard.id, additionalPrice: 0 },
+    { productId: prodCetakFoto.id, materialId: matCanvas.id, additionalPrice: 0 },
+    { productId: prodPosterAlbatros.id, materialId: matCanvas.id, additionalPrice: 0 },
   ];
   for (const link of productMaterialLinks) {
     const exists = await prisma.productMaterial.findFirst({

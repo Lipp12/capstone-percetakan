@@ -40,6 +40,9 @@ module.exports = {
         },
         // Token Material Design 3 dari stitch (katalog/detail/form/admin).
         // Ditambah, tidak menimpa token yang sudah ada.
+        "cetak-orange": "#c25028",
+        "cetak-orange-hover": "#a9421e",
+        "cetak-navy": "#2D2926",
         "background": "#fcf9f4",
         "surface": "#fcf9f4",
         "surface-container-lowest": "#ffffff",
@@ -131,6 +134,9 @@ module.exports = {
         "theme-md": "0 4px 12px -2px rgb(15 23 42 / 0.08), 0 2px 6px -2px rgb(15 23 42 / 0.05)",
         "theme-lg": "0 12px 24px -6px rgb(15 23 42 / 0.10)",
         "focus-ring": "0 0 0 3px rgb(244 63 94 / 0.25)",
+        "hard-shadow": "2px 2px 0px #1c1c19",
+        "hard-shadow-sm": "0 4px 16px rgba(188, 148, 120, 0.06)",
+        "hard-shadow-offset": "3px 3px 0px #2D2926",
       },
       spacing: {
         sidebar: "18.125rem", // 290px - sidebar expanded

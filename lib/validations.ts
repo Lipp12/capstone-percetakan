@@ -1,5 +1,18 @@
-export const ACCEPTED_FILE_TYPES = ["pdf", "ai", "psd", "png", "jpg", "jpeg"];
-export const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
+export const ACCEPTED_FILE_TYPES = ["pdf", "ai", "psd", "png", "jpg", "jpeg", "webp", "svg", "zip", "eps"];
+export const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB (sesuai route upload-design)
+
+export const ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/svg+xml",
+  "application/pdf",
+  "application/postscript", // AI/EPS
+  "application/illustrator",
+  "application/x-photoshop",
+  "application/zip",
+  "application/x-zip-compressed",
+];
 
 export function fileExtension(filename: string): string {
   const parts = (filename || "").toLowerCase().split(".");

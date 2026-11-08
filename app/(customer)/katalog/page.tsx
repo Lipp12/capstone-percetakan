@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import ProductCard from "@/components/ProductCard";
 import KatalogFilters from "@/components/katalog/KatalogFilters";
 import Link from "next/link";
-import { SERVICE_CATEGORIES } from "@/lib/service-categories";
+import { SERVICE_CATEGORIES, KATALOG_CATEGORIES } from "@/lib/service-categories";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +38,17 @@ export default async function KatalogPage({ searchParams }: Props) {
     distinct: ["category"],
   });
 
-  const categories = ["all", ...allCategories.map((c) => c.category)];
+  // Urutan tab mengikuti lib/service-categories.ts (7 kategori stitch), lalu kategori lain.
+  const knownOrder = KATALOG_CATEGORIES;
+  const sortedCategories = [...allCategories.map((c) => c.category)].sort((a, b) => {
+    const ia = knownOrder.indexOf(a);
+    const ib = knownOrder.indexOf(b);
+    if (ia === -1 && ib === -1) return a.localeCompare(b);
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
+  const categories = ["all", ...sortedCategories];
 
   // Filter produk
   const whereClause: any = {};
@@ -145,8 +155,8 @@ export default async function KatalogPage({ searchParams }: Props) {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {products.map((product, idx) => (
+            <ProductCard key={product.id} product={product} index={idx} />
           ))}
         </div>
       )}
