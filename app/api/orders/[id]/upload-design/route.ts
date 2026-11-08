@@ -16,6 +16,9 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = (session.user as any)?.id;
+    const role = (session.user as any)?.role;
+
     const orderId = params.id;
     const order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -23,6 +26,11 @@ export async function POST(
 
     if (!order) {
       return NextResponse.json({ error: "Pesanan tidak ditemukan" }, { status: 404 });
+    }
+
+    // Guard: pelanggan hanya boleh mengunggah desain untuk pesanannya sendiri
+    if (role !== "ADMIN" && role !== "OPERATOR" && order.userId !== userId) {
+      return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
     }
 
     const formData = await req.formData();
@@ -36,6 +44,26 @@ export async function POST(
       );
     }
 
+    // Validasi tipe file desain (gambar, PDF, dan format desain umum)
+    const ALLOWED_TYPES = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/svg+xml",
+      "application/pdf",
+      "application/postscript", // AI/EPS
+      "application/illustrator",
+      "application/x-photoshop",
+      "application/zip",
+      "application/x-zip-compressed",
+    ];
+    if (!ALLOWED_TYPES.includes(file.type) && file.type !== "") {
+      return NextResponse.json(
+        { error: "Format file tidak didukung. Gunakan JPG, PNG, WEBP, SVG, PDF, AI, PSD, EPS, atau ZIP." },
+        { status: 400 }
+      );
+    }
+
     // Validasi ukuran max 20MB
     const MAX_SIZE = 20 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
@@ -45,8 +73,11 @@ export async function POST(
       );
     }
 
+    // Validasi nama file (cegah path traversal)
+    const safeOriginalName = file.name.replace(/[/\\]/g, "_");
+
     const fileBuffer = Buffer.from(await file.arrayBuffer());
-    const fileUrl = await uploadFileBuffer(fileBuffer, `designs/${orderId}`, file.name, "auto");
+    const fileUrl = await uploadFileBuffer(fileBuffer, `designs/${orderId}`, safeOriginalName, "auto");
 
     // Update status order ke DESIGN_CHECKING
     const updatedOrder = await prisma.order.update({
