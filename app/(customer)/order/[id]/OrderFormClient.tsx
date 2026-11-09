@@ -395,9 +395,27 @@ export default function OrderFormClient({
             </div>
             <div className="flex items-center gap-2 pt-1">
               <span className="text-[11px] text-on-surface-variant/60">Preset cepat:</span>
-              <button type="button" onClick={() => { setWidth(2); setHeight(1); }} className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-slate-200 text-on-surface-variant rounded-md">2 x 1 m</button>
-              <button type="button" onClick={() => { setWidth(3); setHeight(1); }} className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-slate-200 text-on-surface-variant rounded-md">3 x 1 m</button>
-              <button type="button" onClick={() => { setWidth(4); setHeight(2); }} className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-slate-200 text-on-surface-variant rounded-md">4 x 2 m</button>
+              <button
+                type="button"
+                onClick={() => { setWidth(2); setHeight(1); }}
+                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-surface-container text-on-surface-variant rounded-md"
+              >
+                2 x 1 m
+              </button>
+              <button
+                type="button"
+                onClick={() => { setWidth(3); setHeight(1); }}
+                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-surface-container text-on-surface-variant rounded-md"
+              >
+                3 x 1 m
+              </button>
+              <button
+                type="button"
+                onClick={() => { setWidth(4); setHeight(2); }}
+                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-surface-container text-on-surface-variant rounded-md"
+              >
+                4 x 2 m
+              </button>
             </div>
           </div>
         )}
@@ -435,8 +453,15 @@ export default function OrderFormClient({
                 return (
                   <label key={fin.id} className={`p-3 rounded-2xl border flex items-center justify-between cursor-pointer transition ${isChecked ? "border-primary bg-primary-container/20" : "border-outline-variant/50 hover:border-outline-variant"}`}>
                     <div className="flex items-center gap-2.5">
-                      <input type="checkbox" checked={isChecked} onChange={() => toggleFinishing(fin.id)} className="w-4 h-4 rounded text-primary focus:ring-primary" />
-                      <span className="text-xs font-medium text-on-surface">{fin.name}</span>
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleFinishing(fin.id)}
+                        className="w-4 h-4 rounded text-primary focus:ring-primary"
+                      />
+                      <span className="text-xs font-medium text-on-surface">
+                        {fin.name}
+                      </span>
                     </div>
                     <span className="text-[11px] font-semibold text-primary">+{formatRupiah(fin.price)}/{fin.unit}</span>
                   </label>
@@ -470,8 +495,17 @@ export default function OrderFormClient({
           </div>
           {pickupMethod === "DELIVERY" && (
             <div className="space-y-1.5 pt-2">
-              <span className="text-xs font-semibold text-on-surface-variant block">Alamat Lengkap Pengiriman *</span>
-              <textarea required rows={3} value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Jl. Sukajadi No. 123, RT 01/02, Kel. Pasteur, Kec. Sukajadi, Kota Bandung 40161" className="w-full p-3 text-xs border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none" />
+              <span className="text-xs font-semibold text-on-surface-variant block">
+                Alamat Lengkap Pengiriman *
+              </span>
+              <textarea
+                required
+                rows={3}
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Jl. Sukajadi No. 123, RT 01/02, Kel. Pasteur, Kec. Sukajadi, Kota Bandung 40161"
+                className="w-full p-3 text-xs border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none"
+              />
             </div>
           )}
         </div>
@@ -565,7 +599,7 @@ export default function OrderFormClient({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary text-white font-bold text-sm shadow-xl shadow-primary/30 transition flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-xl shadow-primary/30 transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isLoading ? (
               <>
