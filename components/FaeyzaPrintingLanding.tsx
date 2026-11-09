@@ -1,6 +1,8 @@
-"use client";
+﻿"use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import Link from "next/link";
+import { SERVICE_CATEGORIES, categoryHref } from "@/lib/service-categories";
 
 /**
  * FaeyzaPrintingLanding
@@ -14,7 +16,7 @@ import React, { useState } from "react";
  *   carousel scroll). Jangan pindahkan ke server component.
  * - Gambar contoh portofolio memakai <img> biasa karena sumbernya
  *   eksternal dan domainnya tidak terdaftar di next.config.
- * - Emoticon yang gagal render di HTML (��) diganti dengan emoji
+ * - Emoticon yang gagal render di HTML (ï¿½ï¿½) diganti dengan emoji
  *   atau ASCII yang mencerminkan maksud aslinya.
  */
 
@@ -24,6 +26,8 @@ import React, { useState } from "react";
 
 export default function FaeyzaPrintingLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+  const dragStartX = useRef<number | null>(null);
+  const [didDrag, setDidDrag] = useState(false);
 
   /* ---------- Carousel scroll helpers ---------- */
   const scrollLeft = () => {
@@ -53,7 +57,7 @@ export default function FaeyzaPrintingLanding() {
           <div className="flex-1 text-center font-medium" />
           {/* Hubungi / Lokasi Cepat */}
           <div className="text-right text-xs hidden md:block text-brand-navy/80 font-semibold">
-            <span>⏱️ Setiap Hari&nbsp; 10.00- 20.00 WIB</span>
+            <span>â±ï¸ Setiap Hari&nbsp; 10.00- 20.00 WIB</span>
           </div>
         </div>
       </aside>
@@ -87,7 +91,7 @@ export default function FaeyzaPrintingLanding() {
             {/* Menu Navigasi */}
             <nav className="hidden md:flex items-center space-x-7 text-xs uppercase tracking-wider font-bold text-brand-navy/90">
               <a className="hover:text-coral-warm transition flex items-center gap-1" href="#layanan-cetak">
-                Layanan Cetak <span className="text-[9px] text-coral-warm">▾</span>
+                Layanan Cetak <span className="text-[9px] text-coral-warm">â–¾</span>
               </a>
               <a className="hover:text-coral-warm transition" href="#cara-pesan">
                 Cara Pesan
@@ -229,7 +233,7 @@ export default function FaeyzaPrintingLanding() {
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-pastel-butter border border-amber-300 flex items-center justify-center text-xs">
-                        ✨
+                        âœ¨
                       </div>
                       <div>
                         <div className="h-2 bg-gray-300 rounded-full w-20 mb-1" />
@@ -249,7 +253,7 @@ export default function FaeyzaPrintingLanding() {
                       </p>
                     </div>
                     <span className="bg-white border border-brand-navy px-3 py-1 rounded-full text-xs font-bold text-brand-navy">
-                      ✅ Siap Kirim
+                      âœ… Siap Kirim
                     </span>
                   </div>
                 </div>
@@ -274,7 +278,7 @@ export default function FaeyzaPrintingLanding() {
           ].map((text) => (
             <span key={text} className="mx-4 flex items-center">
               {text}
-              <span className="mx-3 text-pastel-yellow">✿</span>
+              <span className="mx-3 text-pastel-yellow">âœ¿</span>
             </span>
           ))}
         </div>
@@ -301,14 +305,14 @@ export default function FaeyzaPrintingLanding() {
               aria-label="Geser ke kiri"
               className="hidden sm:flex absolute -left-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white border-2 border-brand-navy hard-shadow items-center justify-center text-brand-navy hover:bg-pastel-yellow transition-all duration-200 active:scale-95"
             >
-              <span className="text-lg font-bold">‹</span>
+              <span className="text-lg font-bold" aria-label="Sebelumnya">&lsaquo;</span>
             </button>
             <button
               onClick={scrollRight}
               aria-label="Geser ke kanan"
               className="hidden sm:flex absolute -right-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white border-2 border-brand-navy hard-shadow items-center justify-center text-brand-navy hover:bg-pastel-yellow transition-all duration-200 active:scale-95"
             >
-              <span className="text-lg font-bold">›</span>
+              <span className="text-lg font-bold" aria-label="Berikutnya">&rsaquo;</span>
             </button>
 
             {/* Horizontal Scroll Container */}
@@ -318,7 +322,29 @@ export default function FaeyzaPrintingLanding() {
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {services.map((svc) => (
-                <a key={svc.href} className={`group flex flex-col items-center text-center shrink-0 w-32 sm:w-36 ${svc.href === "#banner" ? "relative" : ""}`} href={svc.href}>
+                <Link
+                  key={svc.href}
+                  href={svc.href}
+                  onClick={(e) => {
+                    if (didDrag) {
+                      e.preventDefault();
+                      setDidDrag(false);
+                    }
+                  }}
+                  onPointerDown={(e) => {
+                    dragStartX.current = e.clientX;
+                    setDidDrag(false);
+                  }}
+                  onPointerMove={(e) => {
+                    if (dragStartX.current !== null && Math.abs(e.clientX - dragStartX.current) > 6) {
+                      setDidDrag(true);
+                    }
+                  }}
+                  onPointerUp={() => {
+                    dragStartX.current = null;
+                  }}
+                  className={`group flex flex-col items-center text-center shrink-0 w-32 sm:w-36 ${svc.href === "#banner" ? "relative" : ""}`}
+                >
                   {/* Card Background */}
                   <div className={`w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-white hard-shadow flex items-center justify-center p-3 relative overflow-hidden group-hover:scale-105 transition-transform duration-300 ${serviceColorClasses[svc.color]}`}>
                     <div className={`w-16 h-16 bg-white border border-amber-300 rounded shadow-sm p-1.5 flex flex-col justify-center items-center group-hover:-translate-y-1 transition-transform`}>
@@ -333,7 +359,7 @@ export default function FaeyzaPrintingLanding() {
                   <p className="text-[11px] text-gray-500 mt-1 leading-tight line-clamp-2 max-w-[150px]">
                     {svc.desc}
                   </p>
-                </a>
+                </Link>
               ))}
             </div>
 
@@ -342,7 +368,7 @@ export default function FaeyzaPrintingLanding() {
               <span className="inline-block w-8 h-1 rounded-full bg-coral-warm" />
               <span className="inline-block w-2 h-1 rounded-full bg-amber-200" />
               <span className="inline-block w-2 h-1 rounded-full bg-amber-200" />
-              <span className="text-[11px] ml-2 text-brand-navy/70">Geser untuk melihat semua layanan ➔</span>
+              <span className="text-[11px] ml-2 text-brand-navy/70">Geser untuk melihat semua layanan âž”</span>
             </div>
           </div>
 
@@ -350,7 +376,7 @@ export default function FaeyzaPrintingLanding() {
           <div className="mt-12 text-center">
             <a className="inline-flex items-center gap-2 bg-white hover:bg-pastel-pink/60 text-brand-navy border-2 border-brand-navy font-heading font-bold text-xs uppercase px-8 py-3 rounded-full hard-shadow transition duration-200" href="/katalog">
               <span>Lihat Daftar Harga &amp; Spesifikasi Lengkap</span>
-              <span>➔</span>
+              <span>âž”</span>
             </a>
           </div>
         </div>
@@ -408,7 +434,7 @@ export default function FaeyzaPrintingLanding() {
                       />
                     </div>
                     <div className="text-center bg-white/90 backdrop-blur-sm rounded py-1 px-2 border border-purple-200 text-[10px] text-gray-700 font-mono z-10">
-                      WARNA AKURAT • TEKSTUR MEWAH
+                      WARNA AKURAT &bull; TEKSTUR MEWAH
                     </div>
                   </div>
                 </div>
@@ -494,7 +520,7 @@ export default function FaeyzaPrintingLanding() {
                 Percetakan digital printing dan studio percetakan independen. Mengombinasikan kemudahan pesan cetak online dengan hasil cetak rapi, teliti, dan estetik.
               </p>
               <a className="inline-flex items-center gap-2 bg-white hover:bg-pastel-pink/60 text-brand-navy border-2 border-brand-navy font-heading font-bold text-xs uppercase px-6 py-2.5 rounded-full hard-shadow transition" href="/register">
-                Daftar Sekarang <span>➔</span>
+                Daftar Sekarang <span>âž”</span>
               </a>
             </div>
 
@@ -538,7 +564,7 @@ export default function FaeyzaPrintingLanding() {
                   Studio Percetakan: Jl. Pawon Raya Jl. Harapankita No.22A, Bencongan, Kecamatan Kelapa Dua, Kabupaten Tangerang, Banten 15810
                 </p>
                 <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 text-[11px] text-emerald-800 flex items-center gap-2">
-                  <span className="text-sm">✨</span>
+                  <span className="text-sm">âœ¨</span>
                   <span className="text-xs">Kualitas Cetak Presisi &amp; Pilihan Kertas Premium</span>
                 </div>
               </div>
@@ -561,7 +587,7 @@ export default function FaeyzaPrintingLanding() {
 
           {/* Copyright */}
           <div className="pt-8 border-t border-amber-200/70 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4">
-            <p>© 2025 Faeyza Printing. Seluruh Hak Cipta Dilindungi.</p>
+            <p>&copy; 2025 Faeyza Printing. Seluruh Hak Cipta Dilindungi.</p>
             <div className="flex items-center space-x-3 text-brand-navy/60">
               <span className="text-[10px] font-semibold">METODE PEMBAYARAN:</span>
               {["QRIS", "BCA", "MANDIRI"].map((m) => (
@@ -591,134 +617,27 @@ interface ServiceItem {
   color: "yellow" | "sky" | "lavender" | "pink" | "mint" | "butter";
 }
 
-const services: ServiceItem[] = [
-  {
-    href: "#banner",
-    icon: "📢",
-    emoji1: "Roll-Up",
-    emoji2: "Banner",
-    title: "Banner & Promosi",
-    desc: "X-Banner, Roll-up, Baliho & spanduk kain.",
-    color: "yellow",
-  },
-  {
-    href: "#poster",
-    icon: "🖼️",
-    emoji1: "ART PRINT",
-    emoji2: "",
-    title: "Poster & Cetak Foto",
-    desc: "Art print, kanvas premium, foto galeri resolusi HD.",
-    color: "sky",
-  },
-  {
-    href: "#stiker",
-    icon: "🏷️",
-    emoji1: "DIE-CUT",
-    emoji2: "",
-    title: "Sticker & Label",
-    desc: "Die-cut, vinyl kromo, label kemasan anti-air.",
-    color: "lavender",
-  },
-  {
-    href: "#kartu",
-    icon: "🪪",
-    emoji1: "ID & LANYARD",
-    emoji2: "",
-    title: "Kartu & Identitas",
-    desc: "Kartu nama, ID card RFID, member card & lanyard.",
-    color: "pink",
-  },
-  {
-    href: "#brosur",
-    icon: "📄",
-    emoji1: "ART PAPER",
-    emoji2: "",
-    title: "Brosur & Leaflet",
-    desc: "Brosur lipat 2/3, flyer promosi, art paper doff.",
-    color: "mint",
-  },
-  {
-    href: "#buku-dokumen",
-    icon: "📚",
-    emoji1: "HARDCOVER",
-    emoji2: "",
-    title: "Buku & Dokumen",
-    desc: "Buku jilid jahit, booklet, majalah, skripsi rapi.",
-    color: "sky",
-  },
-  {
-    href: "#kemasan",
-    icon: "📦",
-    emoji1: "BOX & BAG",
-    emoji2: "",
-    title: "Kemasan & Packaging",
-    desc: "Box makanan, standing pouch, paper bag custom.",
-    color: "butter",
-  },
-  {
-    href: "#stempel",
-    icon: "✒️",
-    emoji1: "FLASH",
-    emoji2: "OTOMATIS",
-    title: "Stempel Flash",
-    desc: "Stempel otomatis warna, stempel kayu, refill tinta.",
-    color: "pink",
-  },
-  {
-    href: "#apparel",
-    icon: "👕",
-    emoji1: "DTF & SABLON",
-    emoji2: "",
-    title: "Sablon & Apparel",
-    desc: "Kaos sablon DTF, totebag kanvas, polo & jersey.",
-    color: "yellow",
-  },
-  {
-    href: "#undangan",
-    icon: "💒",
-    emoji1: "GOLD FOIL",
-    emoji2: "",
-    title: "Undangan & Stationery",
-    desc: "Undangan nikah/event, amplop khusus & kop surat.",
-    color: "pink",
-  },
-  {
-    href: "#kalender",
-    icon: "📆",
-    emoji1: "KALENDER MEJA",
-    emoji2: "",
-    title: "Kalender Custom",
-    desc: "Kalender meja spiral custom & kalender dinding.",
-    color: "mint",
-  },
-  {
-    href: "#signage",
-    icon: "📋",
-    emoji1: "AKRILIK & NEON",
-    emoji2: "",
-    title: "Signage & Papan Info",
-    desc: "Plang akrilik, neon box mini, papan petunjuk toko.",
-    color: "lavender",
-  },
-  {
-    href: "#media-khusus",
-    icon: "🖨️",
-    emoji1: "LANYARD & UV",
-    emoji2: "",
-    title: "Cetak Media Khusus",
-    desc: "Lanyard cetak kustom, UV flatbed kayu & keramik.",
-    color: "sky",
-  },
-  {
-    href: "#finishing",
-    icon: "🎨",
-    emoji1: "FOIL & SPOT UV",
-    emoji2: "",
-    title: "Finishing & Efek",
-    desc: "Laminasi doff/glossy, spot UV, hot foil emas, emboss.",
-    color: "butter",
-  },
-];
+const servicePresentation: Record<string, { icon: string; emoji1: string; emoji2: string; color: ServiceItem["color"] }> = {
+  "banner-promosi": { icon: "🖨️", emoji1: "Roll-Up", emoji2: "Banner", color: "yellow" },
+  "poster-cetak-foto": { icon: "🖼️", emoji1: "ART PRINT", emoji2: "", color: "sky" },
+  "sticker-label": { icon: "🏷️", emoji1: "DIE-CUT", emoji2: "", color: "lavender" },
+  "kartu-identitas": { icon: "💳", emoji1: "ID & LANYARD", emoji2: "", color: "pink" },
+  "brosur-leaflet": { icon: "📄", emoji1: "ART PAPER", emoji2: "", color: "mint" },
+  "buku-dokumen": { icon: "📚", emoji1: "HARDCOVER", emoji2: "", color: "sky" },
+  "kemasan-packaging": { icon: "📦", emoji1: "BOX & BAG", emoji2: "", color: "butter" },
+  "stempel-flash": { icon: "🔖", emoji1: "FLASH", emoji2: "OTOMATIS", color: "pink" },
+  "apparel-sablon": { icon: "👕", emoji1: "DTF & SABLON", emoji2: "", color: "yellow" },
+};
+
+const services: ServiceItem[] = SERVICE_CATEGORIES.map((cat) => ({
+  href: categoryHref(cat),
+  icon: servicePresentation[cat.slug]?.icon ?? "🖨️",
+  emoji1: servicePresentation[cat.slug]?.emoji1 ?? "",
+  emoji2: servicePresentation[cat.slug]?.emoji2 ?? "",
+  title: cat.label,
+  desc: cat.description,
+  color: servicePresentation[cat.slug]?.color ?? "yellow",
+}));
 
 const serviceColorClasses: Record<ServiceItem["color"], string> = {
   yellow: "bg-pastel-yellow group-hover:border-pastel-yellow",
@@ -761,3 +680,4 @@ const steps: StepItem[] = [
     bgClass: "bg-coral-warm",
   },
 ];
+

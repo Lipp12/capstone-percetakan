@@ -61,15 +61,27 @@ export default async function CustomOrderPage({ params, searchParams }: Props) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="w-full max-w-[1280px] mx-auto px-4 lg:px-10 pt-8 pb-8 bg-background min-h-screen">
+      {/* Badge row */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps tracking-widest uppercase shadow-[2px_2px_0px_#1c1c19]">
+          Katalog Standar Studio
+        </span>
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps tracking-widest uppercase">
+          Terkalibrasi CMYK
+        </span>
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps tracking-widest uppercase">
+          Presisi Lipat &amp; Potong
+        </span>
+      </div>
       <div className="space-y-1">
-        <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+        <span className="font-label-caps text-label-caps text-tertiary uppercase tracking-widest">
           Formulir Pemesanan Custom
         </span>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900">
+        <h1 className="font-epilogue text-2xl sm:text-3xl font-bold text-on-surface">
           Kustomisasi Pesanan: {product.name}
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500">
+        <p className="font-body-sm text-body-sm text-on-surface-variant">
           Tentukan spesifikasi ukuran, material, dan finishing. Estimasi harga langsung dihitung secara otomatis.
         </p>
       </div>

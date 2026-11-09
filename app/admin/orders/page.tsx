@@ -2,20 +2,24 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
-import { Search, ShoppingBag, Eye, ExternalLink } from "lucide-react";
+import { Search, ShoppingBag, Eye, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 20;
 
 interface Props {
   searchParams: {
     status?: string;
     search?: string;
+    page?: string;
   };
 }
 
 export default async function AdminOrdersListPage({ searchParams }: Props) {
   const statusFilter = searchParams.status || "ALL";
   const searchQuery = searchParams.search || "";
+  const page = Math.max(1, Number(searchParams.page) || 1);
 
   const where: any = {};
   if (statusFilter !== "ALL") {
@@ -29,15 +33,22 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
     ];
   }
 
-  const orders = await prisma.order.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    include: {
-      user: { select: { name: true, phone: true } },
-      product: true,
-      material: true,
-    },
-  });
+  const [orders, total] = await Promise.all([
+    prisma.order.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+      include: {
+        user: { select: { name: true, phone: true, email: true } },
+        product: true,
+        material: true,
+      },
+    }),
+    prisma.order.count({ where }),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const statuses = [
     { label: "Semua", value: "ALL" },
@@ -50,10 +61,32 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
     { label: "Siap Diambil", value: "READY" },
     { label: "Dikirim", value: "SHIPPING" },
     { label: "Selesai", value: "COMPLETED" },
+    { label: "Ditolak/Batal", value: "CANCELLED" },
   ];
 
+  function pageHref(p: number) {
+    const params = new URLSearchParams();
+    if (statusFilter !== "ALL") params.set("status", statusFilter);
+    if (searchQuery) params.set("search", searchQuery);
+    params.set("page", String(p));
+    return `/admin/orders?${params.toString()}`;
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-[1280px] mx-auto px-4 lg:px-10 pt-8 pb-8 bg-background min-h-screen">
+      {/* Badge row */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps tracking-widest uppercase shadow-[2px_2px_0px_#1c1c19]">
+          Katalog Standar Studio
+        </span>
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps tracking-widest uppercase">
+          Terkalibrasi CMYK
+        </span>
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps tracking-widest uppercase">
+          Presisi Lipat &amp; Potong
+        </span>
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-xs font-bold text-brand-600 uppercase tracking-wider">
@@ -69,7 +102,7 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
       </div>
 
       {/* Filter Status & Search Bar */}
-      <div className="bg-white p-4 rounded-3xl border border-ink-200 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
+      <div className="bg-surface-container-lowest p-4 rounded-3xl border border-outline-variant/50 shadow-[0_4px_16px_rgba(188,148,120,0.06)] flex flex-col lg:flex-row items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-1.5 w-full lg:w-auto">
           {statuses.map((st) => (
             <Link
@@ -100,7 +133,7 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
       </div>
 
       {/* Tabel Pesanan */}
-      <div className="bg-white rounded-3xl border border-ink-200 shadow-sm overflow-hidden">
+      <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/50 shadow-[0_4px_16px_rgba(188,148,120,0.06)] overflow-hidden">
         {orders.length === 0 ? (
           <div className="p-12 text-center text-ink-400 text-xs">
             Tidak ada pesanan yang sesuai kriteria pencarian.
@@ -108,11 +141,12 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-ink-700">
-              <thead className="bg-ink-50 border-b border-ink-200 text-ink-500 font-bold uppercase tracking-wider text-[10px]">
+              <thead className="bg-surface-container border-b border-outline-variant/50 text-on-surface-variant font-bold uppercase tracking-wider text-[10px]">
                 <tr>
                   <th className="py-3.5 px-4">No. Pesanan</th>
                   <th className="py-3.5 px-4">Pelanggan</th>
                   <th className="py-3.5 px-4">Produk & Spesifikasi</th>
+                  <th className="py-3.5 px-4">File</th>
                   <th className="py-3.5 px-4">Status</th>
                   <th className="py-3.5 px-4 text-right">Total Tagihan</th>
                   <th className="py-3.5 px-4 text-center">Aksi</th>
@@ -120,35 +154,55 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
               </thead>
               <tbody className="divide-y divide-ink-100">
                 {orders.map((o) => (
-                  <tr key={o.id} className="hover:bg-ink-50/80 transition">
-                    <td className="py-3.5 px-4 font-bold text-ink-900">
+                  <tr key={o.id} className="hover:bg-surface-container-low transition">
+                    <td className="py-3.5 px-4 font-bold text-on-surface">
                       {o.orderNumber}
-                      <span className="block text-[10px] text-ink-400 font-normal">
+                      <span className="block text-[10px] text-on-surface-variant/60 font-normal">
                         {formatDate(o.createdAt)}
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="font-semibold text-ink-900 block">
+                      <span className="font-semibold text-on-surface block">
                         {o.user.name}
                       </span>
-                      <span className="text-[10px] text-ink-400">
-                        {o.user.phone || "-"}
+                      <span className="text-[10px] text-on-surface-variant/60">
+                        {o.user.phone || o.user.email || "-"}
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="font-medium text-ink-800 block">
+                      <span className="font-medium text-on-surface block">
                         {o.product.name}
                       </span>
-                      <span className="text-[11px] text-ink-500">
-                        {o.material ? `${o.material.name} â€¢ ` : ""}
-                        {o.width && o.height ? `${o.width}x${o.height}m â€¢ ` : ""}
+                      <span className="text-[11px] text-on-surface-variant">
+                        {o.material ? `${o.material.name} • ` : ""}
+                        {o.width && o.height ? `${o.width}x${o.height}m • ` : ""}
                         {o.quantity} {o.product.unit}
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <OrderStatusBadge status={o.status} size="sm" />
+                      {o.designFileUrl ? (
+                        <a
+                          href={o.designFileUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 text-brand-600 hover:underline font-semibold"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Lihat</span>
+                        </a>
+                      ) : (
+                        <span className="text-ink-400">-</span>
+                      )}
                     </td>
-                    <td className="py-3.5 px-4 text-right font-extrabold text-ink-900">
+                    <td className="py-3.5 px-4">
+                      <OrderStatusBadge status={o.status} size="sm" />
+                      {o.alifSyncStatus === "FAILED" && (
+                        <span className="block text-[10px] text-rose-600 mt-1">
+                          Sync Alif gagal
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4 text-right font-extrabold text-primary">
                       {formatRupiah(o.totalPrice)}
                     </td>
                     <td className="py-3.5 px-4 text-center">
@@ -164,6 +218,35 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-ink-100 text-xs">
+            <span className="text-ink-400">
+              Halaman {page} dari {totalPages} ({total} pesanan)
+            </span>
+            <div className="flex items-center gap-2">
+              {page > 1 ? (
+                <Link href={pageHref(page - 1)} className="p-1.5 rounded-lg bg-ink-100 hover:bg-ink-200">
+                  <ChevronLeft className="w-4 h-4" />
+                </Link>
+              ) : (
+                <span className="p-1.5 rounded-lg bg-ink-50 text-ink-300">
+                  <ChevronLeft className="w-4 h-4" />
+                </span>
+              )}
+              {page < totalPages ? (
+                <Link href={pageHref(page + 1)} className="p-1.5 rounded-lg bg-ink-100 hover:bg-ink-200">
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              ) : (
+                <span className="p-1.5 rounded-lg bg-ink-50 text-ink-300">
+                  <ChevronRight className="w-4 h-4" />
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>

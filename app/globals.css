@@ -68,6 +68,20 @@
     @apply mb-3 flex items-center gap-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-ink-400 dark:text-ink-500;
   }
 
+  /* Bayangan offset dari desain stitch (katalog/detail/form/admin) */
+  .hard-shadow {
+    box-shadow: 2px 2px 0px #1c1c19;
+  }
+  .hard-shadow-sm {
+    box-shadow: 0 4px 16px rgba(188, 148, 120, 0.06);
+  }
+  .hard-shadow-lg {
+    box-shadow: 0 12px 32px rgba(160, 120, 100, 0.12);
+  }
+  .hard-shadow-offset {
+    box-shadow: 3px 3px 0px #2D2926;
+  }
+
   /* Submenu dropdown */
   .menu-dropdown-item {
     @apply relative flex items-center gap-3 rounded-lg px-3 py-2 text-theme-sm font-medium transition-colors duration-150;

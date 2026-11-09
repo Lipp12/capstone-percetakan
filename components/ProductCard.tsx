@@ -19,63 +19,99 @@ interface ProductProps {
       };
     }>;
   };
+  index?: number;
 }
 
-export default function ProductCard({ product }: ProductProps) {
+export default function ProductCard({ product, index = 0 }: ProductProps) {
   return (
-    <div className="bg-white rounded-lg border border-stone-200 overflow-hidden flex flex-col hover:shadow-md hover:border-rose-300 transition-all duration-200 group">
+    <div className="group flex flex-col bg-surface-container-lowest rounded-3xl p-4 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_32px_rgba(160,120,100,0.12)] shadow-[0_4px_16px_rgba(188,148,120,0.06)] relative">
       {/* Gambar Produk */}
-      <div className="relative h-44 sm:h-48 w-full bg-stone-100 overflow-hidden">
-        {product.imageUrl ? (
+      <div
+        className={`relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-4 flex items-center justify-center ${
+          [
+            "bg-gradient-to-b from-[#daf1e1] to-[#cae8d3]",
+            "bg-gradient-to-b from-[#e3edf7] to-[#d6e4f3]",
+            "bg-gradient-to-b from-[#fef5cb] to-[#fdeea7]",
+            "bg-gradient-to-b from-[#fed9e1] to-[#fdeea7]",
+            "bg-gradient-to-b from-[#e3edf7] to-[#d6e4f3]",
+            "bg-gradient-to-b from-[#fef5cb] to-[#fdeea7]",
+          ][index % 6]
+        }`}
+      >
+        {product.imageUrl && !product.imageUrl.includes("images.unsplash.com") ? (
           <ProductImage
             src={product.imageUrl}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
           />
         ) : (
-          <ProductImage src={null} alt={product.name} />
+          <img
+            src={
+              {
+                "Banner & Spanduk": "/placeholder-banner.svg",
+                "Brosur & Flyer": "/placeholder-brosur.svg",
+                "Cetak Dokumen": "/placeholder-dokumen.svg",
+                "Stiker & Label": "/placeholder-stiker.svg",
+                "Undangan & Kartu Pos": "/placeholder-undangan.svg",
+                "ID Card & Lanyard": "/placeholder-idcard.svg",
+                "Poster & Cetak Foto": "/placeholder-poster.svg",
+              }[product.category] || "/placeholder-banner.svg"
+            }
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
         )}
-        <span className="absolute top-3 left-3 px-2.5 py-1 text-[11px] font-semibold bg-white/95 text-slate-800 rounded-md shadow-sm">
+        <span className="absolute top-3 left-3 bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-label-caps text-label-caps uppercase shadow-[2px_2px_0px_#1c1c19]">
           {product.category}
         </span>
-        <span className="absolute bottom-3 right-3 px-2 py-1 text-[10px] font-bold uppercase bg-slate-900/85 text-white rounded-md">
+        <span className="absolute bottom-3 right-3 bg-surface-container-lowest/90 backdrop-blur-sm text-tertiary px-2.5 py-1 rounded-lg font-label-caps text-label-caps flex items-center gap-1 shadow-sm">
           Per {product.unit}
         </span>
       </div>
 
       {/* Konten Produk */}
-      <div className="p-5 flex-1 flex flex-col">
-        <h3 className="font-bold text-slate-900 text-base group-hover:text-rose-700 transition line-clamp-1">
-          {product.name}
-        </h3>
-        <p className="mt-1 text-xs text-slate-500 line-clamp-2 leading-relaxed flex-1">
-          {product.description}
-        </p>
+      <div className="flex flex-col flex-1 justify-between gap-2">
+        <div className="flex flex-col gap-2 mb-1">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-epilogue font-bold text-lg text-on-surface tracking-tight line-clamp-1">
+              {product.name}
+            </h3>
+          </div>
+          <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">
+            {product.description}
+          </p>
+        </div>
 
         {/* Pilihan Bahan yang Tersedia */}
         {product.materials && product.materials.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-xs text-slate-400">
-            <Layers className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span className="truncate text-[11px]">
-              {product.materials.map((m) => m.material.name).join(", ")}
-            </span>
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {product.materials.map((m, idx) => (
+              <span
+                key={idx}
+                className="px-2 py-0.5 rounded-md bg-surface-container font-label-caps text-label-caps text-on-surface-variant"
+              >
+                {m.material.name}
+              </span>
+            ))}
           </div>
         )}
 
         {/* Footer Card: Harga & Tombol */}
-        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+        <div className="flex items-center justify-between pt-4 border-t border-surface-variant/50 mt-auto">
           <div>
-            <span className="text-[10px] text-slate-400 block font-medium">Mulai dari</span>
-            <span className="text-sm sm:text-base font-bold text-rose-700">
+            <span className="font-label-caps text-label-caps text-on-surface-variant block uppercase">
+              Mulai dari
+            </span>
+            <span className="font-epilogue text-xl font-bold text-primary">
               {formatRupiah(product.basePrice)}
             </span>
           </div>
           <Link
             href={`/order/${product.id}`}
-            className="px-3 py-2 rounded-md bg-rose-700 hover:bg-rose-800 text-white text-xs font-semibold transition flex items-center gap-1 shrink-0"
+            className="px-4 py-2 rounded-xl bg-cetak-orange hover:bg-cetak-orange-hover text-white font-label-md text-label-md shadow-hard-shadow-offset active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center gap-1 shrink-0"
           >
             <span>Pesan</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
