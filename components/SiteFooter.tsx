@@ -15,7 +15,7 @@ export default function SiteFooter() {
             className="h-9 w-auto object-contain"
           />
           <p className="font-body-md text-body-md text-on-surface-variant max-w-md leading-relaxed">
-            Workshop Digital &amp; Offset Printing terpercaya di Yogyakarta. Melayani percetakan
+            Workshop Digital &amp; Offset Printing terpercaya di Tangerang. Melayani percetakan
             brosur, banner, stiker, buku, dan kebutuhan promosi berkualitas galeri dengan kalibrasi
             warna terstandar.
           </p>

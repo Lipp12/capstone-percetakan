@@ -113,7 +113,7 @@ export default async function InvoicePage({ params }: Props) {
                 <span className="text-2xl font-black text-primary ml-0.5">Printing</span>
               </div>
               <div className="mt-2 text-xs text-on-surface-variant space-y-0.5 max-w-sm leading-relaxed">
-                <p className="font-medium text-on-surface">Jl. Pawon Raya Jl. Harapankita No.22A, Bencongan, Kelapa Dua, Tangerang</p>
+                <p className="font-medium text-on-surface">Jl. Pawon Raya Jl. Harapankita No.22A, Bencongan, Kecamatan Kelapa Dua, Kabupaten Tangerang, Banten 15810</p>
                 <p>Buka Setiap Hari: 10:00 â€“ 20:00 WIB</p>
                 <p className="text-on-surface font-semibold pt-0.5">WhatsApp CS: +62 812-3456-7890</p>
               </div>
@@ -148,7 +148,7 @@ export default async function InvoicePage({ params }: Props) {
               <div className="text-on-surface-variant mt-0.5 leading-relaxed">
                 {order.pickupMethod === "DELIVERY"
                   ? order.address || "-"
-                  : "Workshop Faeyza Printing (Jl. Pawon Raya No.22A, Kelapa Dua)"}
+                  : "Workshop Faeyza Printing (Jl. Pawon Raya Jl. Harapankita No.22A, Bencongan, Kecamatan Kelapa Dua, Kabupaten Tangerang, Banten 15810)"}
               </div>
             </div>
             <div>
