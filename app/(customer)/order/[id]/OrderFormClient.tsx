@@ -226,7 +226,7 @@ export default function OrderFormClient({
                   required
                   value={width}
                   onChange={(e) => setWidth(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3.5 py-2.5 text-sm border border-outline-variant rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
+                  className="w-full px-3.5 py-2.5 text-sm border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none"
                 />
               </div>
               <div>
@@ -238,7 +238,7 @@ export default function OrderFormClient({
                   required
                   value={height}
                   onChange={(e) => setHeight(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3.5 py-2.5 text-sm border border-outline-variant rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
+                  className="w-full px-3.5 py-2.5 text-sm border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none"
                 />
               </div>
             </div>
@@ -249,21 +249,21 @@ export default function OrderFormClient({
               <button
                 type="button"
                 onClick={() => { setWidth(2); setHeight(1); }}
-                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-slate-200 text-on-surface-variant rounded-md"
+                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-surface-container text-on-surface-variant rounded-md"
               >
                 2 x 1 m
               </button>
               <button
                 type="button"
                 onClick={() => { setWidth(3); setHeight(1); }}
-                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-slate-200 text-on-surface-variant rounded-md"
+                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-surface-container text-on-surface-variant rounded-md"
               >
                 3 x 1 m
               </button>
               <button
                 type="button"
                 onClick={() => { setWidth(4); setHeight(2); }}
-                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-slate-200 text-on-surface-variant rounded-md"
+                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-surface-container text-on-surface-variant rounded-md"
               >
                 4 x 2 m
               </button>
@@ -291,7 +291,7 @@ export default function OrderFormClient({
               required
               value={quantity}
               onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-              className="w-24 text-center py-2 text-base font-bold border border-outline-variant rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
+              className="w-24 text-center py-2 text-base font-bold border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none"
             />
             <button
               type="button"
@@ -327,7 +327,7 @@ export default function OrderFormClient({
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => toggleFinishing(fin.id)}
-                        className="w-4 h-4 rounded text-primary focus:ring-blue-500"
+                        className="w-4 h-4 rounded text-primary focus:ring-primary"
                       />
                       <span className="text-xs font-medium text-on-surface">
                         {fin.name}
@@ -402,7 +402,7 @@ export default function OrderFormClient({
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Jl. Sukajadi No. 123, RT 01/02, Kel. Pasteur, Kec. Sukajadi, Kota Bandung 40161"
-                className="w-full p-3 text-xs border border-outline-variant rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
+                className="w-full p-3 text-xs border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none"
               />
             </div>
           )}
@@ -419,7 +419,7 @@ export default function OrderFormClient({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Contoh: Tolong lubang mata ayam di perbanyak di bagian atas..."
-            className="w-full p-3 text-xs border border-outline-variant rounded-xl focus:ring-2 focus:ring-blue-600 outline-none"
+            className="w-full p-3 text-xs border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none"
           />
         </div>
       </div>
@@ -437,7 +437,7 @@ export default function OrderFormClient({
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 px-6 rounded-2xl bg-primary hover:bg-blue-700 text-white font-bold text-sm shadow-xl shadow-blue-500/30 transition flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-xl shadow-primary/30 transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading ? (
               <>
