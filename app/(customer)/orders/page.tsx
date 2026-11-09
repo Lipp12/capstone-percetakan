@@ -1,205 +1,285 @@
+﻿import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
+import { formatRupiah } from "@/lib/utils";
 import Link from "next/link";
-import { formatRupiah, formatDate } from "@/lib/utils";
-import OrderStatusBadge from "@/components/OrderStatusBadge";
-import { ShoppingBag, Search, Clock, RefreshCw, Upload, CreditCard } from "lucide-react";
+import { ArrowLeft, Search, Package, Clock, CheckCircle2, AlertCircle, XCircle, RefreshCw, FileCheck, Printer, Scissors, PackageCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-interface Props {
-  searchParams: {
-    status?: string;
-    search?: string;
-  };
-}
-
-export default async function CustomerOrdersPage({ searchParams }: Props) {
+export default async function OrdersPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
-    redirect("/login");
+    return (
+      <div className="text-center py-12">
+        <p className="text-on-surface-variant">Silakan login untuk melihat pesanan.</p>
+        <Link href="/login" className="text-primary font-semibold hover:underline mt-2 inline-block">
+          Login
+        </Link>
+      </div>
+    );
   }
 
-  const userId = (session.user as any).id;
-  const statusFilter = searchParams.status || "ALL";
-  const searchQuery = searchParams.search || "";
-
-  const where: any = { userId };
-  if (statusFilter !== "ALL") {
-    where.status = statusFilter;
-  }
-  if (searchQuery) {
-    where.OR = [
-      { orderNumber: { contains: searchQuery } },
-      { product: { name: { contains: searchQuery } } },
-    ];
-  }
+  const userId = (session.user as any)?.id;
+  const role = (session.user as any)?.role;
+  const isAdmin = role === "ADMIN" || role === "OPERATOR";
 
   const orders = await prisma.order.findMany({
-    where,
+    where: isAdmin ? {} : { userId },
     orderBy: { createdAt: "desc" },
     include: {
       product: true,
       material: true,
+      finishings: { include: { finishing: true } },
     },
   });
 
+  const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
+    PENDING_PAYMENT: { label: "Menunggu Pembayaran", color: "bg-amber-100 text-amber-800 border-amber-300", icon: Clock },
+    PAID: { label: "Dibayar", color: "bg-blue-100 text-blue-800 border-blue-300", icon: CheckCircle2 },
+    DESIGN_CHECKING: { label: "Cek Desain", color: "bg-sky-100 text-sky-800 border-sky-300", icon: FileCheck },
+    DESIGN_REJECTED: { label: "Perlu Revisi", color: "bg-rose-100 text-rose-800 border-rose-300", icon: AlertCircle },
+    DESIGN_APPROVED: { label: "Desain Disetujui", color: "bg-emerald-100 text-emerald-800 border-emerald-300", icon: CheckCircle2 },
+    IN_PRODUCTION: { label: "Proses Cetak", color: "bg-indigo-100 text-indigo-800 border-indigo-300", icon: Printer },
+    FINISHING: { label: "Finishing", color: "bg-purple-100 text-purple-800 border-purple-300", icon: Scissors },
+    READY: { label: "Siap Diambil", color: "bg-teal-100 text-teal-800 border-teal-300", icon: PackageCheck },
+    SHIPPING: { label: "Dikirim", color: "bg-cyan-100 text-cyan-800 border-cyan-300", icon: Package },
+    COMPLETED: { label: "Selesai", color: "bg-emerald-100 text-emerald-800 border-emerald-300", icon: CheckCircle2 },
+    CANCELLED: { label: "Dibatalkan", color: "bg-stone-100 text-stone-600 border-stone-300", icon: XCircle },
+  };
+
   const filterTabs = [
-    { label: "Semua", value: "ALL" },
-    { label: "Menunggu Bayar", value: "PENDING_PAYMENT" },
-    { label: "Cek Desain", value: "DESIGN_CHECKING" },
-    { label: "Dalam Produksi", value: "IN_PRODUCTION" },
-    { label: "Siap Diambil", value: "READY" },
-    { label: "Selesai", value: "COMPLETED" },
+    { id: "all", label: "Semua", count: orders.length },
+    { id: "pending", label: "Menunggu Pembayaran", count: orders.filter((o) => o.status === "PENDING_PAYMENT").length },
+    { id: "processing", label: "Diproses", count: orders.filter((o) => ["PAID", "DESIGN_CHECKING", "DESIGN_APPROVED", "IN_PRODUCTION", "FINISHING"].includes(o.status)).length },
+    { id: "revision", label: "Perlu Revisi", count: orders.filter((o) => o.status === "DESIGN_REJECTED").length },
+    { id: "ready", label: "Siap Diambil", count: orders.filter((o) => o.status === "READY" || o.status === "SHIPPING").length },
+    { id: "completed", label: "Selesai", count: orders.filter((o) => o.status === "COMPLETED").length },
   ];
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <div className="flex flex-col gap-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-semibold text-slate-900 sm:text-4xl">
-            Pesanan saya
-        </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Lihat status, detail, dan tindakan untuk setiap pesanan.
+          <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
+            Pesanan Saya
+          </h1>
+          <p className="text-sm text-on-surface-variant mt-1">
+            Pantau seluruh progres kurasi &amp; produksi pesanan cetakmu di sini secara transparan.
           </p>
         </div>
-        <span className="text-xs text-slate-500">{orders.length} pesanan ditampilkan</span>
+        <Link
+          href="/katalog"
+          className="inline-flex items-center gap-2 bg-primary text-on-primary font-label-md text-label-md px-5 py-2.5 rounded-full shadow-[2px_2px_0px_#2D2926] hover:bg-primary/90 transition"
+        >
+          <span className="material-symbols-outlined text-[18px]">add</span>
+          <span>Pesan Baru</span>
+        </Link>
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="space-y-3">
-        {/* Tabs Status */}
-        <div className="flex w-full gap-5 overflow-x-auto border-b border-stone-200">
-          {filterTabs.map((tab) => (
-            <Link
-              key={tab.value}
-              href={`/orders?status=${tab.value}${searchQuery ? `&search=${searchQuery}` : ""}`}
-              aria-current={statusFilter === tab.value ? "page" : undefined}
-              className={`shrink-0 border-b-2 px-0.5 pb-3 text-xs font-semibold transition ${
-                statusFilter === tab.value
-                  ? "border-rose-700 text-rose-800"
-                  : "border-transparent text-slate-500 hover:border-stone-400 hover:text-slate-900"
-              }`}
-            >
-              {tab.label}
-            </Link>
-          ))}
-        </div>
-
-        {/* Search */}
-        <form method="GET" action="/orders" className="relative w-full sm:max-w-sm">
-          <input type="hidden" name="status" value={statusFilter} />
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            name="search"
-            defaultValue={searchQuery}
-            placeholder="Cari no. pesanan..."
-            className="w-full rounded-md border border-stone-300 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-rose-600 focus:ring-2 focus:ring-rose-600/20"
-          />
-        </form>
-      </div>
-
-      {/* List Orders */}
-      {orders.length === 0 ? (
-        <div className="border-y border-stone-200 py-10 text-center sm:py-14">
-          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-md bg-stone-100 text-slate-500">
-            <ShoppingBag className="h-5 w-5" />
-          </div>
-          <p className="text-base font-semibold text-slate-700">
-            Tidak ada pesanan ditemukan
-          </p>
-          <p className="text-xs text-slate-400 mt-1">
-            Belum ada pesanan yang sesuai dengan filter atau kata kunci saat ini.
-          </p>
-          <Link
-            href="/katalog"
-            className="mt-4 inline-block rounded-md bg-rose-700 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-800"
-          >
-            Mulai Pesan Sekarang
-          </Link>
-        </div>
-      ) : (
-        <div className="divide-y divide-stone-200 border-y border-stone-200">
-          {orders.map((order) => (
-            <div
-              key={order.id}
-              className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
-            >
-              <div className="min-w-0 space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-semibold text-sm text-slate-900 sm:text-base">
-                    {order.orderNumber}
-                  </span>
-                  <OrderStatusBadge status={order.status} size="sm" />
-                </div>
-                <h3 className="text-sm font-semibold text-slate-800 sm:text-base">
-                  {order.product.name}
-                  {order.material ? ` • ${order.material.name}` : ""}
-                </h3>
-                <p className="text-xs leading-relaxed text-slate-500">
-                  {order.width && order.height ? `${order.width}x${order.height}m • ` : ""}
-                  Jumlah: {order.quantity} {order.product.unit} • Dibuat pada {formatDate(order.createdAt)}
+      {/* Alert banner for action-needed orders */}
+      {orders.some((o) => o.status === "DESIGN_REJECTED" || o.status === "PENDING_PAYMENT") && (
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-3xl p-5 shadow-sm">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-800 border border-amber-300 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-lg">warning</span>
+              </div>
+              <div>
+                <h2 className="font-heading text-base font-bold text-on-surface">
+                  Pesanan perlu tindakanmu
+                </h2>
+                <p className="text-xs text-amber-800 mt-0.5">
+                  Selesaikan tindakan berikut agar proses cetak &amp; kurasi warna tidak tertunda.
                 </p>
               </div>
-
-              <div className="flex flex-col gap-3 border-t border-stone-200 pt-3 sm:flex-row sm:items-center sm:justify-end sm:gap-6 sm:border-0 sm:pt-0">
-                <div>
-                  <span className="text-[10px] text-slate-400 block font-medium">Total Harga</span>
-                  <span className="text-base font-bold text-slate-900">
-                    {formatRupiah(order.totalPrice)}
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  {/* Action jika pending payment */}
-                  {order.status === "PENDING_PAYMENT" && (
-                    <Link
-                      href={`/checkout/${order.id}`}
-                      className="px-3.5 py-2 rounded-md bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold transition flex items-center gap-1.5"
-                    >
-                      <CreditCard className="w-3.5 h-3.5" />
-                      <span>Bayar</span>
-                    </Link>
-                  )}
-
-                  {/* Action jika file desain belum diunggah */}
-                  {!order.designFileUrl && (
-                    <Link
-                      href={`/order/${order.id}/upload`}
-                      className="px-3 py-2 rounded-md bg-rose-50 text-rose-800 hover:bg-rose-100 text-xs font-semibold transition flex items-center gap-1.5"
-                    >
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>Unggah Desain</span>
-                    </Link>
-                  )}
-
-                  {/* Tombol Tracking */}
-                  <Link
-                    href={`/orders/${order.id}/tracking`}
-                    className="px-4 py-2 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition flex items-center gap-1.5"
-                  >
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>Tracking</span>
-                  </Link>
-
-                  {/* Tombol Repeat Order */}
-                  <Link
-                    href={`/order/${order.productId}?repeatOrderId=${order.id}`}
-                    title="Pesan Lagi dengan konfigurasi yang sama"
-                    className="p-2 rounded-md border border-stone-300 text-slate-600 hover:text-rose-700 hover:bg-rose-50 transition"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
             </div>
-          ))}
+            <div className="flex flex-wrap items-center gap-3">
+              {orders
+                .filter((o) => o.status === "DESIGN_REJECTED")
+                .slice(0, 1)
+                .map((o) => (
+                  <Link
+                    key={o.id}
+                    href={`/order/${o.productId}?repeatOrderId=${o.id}`}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-300 hover:bg-rose-100 transition shadow-xs group"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                    <span>Desain perlu revisi: #{o.orderNumber}</span>
+                    <ArrowLeft className="w-3 h-3 rotate-180 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+                ))}
+              {orders
+                .filter((o) => o.status === "PENDING_PAYMENT")
+                .slice(0, 1)
+                .map((o) => (
+                  <Link
+                    key={o.id}
+                    href={`/checkout/${o.id}`}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100 transition shadow-xs group"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                    <span>Menunggu pembayaran: #{o.orderNumber}</span>
+                    <ArrowLeft className="w-3 h-3 rotate-180 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+                ))}
+            </div>
+          </div>
         </div>
       )}
+
+      {/* Filter tabs */}
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-surface-container-low px-5 py-3 rounded-2xl">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-none">
+          {filterTabs.map((tab, idx) => (
+            <button
+              key={tab.id}
+              type="button"
+              className={`px-4 py-2 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
+                idx === 0
+                  ? "bg-primary text-on-primary shadow-sm"
+                  : "bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-container border border-outline-variant"
+              }`}
+            >
+              {tab.label} ({tab.count})
+            </button>
+          ))}
+        </div>
+        <div className="relative min-w-[280px]">
+          <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-outline">
+            <Search className="w-4 h-4" />
+          </span>
+          <input
+            type="text"
+            placeholder="Cari nomor pesanan atau produk..."
+            className="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-2xl text-xs sm:text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+          />
+        </div>
+      </div>
+
+      {/* Order list */}
+      <div className="space-y-4">
+        {orders.length === 0 && (
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-3xl p-12 text-center">
+            <Package className="w-12 h-12 text-outline mx-auto mb-3" />
+            <p className="text-on-surface-variant text-sm">Belum ada pesanan.</p>
+            <Link href="/katalog" className="text-primary font-semibold hover:underline mt-2 inline-block text-sm">
+              Mulai belanja
+            </Link>
+          </div>
+        )}
+
+        {orders.map((order) => {
+          const cfg = statusConfig[order.status] || {
+            label: order.status,
+            color: "bg-surface-container text-on-surface-variant border-outline-variant",
+            icon: Package,
+          };
+          const Icon = cfg.icon;
+          const isCancelled = order.status === "CANCELLED";
+          const isCompleted = order.status === "COMPLETED";
+          const isPending = order.status === "PENDING_PAYMENT";
+          const isRevision = order.status === "DESIGN_REJECTED";
+
+          return (
+            <article
+              key={order.id}
+              className={`bg-surface-container-lowest border-2 rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden ${
+                isRevision
+                  ? "border-rose-300"
+                  : isPending
+                  ? "border-amber-300"
+                  : isCompleted
+                  ? "border-emerald-300"
+                  : "border-outline-variant"
+              }`}
+            >
+              <div className="absolute top-0 left-0 bottom-0 w-2 bg-primary" />
+
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pl-2">
+                {/* Product info */}
+                <div className="flex items-start gap-4">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-[#e0f2fe] to-[#bae6fd] flex-shrink-0 flex flex-col items-center justify-center p-3 border border-[#93c5fd] shadow-inner">
+                    <span className="material-symbols-outlined text-4xl text-[#0369a1]">inventory_2</span>
+                    <span className="text-[9px] font-black uppercase tracking-tight text-[#0369a1] mt-0.5 bg-white/80 px-1.5 rounded">
+                      {order.product.unit}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center flex-wrap gap-2">
+                      <span className="text-xs font-bold text-primary font-mono bg-primary-container/40 px-2 py-0.5 rounded-md">
+                        #{order.orderNumber}
+                      </span>
+                      <span className="text-xs text-on-surface-variant">
+                        â€¢ {new Date(order.createdAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
+                      </span>
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded ${cfg.color} border`}>
+                        {cfg.label}
+                      </span>
+                    </div>
+                    <h3 className="font-heading text-xl font-bold text-on-surface leading-snug">
+                      {order.product.name}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-on-surface-variant">
+                      {order.quantity} {order.product.unit}
+                      {order.material ? ` Â· ${order.material.name}` : ""}
+                      {order.width && order.height ? ` Â· ${order.width}Ã—${order.height}m` : ""}
+                    </p>
+                    {isRevision && (
+                      <div className="mt-2 max-w-lg bg-rose-50 border border-rose-200 rounded-2xl p-3 flex items-start gap-2.5">
+                        <span className="material-symbols-outlined text-rose-600 text-sm mt-0.5 shrink-0">error</span>
+                        <p className="text-xs text-rose-800 leading-relaxed">
+                          <strong className="font-bold text-rose-900">Catatan revisi:</strong>{" "}
+                          {order.designNotes || "Desain perlu revisi. Silakan unggah ulang file desain."}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Status, Price & Actions */}
+                <div className="flex flex-col sm:flex-row lg:flex-row items-start sm:items-center justify-between lg:justify-end gap-5 pt-4 lg:pt-0 border-t lg:border-t-0 border-surface-container-low">
+                  <div className="flex flex-col lg:items-end">
+                    <span className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold border ${cfg.color}`}>
+                      <span className="w-2 h-2 rounded-full bg-current mr-2" />
+                      {cfg.label}
+                    </span>
+                    <span className="font-heading text-2xl font-extrabold text-on-surface mt-2">
+                      {formatRupiah(order.totalPrice)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <Link
+                      href={`/orders/${order.id}/tracking`}
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-on-primary text-xs sm:text-sm font-bold px-5 py-2.5 rounded-full shadow-sm transition"
+                    >
+                      <span className="material-symbols-outlined text-xs">route</span>
+                      <span>Lacak Pesanan</span>
+                    </Link>
+                    <Link
+                      href={`/orders/${order.id}/invoice`}
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-full transition"
+                    >
+                      <span className="material-symbols-outlined text-xs">receipt</span>
+                      <span>Invoice</span>
+                    </Link>
+                    {isRevision && (
+                      <Link
+                        href={`/order/${order.productId}?repeatOrderId=${order.id}`}
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-amber-100 border border-amber-300 text-amber-900 hover:bg-amber-200 text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-full transition"
+                      >
+                        <span className="material-symbols-outlined text-xs">upload_file</span>
+                        <span>Upload Revisi</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
     </div>
   );
 }
