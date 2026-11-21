@@ -31,8 +31,13 @@ declare global {
 let snapScriptPromise: Promise<void> | null = null;
 
 function snapScriptUrl(clientKey: string): string {
-  // Sandbox client key selalu diawali "SB-Mid-client-".
-  const isSandbox = clientKey.startsWith("SB-Mid-client-");
+  // Hanya gunakan production jika NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION bernilai "true"
+  // dan client key bukan key sandbox.
+  const isExplicitProduction =
+    process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === "true";
+  const isSandbox =
+    !isExplicitProduction || clientKey.startsWith("SB-Mid-client-");
+
   return isSandbox
     ? "https://app.sandbox.midtrans.com/snap/snap.js"
     : "https://app.midtrans.com/snap/snap.js";
@@ -40,31 +45,46 @@ function snapScriptUrl(clientKey: string): string {
 
 export function loadSnapScript(clientKey: string): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
+
+  const targetUrl = snapScriptUrl(clientKey);
+  const existing = document.querySelector<HTMLScriptElement>("script[data-midtrans-snap]");
+
+  // Jika script yang terpasang berasal dari environment yang berbeda (misal app.midtrans.com vs sandbox),
+  // hapus script lama agar digantikan dengan script yang benar.
+  if (existing && existing.src !== targetUrl) {
+    existing.remove();
+    delete (window as any).snap;
+    snapScriptPromise = null;
+  }
+
   if (window.snap?.pay) return Promise.resolve();
   if (snapScriptPromise) return snapScriptPromise;
 
   snapScriptPromise = new Promise<void>((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>("script[data-midtrans-snap]");
-    const script = existing || document.createElement("script");
+    const currentScript =
+      document.querySelector<HTMLScriptElement>("script[data-midtrans-snap]") ||
+      document.createElement("script");
 
-    script.src = snapScriptUrl(clientKey);
-    script.async = true;
-    script.setAttribute("data-client-key", clientKey);
-    script.setAttribute("data-midtrans-snap", "true");
+    currentScript.src = targetUrl;
+    currentScript.async = true;
+    currentScript.setAttribute("data-client-key", clientKey);
+    currentScript.setAttribute("data-midtrans-snap", "true");
 
-    script.onload = () => {
+    currentScript.onload = () => {
       if (window.snap?.pay) resolve();
       else {
         snapScriptPromise = null;
         reject(new Error("Snap.js berhasil dimuat tetapi tidak tersedia."));
       }
     };
-    script.onerror = () => {
+    currentScript.onerror = () => {
       snapScriptPromise = null;
       reject(new Error("Gagal memuat Snap.js dari Midtrans."));
     };
 
-    if (!existing) document.body.appendChild(script);
+    if (!document.body.contains(currentScript)) {
+      document.body.appendChild(currentScript);
+    }
   });
 
   return snapScriptPromise;

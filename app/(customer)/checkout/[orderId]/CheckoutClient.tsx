@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -205,6 +205,9 @@ export default function CheckoutClient({ order }: Props) {
           );
         },
         onClose: () => {
+          try {
+            sessionStorage.removeItem(tokenCacheKey);
+          } catch {}
           setLoading(false);
           setInfo(
             "Popup ditutup. Jika pembayaran sudah dilakukan, klik Cek Status Pembayaran."
