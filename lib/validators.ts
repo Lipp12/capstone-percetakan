@@ -1,12 +1,23 @@
 import { z } from "zod";
 
 export const registerSchema = z.object({
-  name: z.string().min(3, "Nama minimal 3 karakter"),
-  email: z.string().email("Format email tidak valid"),
+  name: z
+    .string()
+    .trim()
+    .min(3, "Nama minimal 3 karakter")
+    .regex(/^[\p{L}]+(?:\s+[\p{L}]+)*$/u, "Nama Lengkap harus terdiri dari huruf"),
+  email: z
+    .string()
+    .trim()
+    .email("Format email tidak valid")
+    .refine((email) => email.toLowerCase().endsWith("@gmail.com"), "Alamat Email harus ada @gmail.com"),
   phone: z
     .string()
-    .regex(/^08[0-9]{8,13}$/, "Nomor telepon harus diawali 08 dan terdiri dari 10-15 digit (contoh: 081234567890)"),
-  password: z.string().min(6, "Password minimal 6 karakter"),
+    .regex(
+      /^08[0-9]{8,13}$/,
+      "Nomor WhatsApp / Telepon harus diawali 08 dan terdiri dari 10-15 digit"
+    ),
+  password: z.string().min(6, "Kata Sandi minimal 6 karakter"),
 });
 
 export const loginSchema = z.object({
@@ -17,8 +28,8 @@ export const loginSchema = z.object({
 export const orderFormSchema = z.object({
   productId: z.string().min(1, "Produk wajib dipilih"),
   materialId: z.string().optional(),
-  width: z.number().positive("Lebar harus lebih dari 0").optional(),
-  height: z.number().positive("Tinggi harus lebih dari 0").optional(),
+  width: z.number().min(1, "Wajib di isi minimal 1").optional(),
+  height: z.number().min(1, "Wajib di isi minimal 1").optional(),
   quantity: z.number().int().min(1, "Jumlah minimal 1"),
   pickupMethod: z.enum(["PICKUP", "DELIVERY"]),
   address: z.string().optional(),

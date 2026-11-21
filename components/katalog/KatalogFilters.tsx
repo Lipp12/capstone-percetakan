@@ -64,7 +64,7 @@ export default function KatalogFilters({
   }, [search]);
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-container-lowest p-2 rounded-2xl shadow-[0_4px_16px_rgba(188,148,120,0.06)] mb-8">
+    <div className="flex flex-col md:flex-row md:items-center justify-end gap-3 bg-surface-container-lowest p-2 rounded-2xl shadow-[0_4px_16px_rgba(188,148,120,0.06)] mb-8">
       {/* Kategori Tabs */}
       <div className="flex items-center gap-1.5 w-full overflow-x-auto pb-1 sm:w-auto sm:flex-1">
         {categories.map((cat) => (
@@ -92,14 +92,14 @@ export default function KatalogFilters({
       </div>
 
       {/* Search Bar */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-surface-container rounded-xl flex-1 md:w-64">
+      <div className="flex items-center gap-2 px-3 py-2 bg-surface-container rounded-xl w-full md:w-72 md:flex-none ml-auto">
         <Search className="w-4 h-4 text-on-surface-variant" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Cari produk cetak..."
-          className="w-full pl-9 pr-3 py-2 text-sm bg-transparent border-none focus:ring-0 outline-none font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60"
+          className="w-full px-1 py-2 text-sm bg-transparent border-none focus:ring-0 outline-none font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60"
         />
       </div>
 

@@ -74,19 +74,6 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
 
   return (
     <div className="w-full max-w-[1280px] mx-auto px-4 lg:px-10 pt-8 pb-8 bg-background min-h-screen">
-      {/* Badge row */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps tracking-widest uppercase shadow-[2px_2px_0px_#1c1c19]">
-          Katalog Standar Studio
-        </span>
-        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps tracking-widest uppercase">
-          Terkalibrasi CMYK
-        </span>
-        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps tracking-widest uppercase">
-          Presisi Lipat &amp; Potong
-        </span>
-      </div>
-
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-xs font-bold text-brand-600 uppercase tracking-wider">

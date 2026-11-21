@@ -84,12 +84,14 @@ export async function POST(
       where: { id: orderId },
       data: {
         designFileUrl: fileUrl,
-        designNotes: designNotes || order.designNotes,
+        designNotes: designNotes || (order.status === "DESIGN_REJECTED" ? null : order.designNotes),
         status: "DESIGN_CHECKING",
         statusHistory: {
           create: {
             status: "DESIGN_CHECKING",
-            notes: "File desain berhasil diunggah oleh pelanggan, menunggu validasi.",
+            notes: order.status === "DESIGN_REJECTED"
+              ? "File revisi desain berhasil diunggah pada pesanan yang sama, menunggu validasi."
+              : "File desain berhasil diunggah oleh pelanggan, menunggu validasi.",
             changedBy: session.user.name || "Customer",
           },
         },

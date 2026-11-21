@@ -8,12 +8,14 @@ interface Props {
   orderId: string;
   orderNumber: string;
   existingFileUrl?: string | null;
+  isRevision?: boolean;
 }
 
 export default function UploadDesignForm({
   orderId,
   orderNumber,
   existingFileUrl,
+  isRevision = false,
 }: Props) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
@@ -26,6 +28,8 @@ export default function UploadDesignForm({
     if (e.target.files && e.target.files[0]) {
       const selected = e.target.files[0];
       if (selected.size > 20 * 1024 * 1024) {
+        setFile(null);
+        e.currentTarget.value = "";
         setError("Ukuran file melebihi 20MB");
         return;
       }
@@ -36,8 +40,8 @@ export default function UploadDesignForm({
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault();
-    if (!file && !existingFileUrl) {
-      setError("Pilih file desain terlebih dahulu");
+    if (!file && (isRevision || !existingFileUrl)) {
+      setError(isRevision ? "Pilih file desain revisi terlebih dahulu" : "Pilih file desain terlebih dahulu");
       return;
     }
 
@@ -72,7 +76,7 @@ export default function UploadDesignForm({
 
       setIsSuccess(true);
       setTimeout(() => {
-        router.push(`/checkout/${orderId}`);
+        router.push(isRevision ? `/orders/${orderId}/tracking` : `/checkout/${orderId}`);
       }, 1500);
     } catch (err) {
       setError("Terjadi kesalahan jaringan");
@@ -92,7 +96,11 @@ export default function UploadDesignForm({
       {isSuccess && (
         <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-2xl flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
-          <span>File berhasil diunggah! Mengalihkan ke pembayaran...</span>
+          <span>
+            {isRevision
+              ? "Revisi desain berhasil diunggah! Mengalihkan ke tracking pesanan..."
+              : "File berhasil diunggah! Mengalihkan ke pembayaran..."}
+          </span>
         </div>
       )}
 
@@ -101,6 +109,7 @@ export default function UploadDesignForm({
         <input
           type="file"
           accept=".pdf,.jpg,.jpeg,.png,.ai,.psd,.zip"
+          required={isRevision}
           onChange={handleFileChange}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         />
@@ -110,7 +119,7 @@ export default function UploadDesignForm({
           </div>
           <div>
             <p className="text-sm font-bold text-slate-800">
-              {file ? file.name : "Klik atau seret file desain ke sini"}
+              {file ? file.name : isRevision ? "Unggah file desain revisi yang baru" : "Klik atau seret file desain ke sini"}
             </p>
             <p className="text-xs text-slate-400 mt-1">
               Format yang didukung: PDF, JPG, PNG, AI, PSD, ZIP (Maksimal 20MB)
@@ -128,7 +137,9 @@ export default function UploadDesignForm({
         <p className="text-xs text-slate-500 bg-slate-100 p-3 rounded-xl flex items-center gap-2">
           <FileText className="w-4 h-4 text-blue-600" />
           <span>
-            Sudah ada file yang terunggah sebelumnya:{" "}
+            {isRevision
+              ? "File desain sebelumnya (ditolak): "
+              : "Sudah ada file yang terunggah sebelumnya: "}
             <a
               href={existingFileUrl}
               target="_blank"
@@ -144,7 +155,7 @@ export default function UploadDesignForm({
       {/* Catatan Desain */}
       <div className="space-y-1.5">
         <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
-          Catatan Tambahan Mengenai Desain (Opsional)
+        Catatan Tambahan Mengenai Desain (Opsional)
         </label>
         <textarea
           rows={3}
@@ -168,7 +179,7 @@ export default function UploadDesignForm({
           </>
         ) : (
           <>
-            <span>Konfirmasi & Lanjut ke Pembayaran</span>
+            <span>{isRevision ? "Unggah Revisi Desain" : "Konfirmasi & Lanjut ke Pembayaran"}</span>
             <ArrowRight className="w-4 h-4" />
           </>
         )}

@@ -23,6 +23,7 @@ export default async function CheckoutPage({ params }: Props) {
     include: {
       product: true,
       material: true,
+      statusHistory: true,
       finishings: {
         include: { finishing: true },
       },
@@ -40,7 +41,7 @@ export default async function CheckoutPage({ params }: Props) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <div className="space-y-1">
         <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
           Langkah 3 dari 3: Pembayaran
@@ -49,7 +50,7 @@ export default async function CheckoutPage({ params }: Props) {
           Pembayaran & Konfirmasi Pesanan
         </h1>
         <p className="text-xs sm:text-sm text-slate-500">
-          Pesanan #{order.orderNumber} • Selesaikan pembayaran agar pesanan segera masuk ke antrean validasi desain.
+          Pesanan #{order.orderNumber} • Selesaikan pembayaran untuk melanjutkan pemrosesan pesanan.
         </p>
       </div>
 

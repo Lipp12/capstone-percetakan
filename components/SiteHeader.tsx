@@ -4,18 +4,21 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 export default function SiteHeader() {
   const { data: session } = useSession();
   const user = session?.user as any;
+  const pathname = usePathname();
+  const navClass = (active: boolean) =>
+    `px-4 py-2 rounded-full font-label-md text-label-md transition-all ${
+      active
+        ? "bg-secondary-fixed text-on-secondary-fixed font-bold shadow-[2px_2px_0px_#2D2926]"
+        : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
+    }`;
 
   return (
     <header className="fixed top-0 left-0 right-0 w-full z-50 bg-surface/95 backdrop-blur-md shadow-sm">
-      <div className="w-full bg-[#2D2926] text-[#fae28c] text-[11px] font-label-caps uppercase tracking-wider py-1.5 px-4 text-center overflow-hidden flex items-center justify-center gap-2">
-        <span className="material-symbols-outlined text-[14px] text-[#fae28c]">precision_manufacturing</span>
-        <span>MESIN DIGITAL PRINTING &amp; OFFSET BERPRESISI • FREE PREPRESS FILE AUDIT • KALIBRASI CMYK FOGRA39 AKURAT • KUALITAS STUDIO TERJAMIN</span>
-      </div>
-
       <div className="h-20 max-w-[1280px] mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-3 group">
           <Image
@@ -29,17 +32,17 @@ export default function SiteHeader() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-2">
-          <Link href="/" className="px-4 py-2 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all">
+          <Link href="/" className={navClass(pathname === "/")}>
             Beranda
           </Link>
-          <Link href="/katalog" className="px-4 py-2 rounded-full font-label-md text-label-md bg-secondary-fixed text-on-secondary-fixed font-bold shadow-[2px_2px_0px_#2D2926]">
+          <Link href="/katalog" className={navClass(pathname.startsWith("/katalog"))}>
             Produk
           </Link>
-          <Link href="/orders" className="px-4 py-2 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all">
+          <Link href="/orders" className={navClass(pathname.startsWith("/orders"))}>
             Pesanan Saya
           </Link>
-          <Link href="/help" className="px-4 py-2 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all">
-            Bantuan
+          <Link href="/riwayat-pesanan" className={navClass(pathname.startsWith("/riwayat-pesanan"))}>
+            Riwayat Pesanan
           </Link>
         </nav>
 

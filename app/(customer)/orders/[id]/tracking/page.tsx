@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { formatRupiah, formatDateTime } from "@/lib/utils";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
 import OrderReviewCard from "@/components/OrderReviewCard";
+import PaymentStatusRefresher from "@/components/PaymentStatusRefresher";
 import Link from "next/link";
 import {
   CreditCard,
@@ -19,6 +20,7 @@ import {
   MapPin,
   Store,
   RefreshCw,
+  Upload,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -80,7 +82,9 @@ export default async function OrderTrackingPage({ params }: Props) {
         "COMPLETED",
       ].includes(order.status),
       isCurrent:
-        order.status === "DESIGN_CHECKING" || order.status === "DESIGN_REJECTED",
+        order.status === "DESIGN_CHECKING" ||
+        order.status === "DESIGN_REJECTED" ||
+        order.status === "PAID",
     },
     {
       key: "PRINTING",
@@ -121,6 +125,23 @@ export default async function OrderTrackingPage({ params }: Props) {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      <PaymentStatusRefresher
+        orderId={order.id}
+        active={["PENDING_PAYMENT", "PAID"].includes(order.status)}
+      />
+
+      {order.status === "PENDING_PAYMENT" && (
+        <div className="p-4 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-2xl flex items-center justify-between gap-3">
+          <span>Pesanan ini belum lunas. Selesaikan pembayaran agar otomatis lanjut ke pengecekan desain.</span>
+          <Link
+            href={`/checkout/${order.id}`}
+            className="shrink-0 px-3 py-1.5 bg-amber-600 text-white rounded-lg font-semibold"
+          >
+            Bayar Sekarang
+          </Link>
+        </div>
+      )}
+
       {/* Back & Info */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Link
@@ -133,11 +154,15 @@ export default async function OrderTrackingPage({ params }: Props) {
         <div className="flex items-center gap-2">
           <OrderStatusBadge status={order.status} size="lg" />
           <Link
-            href={`/order/${order.productId}?repeatOrderId=${order.id}`}
+            href={order.status === "DESIGN_REJECTED"
+              ? `/order/${order.id}/upload`
+              : `/order/${order.productId}?repeatOrderId=${order.id}`}
             className="px-3 py-1.5 rounded-xl border border-outline-variant text-xs font-semibold text-on-surface hover:bg-surface-container transition flex items-center gap-1.5"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Pesan Lagi</span>
+            {order.status === "DESIGN_REJECTED"
+              ? <Upload className="w-3.5 h-3.5" />
+              : <RefreshCw className="w-3.5 h-3.5" />}
+            <span>{order.status === "DESIGN_REJECTED" ? "Upload Revisi" : "Pesan Lagi"}</span>
           </Link>
         </div>
       </div>
@@ -190,7 +215,7 @@ export default async function OrderTrackingPage({ params }: Props) {
                   </span>
                   {isCurrentHighlight && (
                     <span className="mt-1 text-[10px] font-bold text-primary uppercase tracking-wider">
-                      â— Sedang Berjalan
+                      Sedang Berjalan
                     </span>
                   )}
                 </div>
@@ -259,7 +284,7 @@ export default async function OrderTrackingPage({ params }: Props) {
               <div className="flex justify-between py-1 border-b border-surface-container-low">
                 <span className="text-outline">Dimensi Ukuran:</span>
                 <span className="font-medium text-on-surface">
-                  {order.width} x {order.height} meter ({order.width * order.height} mÂ²)
+                  {order.width} x {order.height} meter ({order.width * order.height} m²)
                 </span>
               </div>
             )}

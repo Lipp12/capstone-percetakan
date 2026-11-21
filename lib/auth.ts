@@ -13,20 +13,28 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Email / Nomor WhatsApp / ID Pelanggan", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Email dan password wajib diisi");
+          throw new Error("Email / Nomor WhatsApp / ID Pelanggan dan kata sandi wajib diisi");
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email.toLowerCase().trim() },
+        const identifier = credentials.email.trim();
+        const normalizedPhone = identifier.replace(/[\s-]/g, "");
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: identifier.toLowerCase() },
+              { phone: normalizedPhone },
+              { id: identifier },
+            ],
+          },
         });
 
         if (!user) {
-          throw new Error("Email atau password salah");
+          throw new Error("Email / Nomor WhatsApp / ID Pelanggan atau kata sandi salah");
         }
 
         const isValidPassword = await bcrypt.compare(
@@ -35,7 +43,7 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!isValidPassword) {
-          throw new Error("Email atau password salah");
+          throw new Error("Email / Nomor WhatsApp / ID Pelanggan atau kata sandi salah");
         }
 
         return {

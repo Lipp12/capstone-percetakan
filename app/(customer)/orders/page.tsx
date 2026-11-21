@@ -7,7 +7,13 @@ import { ArrowLeft, Search, Package, Clock, CheckCircle2, AlertCircle, XCircle, 
 
 export const dynamic = "force-dynamic";
 
-export default async function OrdersPage() {
+interface OrdersPageProps {
+  searchParams: {
+    status?: string;
+  };
+}
+
+export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return (
@@ -56,6 +62,26 @@ export default async function OrdersPage() {
     { id: "ready", label: "Siap Diambil", count: orders.filter((o) => o.status === "READY" || o.status === "SHIPPING").length },
     { id: "completed", label: "Selesai", count: orders.filter((o) => o.status === "COMPLETED").length },
   ];
+  const requestedFilter = searchParams.status || "all";
+  const activeFilter = filterTabs.some((tab) => tab.id === requestedFilter)
+    ? requestedFilter
+    : "all";
+  const filteredOrders = orders.filter((order) => {
+    switch (activeFilter) {
+      case "pending":
+        return order.status === "PENDING_PAYMENT";
+      case "processing":
+        return ["PAID", "DESIGN_CHECKING", "DESIGN_APPROVED", "IN_PRODUCTION", "FINISHING"].includes(order.status);
+      case "revision":
+        return order.status === "DESIGN_REJECTED";
+      case "ready":
+        return order.status === "READY" || order.status === "SHIPPING";
+      case "completed":
+        return order.status === "COMPLETED";
+      default:
+        return true;
+    }
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -102,7 +128,7 @@ export default async function OrdersPage() {
                 .map((o) => (
                   <Link
                     key={o.id}
-                    href={`/order/${o.productId}?repeatOrderId=${o.id}`}
+                    href={`/order/${o.id}/upload`}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-300 hover:bg-rose-100 transition shadow-xs group"
                   >
                     <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
@@ -132,18 +158,19 @@ export default async function OrdersPage() {
       {/* Filter tabs */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-surface-container-low px-5 py-3 rounded-2xl">
         <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-none">
-          {filterTabs.map((tab, idx) => (
-            <button
+          {filterTabs.map((tab) => (
+            <Link
               key={tab.id}
-              type="button"
+              href={tab.id === "all" ? "/orders" : `/orders?status=${tab.id}`}
+              aria-current={activeFilter === tab.id ? "page" : undefined}
               className={`px-4 py-2 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
-                idx === 0
+                activeFilter === tab.id
                   ? "bg-primary text-on-primary shadow-sm"
                   : "bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-container border border-outline-variant"
               }`}
             >
               {tab.label} ({tab.count})
-            </button>
+            </Link>
           ))}
         </div>
         <div className="relative min-w-[280px]">
@@ -160,17 +187,22 @@ export default async function OrdersPage() {
 
       {/* Order list */}
       <div className="space-y-4">
-        {orders.length === 0 && (
+        {filteredOrders.length === 0 && (
           <div className="bg-surface-container-lowest border border-outline-variant rounded-3xl p-12 text-center">
             <Package className="w-12 h-12 text-outline mx-auto mb-3" />
-            <p className="text-on-surface-variant text-sm">Belum ada pesanan.</p>
-            <Link href="/katalog" className="text-primary font-semibold hover:underline mt-2 inline-block text-sm">
-              Mulai belanja
+            <p className="text-on-surface-variant text-sm">
+              {orders.length === 0 ? "Belum ada pesanan." : "Tidak ada pesanan pada kategori ini."}
+            </p>
+            <Link
+              href={orders.length === 0 ? "/katalog" : "/orders"}
+              className="text-primary font-semibold hover:underline mt-2 inline-block text-sm"
+            >
+              {orders.length === 0 ? "Mulai belanja" : "Tampilkan semua pesanan"}
             </Link>
           </div>
         )}
 
-        {orders.map((order) => {
+        {filteredOrders.map((order) => {
           const cfg = statusConfig[order.status] || {
             label: order.status,
             color: "bg-surface-container text-on-surface-variant border-outline-variant",
@@ -212,7 +244,7 @@ export default async function OrdersPage() {
                         #{order.orderNumber}
                       </span>
                       <span className="text-xs text-on-surface-variant">
-                        â€¢ {new Date(order.createdAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
+                        • {new Date(order.createdAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
                       </span>
                       <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded ${cfg.color} border`}>
                         {cfg.label}
@@ -223,8 +255,8 @@ export default async function OrdersPage() {
                     </h3>
                     <p className="text-xs sm:text-sm text-on-surface-variant">
                       {order.quantity} {order.product.unit}
-                      {order.material ? ` Â· ${order.material.name}` : ""}
-                      {order.width && order.height ? ` Â· ${order.width}Ã—${order.height}m` : ""}
+                      {order.material ? ` · ${order.material.name}` : ""}
+                      {order.width && order.height ? ` · ${order.width}×${order.height}m` : ""}
                     </p>
                     {isRevision && (
                       <div className="mt-2 max-w-lg bg-rose-50 border border-rose-200 rounded-2xl p-3 flex items-start gap-2.5">
@@ -251,13 +283,6 @@ export default async function OrdersPage() {
                   </div>
                   <div className="flex items-center gap-2 w-full sm:w-auto">
                     <Link
-                      href={`/orders/${order.id}/tracking`}
-                      className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-on-primary text-xs sm:text-sm font-bold px-5 py-2.5 rounded-full shadow-sm transition"
-                    >
-                      <span className="material-symbols-outlined text-xs">route</span>
-                      <span>Lacak Pesanan</span>
-                    </Link>
-                    <Link
                       href={`/orders/${order.id}/invoice`}
                       className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-full transition"
                     >
@@ -266,7 +291,7 @@ export default async function OrdersPage() {
                     </Link>
                     {isRevision && (
                       <Link
-                        href={`/order/${order.productId}?repeatOrderId=${order.id}`}
+                        href={`/order/${order.id}/upload`}
                         className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-amber-100 border border-amber-300 text-amber-900 hover:bg-amber-200 text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-full transition"
                       >
                         <span className="material-symbols-outlined text-xs">upload_file</span>

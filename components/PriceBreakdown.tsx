@@ -20,13 +20,13 @@ export default function PriceBreakdown({
   return (
     <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0_4px_16px_rgba(188,148,120,0.06)] border border-outline-variant/50 space-y-4">
       <div className="flex items-center gap-2 pb-3 border-b border-outline-variant/50">
-          <div className="p-1.5 bg-primary-container text-on-primary-container rounded-lg">
+        <div className="p-1.5 bg-primary-container text-on-primary-container rounded-lg">
             <Calculator className="w-4 h-4" />
-          </div>
-          <span className="font-epilogue font-bold text-sm tracking-tight text-on-surface">
-            Estimasi Harga Real-Time
-          </span>
         </div>
+        <span className="font-epilogue font-bold text-sm tracking-tight text-on-surface">
+          Estimasi Harga Real-Time
+        </span>
+      </div>
 
       {/* Rincian Komponen Biaya */}
       <div className="space-y-2 text-xs text-on-surface-variant">

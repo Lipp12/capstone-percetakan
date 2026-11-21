@@ -1,4 +1,4 @@
-﻿// lib/products.ts â€” Data statis katalog produk Faeyza Printing
+// lib/products.ts - Data statis katalog produk Faeyza Printing
 
 export interface Product {
   id: string;
@@ -33,7 +33,7 @@ export const products: Product[] = [
     category: "banner",
     description: "Bahan Flexi 280g, 340g, atau Korea 440g tahan cuaca ekstrem panas dan hujan lebat. Tinta solvent tajam awet.",
     basePrice: 18000,
-    unit: "mÂ²",
+    unit: "m²",
     badge: "Outdoor Favorit",
     badgeColor: "tertiary",
     image: "/products/spanduk-flexi.jpg",
@@ -81,7 +81,7 @@ export const products: Product[] = [
     category: "banner",
     description: "Banner ukuran besar sambung rapi tanpa batas untuk panggung seminar, wisuda, latar resepsi, dan pameran.",
     basePrice: 35000,
-    unit: "mÂ²",
+    unit: "m²",
     badge: "Skala Panggung & Booth",
     badgeColor: "tertiary",
     image: "/products/event-backdrop.jpg",
@@ -129,7 +129,7 @@ export const products: Product[] = [
     slug: "brosur-lipat",
     name: "Brosur Lipat",
     category: "brosur",
-    description: "Bi-Fold / Tri-Fold 4â€“6 panel, creasing mesin anti retak serat kertas. Cocok untuk profil singkat & booklet brosur.",
+    description: "Bi-Fold / Tri-Fold 4-6 panel, creasing mesin anti retak serat kertas. Cocok untuk profil singkat & booklet brosur.",
     basePrice: 970,
     unit: "lembar",
     badge: "Bi-Fold / Tri-Fold",
@@ -319,7 +319,7 @@ export const products: Product[] = [
     category: "poster",
     description: "Media cetak albatros sintetis anti-sobek, permukaan matte lembut anti-silau blitz, cocok untuk pameran dan display frame.",
     basePrice: 35000,
-    unit: "mÂ²",
+    unit: "m²",
     badge: "Format Besar & Pameran",
     badgeColor: "secondary-fixed",
     image: "/products/poster-albatros.jpg",
@@ -331,7 +331,7 @@ export const products: Product[] = [
     slug: "print-dokumen",
     name: "Print Dokumen A4 / F4",
     category: "dokumen",
-    description: "Cetak dokumen teks, laporan kantor, dan makalah di kertas HVS 70gâ€“80g berkualitas laser tajam anti-luntur.",
+    description: "Cetak dokumen teks, laporan kantor, dan makalah di kertas HVS 70g-80g berkualitas laser tajam anti-luntur.",
     basePrice: 500,
     unit: "lembar",
     badge: "Dokumen Harian",

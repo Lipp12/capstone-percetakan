@@ -19,7 +19,6 @@ import {
   AlertCircle,
   Upload,
   X,
-  CheckCircle2,
 } from "lucide-react";
 
 interface Props {
@@ -28,7 +27,14 @@ interface Props {
   initialData?: any;
 }
 
-type SubmitState = "idle" | "loading" | "success" | "error";
+type SubmitState = "idle" | "loading" | "error";
+
+function getDimensionError(value: string): string {
+  const numericValue = Number(value);
+  return value.trim() === "" || !Number.isFinite(numericValue) || numericValue < 1
+    ? "Wajib di isi minimal 1"
+    : "";
+}
 
 export default function OrderFormClient({
   product,
@@ -37,6 +43,13 @@ export default function OrderFormClient({
 }: Props) {
   const router = useRouter();
   const isM2 = product.unit.toLowerCase() === "m2";
+  const materialStep = 1;
+  const dimensionStep = materialStep + Number(product.materials.length > 0);
+  const quantityStep = dimensionStep + Number(isM2);
+  const finishingStep = quantityStep + 1;
+  const pickupStep = finishingStep + Number(finishings.length > 0);
+  const uploadStep = pickupStep + 1;
+  const notesStep = uploadStep + 1;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -45,8 +58,13 @@ export default function OrderFormClient({
   const [materialId, setMaterialId] = useState<string>(
     initialData?.materialId || product.materials[0]?.materialId || ""
   );
-  const [width, setWidth] = useState<number>(initialData?.width || 2);
-  const [height, setHeight] = useState<number>(initialData?.height || 1);
+  const [width, setWidth] = useState<string>(
+    initialData?.width != null ? String(initialData.width) : ""
+  );
+  const [height, setHeight] = useState<string>(
+    initialData?.height != null ? String(initialData.height) : ""
+  );
+  const [dimensionSubmitted, setDimensionSubmitted] = useState(false);
   const [quantity, setQuantity] = useState<number>(initialData?.quantity || 1);
   const [selectedFinishingIds, setSelectedFinishingIds] = useState<string[]>(
     initialData?.finishingIds || []
@@ -64,7 +82,6 @@ export default function OrderFormClient({
   // State submit
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [submitError, setSubmitError] = useState<string>("");
-  const [createdOrderNumber, setCreatedOrderNumber] = useState<string>("");
   const [createdOrderId, setCreatedOrderId] = useState<string>("");
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
@@ -90,8 +107,8 @@ export default function OrderFormClient({
       basePrice: product.basePrice,
       unit: product.unit,
       materialAdditionalPrice,
-      width: isM2 ? width : 1,
-      height: isM2 ? height : 1,
+      width: isM2 ? Number(width) || 0 : 1,
+      height: isM2 ? Number(height) || 0 : 1,
       quantity,
       finishings: selectedFinishingObjects,
     });
@@ -124,6 +141,8 @@ export default function OrderFormClient({
     }
     setFileError("");
     setFile(selected);
+    setSubmitError("");
+    if (submitState === "error") setSubmitState("idle");
   }
 
   function handleDragOver(e: React.DragEvent) {
@@ -149,6 +168,21 @@ export default function OrderFormClient({
 
     setSubmitError("");
 
+    if (!file) {
+      const message = "Berkas desain wajib diunggah sebelum membuat pesanan";
+      setFileError(message);
+      setSubmitError(message);
+      setSubmitState("error");
+      return;
+    }
+
+    if (isM2 && (getDimensionError(width) || getDimensionError(height))) {
+      setDimensionSubmitted(true);
+      setSubmitError("Ukuran cetak wajib diisi minimal 1 meter");
+      setSubmitState("error");
+      return;
+    }
+
     if (pickupMethod === "DELIVERY" && !address.trim()) {
       setSubmitError("Alamat pengiriman wajib diisi jika memilih kurir delivery");
       setSubmitState("error");
@@ -161,14 +195,12 @@ export default function OrderFormClient({
       return;
     }
 
-    if (file) {
-      const fileErr = validateFile(file);
-      if (fileErr) {
-        setFileError(fileErr);
-        setSubmitError(fileErr);
-        setSubmitState("error");
-        return;
-      }
+    const fileErr = validateFile(file);
+    if (fileErr) {
+      setFileError(fileErr);
+      setSubmitError(fileErr);
+      setSubmitState("error");
+      return;
     }
 
     setSubmitState("loading");
@@ -200,28 +232,30 @@ export default function OrderFormClient({
       }
 
       const orderId = data.orderId;
-      setCreatedOrderNumber(data.orderNumber || "");
-      setCreatedOrderId(data.orderId || "");
+      if (!orderId) {
+        setSubmitError("Pesanan berhasil diproses, tetapi nomor pesanan tidak ditemukan. Silakan cek halaman Pesanan Saya.");
+        setSubmitState("error");
+        return;
+      }
+      setCreatedOrderId(orderId);
 
-      // 2) Unggah berkas (opsional) ke route upload-design
-      if (file && orderId) {
-        const formData = new FormData();
-        formData.append("file", file, file.name);
-        if (notes.trim()) formData.append("designNotes", notes.trim());
+      // 2) Unggah berkas desain ke route upload-design
+      const formData = new FormData();
+      formData.append("file", file, file.name);
+      if (notes.trim()) formData.append("designNotes", notes.trim());
 
-        const upRes = await fetch(`/api/orders/${orderId}/upload-design`, {
-          method: "POST",
-          body: formData,
-        });
-        const upData = await upRes.json();
-        if (!upRes.ok) {
-          setSubmitError(upData.error || "Pesanan dibuat, tetapi unggah desain gagal. Coba unggah lagi.");
-          setSubmitState("error");
-          return;
-        }
+      const upRes = await fetch(`/api/orders/${orderId}/upload-design`, {
+        method: "POST",
+        body: formData,
+      });
+      const upData = await upRes.json();
+      if (!upRes.ok) {
+        setSubmitError(upData.error || "Pesanan dibuat, tetapi unggah desain gagal. Coba unggah lagi.");
+        setSubmitState("error");
+        return;
       }
 
-      setSubmitState("success");
+      router.push(`/checkout/${orderId}`);
     } catch (err) {
       setSubmitError("Terjadi kesalahan koneksi. Silakan coba lagi.");
       setSubmitState("error");
@@ -246,59 +280,25 @@ export default function OrderFormClient({
         setSubmitState("error");
         return;
       }
-      setSubmitState("success");
+      router.push(`/checkout/${createdOrderId}`);
     } catch (err) {
       setSubmitError("Terjadi kesalahan koneksi. Silakan coba lagi.");
       setSubmitState("error");
     }
   }
 
-  if (submitState === "success") {
-    return (
-      <div className="max-w-xl mx-auto bg-white p-8 rounded-3xl border border-ink-200 shadow-sm text-center space-y-4">
-        <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
-        <h2 className="text-xl font-black text-ink-900">Pesanan Berhasil Dibuat</h2>
-        <p className="text-sm text-ink-500">
-          Kode pesanan Anda:{" "}
-          <span className="font-bold text-ink-900">{createdOrderNumber}</span>
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-          {!file && createdOrderId && (
-            <button
-              type="button"
-              onClick={() => router.push(`/order/${createdOrderId}/upload`)}
-              className="px-5 py-2.5 rounded-xl bg-ink-100 text-ink-700 font-semibold text-sm hover:bg-ink-200 transition"
-            >
-              Unggah desain sekarang
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => router.push("/katalog")}
-            className="px-5 py-2.5 rounded-xl bg-brand-600 text-white font-semibold text-sm hover:bg-brand-700 transition"
-          >
-            Buat Pesanan Baru
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push("/orders")}
-            className="px-5 py-2.5 rounded-xl bg-ink-100 text-ink-700 font-semibold text-sm hover:bg-ink-200 transition"
-          >
-            Lihat Pesanan Saya
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const isLoading = submitState === "loading";
 
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3"
+    >
       {/* Kolom Kiri: Input Form Spesifikasi */}
-      <div className="lg:col-span-2 space-y-6">
+      <div className="space-y-6 lg:col-span-2">
         {(submitState === "error" || submitError) && (
-          <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-2xl flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span>{submitError}</span>
           </div>
@@ -307,20 +307,21 @@ export default function OrderFormClient({
           <button
             type="button"
             onClick={handleRetryUpload}
-            className="px-4 py-2 bg-ink-100 text-ink-700 rounded-xl text-xs font-semibold hover:bg-ink-200 transition"
+            className="rounded-xl bg-[#f5efe5] px-4 py-2 text-xs font-semibold text-on-surface hover:bg-[#eee5d9] transition"
           >
             Coba unggah lagi
           </button>
         )}
 
-        {/* 1. Pilih Material */}
+        {/* Bahan / Material */}
         {product.materials.length > 0 && (
-          <div className="bg-white p-6 rounded-3xl border border-ink-200 shadow-sm space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-ink-800 flex items-center gap-1.5">
+          <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0_4px_16px_rgba(188,148,120,0.06)] border border-outline-variant/50 space-y-4">
+            <label className="text-xs font-bold uppercase tracking-wider text-ink-800 flex items-center gap-2">
               <Layers className="w-4 h-4 text-primary" />
-              1. Pilih Jenis Bahan / Material
+              {materialStep}. Pilih Jenis Bahan / Material
+              <span className="text-error text-[10px]">*</span>
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {product.materials.map((pm: any) => {
                 const isSelected = materialId === pm.materialId;
                 return (
@@ -328,14 +329,14 @@ export default function OrderFormClient({
                     type="button"
                     key={pm.id}
                     onClick={() => setMaterialId(pm.materialId)}
-                    className={`p-3.5 rounded-2xl border text-left transition ${
+                    className={`rounded-2xl border p-4 text-left transition ${
                       isSelected
                         ? "border-primary bg-primary-container/20 ring-2 ring-primary/20"
-                        : "border-outline-variant/50 hover:border-outline-variant bg-white"
+                        : "border-outline-variant/50 hover:border-primary bg-surface-container-low"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold text-xs text-on-surface">
+                      <span className="font-semibold text-sm text-on-surface">
                         {pm.material.name}
                       </span>
                       <span
@@ -348,7 +349,7 @@ export default function OrderFormClient({
                         {isSelected && <span className="w-1.5 h-1.5 bg-white rounded-full" />}
                       </span>
                     </div>
-                    <span className="text-[11px] text-on-surface-variant block">
+                    <span className="text-xs text-on-surface-variant block">
                       {pm.additionalPrice > 0
                         ? `+${formatRupiah(pm.additionalPrice)} / ${product.unit}`
                         : "Standar"}
@@ -362,58 +363,69 @@ export default function OrderFormClient({
 
         {/* 2. Ukuran Cetak (Jika unit m2) */}
         {isM2 && (
-          <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0_4px_16px_rgba(188,148,120,0.06)] border border-outline-variant/50 space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+          <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0_4px_16px_rgba(188,148,120,0.06)] border border-outline-variant/50 space-y-4">
+            <label className="text-xs font-bold uppercase tracking-wider text-ink-800 flex items-center gap-2">
               <Maximize2 className="w-4 h-4 text-primary" />
-              2. Dimensi Ukuran Cetak (Meter)
+              {dimensionStep}. Dimensi Ukuran Cetak (Meter)
+              <span className="text-error text-[10px]">*</span>
             </label>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <span className="text-xs text-on-surface-variant mb-1 block">Lebar (Meter)</span>
                 <input
                   type="number"
-                  min="0.1"
+                  min="1"
                   step="0.1"
-                  required
                   value={width}
-                  onChange={(e) => setWidth(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3.5 py-2.5 text-sm border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none"
+                  onChange={(e) => {
+                    setWidth(e.target.value);
+                    setSubmitError("");
+                    if (submitState === "error") setSubmitState("idle");
+                  }}
+                  className={`w-full rounded-xl border bg-surface-container-low px-4 py-3 text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none ${
+                    dimensionSubmitted && getDimensionError(width)
+                      ? "border-rose-500"
+                      : "border-outline-variant"
+                  }`}
+                  aria-invalid={Boolean(dimensionSubmitted && getDimensionError(width))}
                 />
+                {dimensionSubmitted && getDimensionError(width) && (
+                  <span className="mt-1 block text-xs text-rose-700">Wajib di isi minimal 1</span>
+                )}
               </div>
               <div>
                 <span className="text-xs text-on-surface-variant mb-1 block">Tinggi / Panjang (Meter)</span>
                 <input
                   type="number"
-                  min="0.1"
+                  min="1"
                   step="0.1"
-                  required
                   value={height}
-                  onChange={(e) => setHeight(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3.5 py-2.5 text-sm border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none"
+                  onChange={(e) => {
+                    setHeight(e.target.value);
+                    setSubmitError("");
+                    if (submitState === "error") setSubmitState("idle");
+                  }}
+                  className={`w-full rounded-xl border bg-surface-container-low px-4 py-3 text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none ${
+                    dimensionSubmitted && getDimensionError(height)
+                      ? "border-rose-500"
+                      : "border-outline-variant"
+                  }`}
+                  aria-invalid={Boolean(dimensionSubmitted && getDimensionError(height))}
                 />
+                {dimensionSubmitted && getDimensionError(height) && (
+                  <span className="mt-1 block text-xs text-rose-700">Wajib di isi minimal 1</span>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2 pt-1">
-              <span className="text-[11px] text-on-surface-variant/60">Preset cepat:</span>
-              <button
-                type="button"
-                onClick={() => { setWidth(2); setHeight(1); }}
-                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-surface-container text-on-surface-variant rounded-md"
-              >
+              <span className="text-xs text-on-surface-variant">Preset cepat:</span>
+              <button type="button" onClick={() => { setWidth("2"); setHeight("1"); setSubmitError(""); if (submitState === "error") setSubmitState("idle"); }} className="rounded-lg bg-primary-container/40 px-3 py-1.5 text-xs text-on-primary-container hover:bg-primary-container">
                 2 x 1 m
               </button>
-              <button
-                type="button"
-                onClick={() => { setWidth(3); setHeight(1); }}
-                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-surface-container text-on-surface-variant rounded-md"
-              >
+              <button type="button" onClick={() => { setWidth("3"); setHeight("1"); setSubmitError(""); if (submitState === "error") setSubmitState("idle"); }} className="rounded-lg bg-primary-container/40 px-3 py-1.5 text-xs text-on-primary-container hover:bg-primary-container">
                 3 x 1 m
               </button>
-              <button
-                type="button"
-                onClick={() => { setWidth(4); setHeight(2); }}
-                className="text-[11px] px-2 py-0.5 bg-surface-container hover:bg-surface-container text-on-surface-variant rounded-md"
-              >
+              <button type="button" onClick={() => { setWidth("4"); setHeight("2"); setSubmitError(""); if (submitState === "error") setSubmitState("idle"); }} className="rounded-lg bg-primary-container/40 px-3 py-1.5 text-xs text-on-primary-container hover:bg-primary-container">
                 4 x 2 m
               </button>
             </div>
@@ -421,37 +433,38 @@ export default function OrderFormClient({
         )}
 
         {/* 3. Jumlah Cetak (Quantity) */}
-        <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0_4px_16px_rgba(188,148,120,0.06)] border border-outline-variant/50 space-y-3">
-          <label className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+        <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0_4px_16px_rgba(188,148,120,0.06)] border border-outline-variant/50 space-y-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-ink-800 flex items-center gap-2">
             <Package className="w-4 h-4 text-primary" />
-            3. Jumlah Cetak ({product.unit})
+            {quantityStep}. Jumlah Cetak ({product.unit})
+            <span className="text-error text-[10px]">*</span>
           </label>
-          <div className="flex items-center gap-3">
-            <button type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-10 h-10 rounded-xl border border-outline-variant text-on-surface-variant font-bold hover:bg-surface-container transition flex items-center justify-center text-lg">-</button>
+          <div className="flex items-center gap-4">
+            <button type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-10 h-10 rounded-xl bg-surface-container-high text-on-surface font-bold text-lg hover:bg-surface-container-highest transition">-</button>
             <input
               type="number"
               min="1"
               required
               value={quantity}
               onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-              className="w-24 text-center py-2 text-base font-bold border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none"
+              className="w-24 rounded-xl border border-outline-variant bg-surface-container-low px-4 py-2 text-center text-base font-bold text-on-surface focus:ring-2 focus:ring-primary outline-none"
             />
-            <button type="button" onClick={() => setQuantity(quantity + 1)} className="w-10 h-10 rounded-xl border border-outline-variant text-on-surface-variant font-bold hover:bg-surface-container transition flex items-center justify-center text-lg">+</button>
+            <button type="button" onClick={() => setQuantity(quantity + 1)} className="w-10 h-10 rounded-xl bg-surface-container-high text-on-surface font-bold text-lg hover:bg-surface-container-highest transition">+</button>
           </div>
         </div>
 
         {/* 4. Opsi Finishing (Opsional) */}
         {finishings.length > 0 && (
-          <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0_4px_16px_rgba(188,148,120,0.06)] border border-outline-variant/50 space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+          <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0_4px_16px_rgba(188,148,120,0.06)] border border-outline-variant/50 space-y-4">
+            <label className="text-xs font-bold uppercase tracking-wider text-ink-800 flex items-center gap-2">
               <Scissors className="w-4 h-4 text-primary" />
-              4. Opsi Finishing Tambahan (Opsional)
+              {finishingStep}. Opsi Finishing Tambahan <span className="text-on-surface-variant text-[10px] normal-case">(Opsional)</span>
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {finishings.map((fin) => {
                 const isChecked = selectedFinishingIds.includes(fin.id);
                 return (
-                  <label key={fin.id} className={`p-3 rounded-2xl border flex items-center justify-between cursor-pointer transition ${isChecked ? "border-primary bg-primary-container/20" : "border-outline-variant/50 hover:border-outline-variant"}`}>
+                  <label key={fin.id} className={`flex cursor-pointer items-center justify-between gap-2 rounded-2xl border p-4 transition ${isChecked ? "border-primary bg-primary-container/20" : "border-outline-variant/50 hover:border-primary bg-surface-container-low"}`}>
                     <div className="flex items-center gap-2.5">
                       <input
                         type="checkbox"
@@ -459,7 +472,7 @@ export default function OrderFormClient({
                         onChange={() => toggleFinishing(fin.id)}
                         className="w-4 h-4 rounded text-primary focus:ring-primary"
                       />
-                      <span className="text-xs font-medium text-on-surface">
+                      <span className="text-sm font-medium text-on-surface">
                         {fin.name}
                       </span>
                     </div>
@@ -473,19 +486,19 @@ export default function OrderFormClient({
 
         {/* 5. Metode Pengambilan & Alamat */}
         <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0_4px_16px_rgba(188,148,120,0.06)] border border-outline-variant/50 space-y-4">
-          <label className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+          <label className="text-xs font-bold uppercase tracking-wider text-ink-800 flex items-center gap-2">
             <Truck className="w-4 h-4 text-primary" />
-            5. Metode Pengambilan & Pengiriman
+            {pickupStep}. Metode Pengambilan & Pengiriman <span className="text-error text-[10px]">*</span>
           </label>
-          <div className="grid grid-cols-2 gap-3">
-            <button type="button" onClick={() => setPickupMethod("PICKUP")} className={`p-4 rounded-2xl border text-left transition flex items-start gap-3 ${pickupMethod === "PICKUP" ? "border-primary bg-primary-container/20 ring-2 ring-primary/20" : "border-outline-variant/50 hover:border-outline-variant"}`}>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <button type="button" onClick={() => setPickupMethod("PICKUP")} className={`flex items-start gap-3 rounded-2xl border p-4 text-left transition ${pickupMethod === "PICKUP" ? "border-primary bg-primary-container/20 ring-2 ring-primary/20" : "border-outline-variant/50 hover:border-primary bg-surface-container-low"}`}>
               <Store className="w-5 h-5 text-primary shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold text-xs text-on-surface block">Ambil di Toko (Pickup)</span>
                 <span className="text-[11px] text-on-surface-variant">Gratis. Ambil langsung saat selesai.</span>
               </div>
             </button>
-            <button type="button" onClick={() => setPickupMethod("DELIVERY")} className={`p-4 rounded-2xl border text-left transition flex items-start gap-3 ${pickupMethod === "DELIVERY" ? "border-primary bg-primary-container/20 ring-2 ring-primary/20" : "border-outline-variant/50 hover:border-outline-variant"}`}>
+            <button type="button" onClick={() => setPickupMethod("DELIVERY")} className={`flex items-start gap-3 rounded-2xl border p-4 text-left transition ${pickupMethod === "DELIVERY" ? "border-primary bg-primary-container/20 ring-2 ring-primary/20" : "border-outline-variant/50 hover:border-primary bg-surface-container-low"}`}>
               <Truck className="w-5 h-5 text-primary shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold text-xs text-on-surface block">Kirim ke Alamat (Delivery)</span>
@@ -495,8 +508,8 @@ export default function OrderFormClient({
           </div>
           {pickupMethod === "DELIVERY" && (
             <div className="space-y-1.5 pt-2">
-              <span className="text-xs font-semibold text-on-surface-variant block">
-                Alamat Lengkap Pengiriman *
+                <span className="text-xs font-semibold text-on-surface-variant block">
+                  Alamat Lengkap Pengiriman <span className="text-error">*</span>
               </span>
               <textarea
                 required
@@ -504,27 +517,30 @@ export default function OrderFormClient({
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Jl. Sukajadi No. 123, RT 01/02, Kel. Pasteur, Kec. Sukajadi, Kota Bandung 40161"
-                className="w-full p-3 text-xs border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none"
+                className="w-full rounded-xl border border-outline-variant bg-surface-container-low p-4 text-sm focus:ring-2 focus:ring-primary outline-none"
               />
             </div>
           )}
         </div>
 
         {/* 6. Unggah Berkas Desain */}
-        <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0_4px_16px_rgba(188,148,120,0.06)] border border-outline-variant/50 space-y-3">
-          <label className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+        <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0_4px_16px_rgba(188,148,120,0.06)] border border-outline-variant/50 space-y-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-ink-800 flex items-center gap-2">
             <Upload className="w-4 h-4 text-primary" />
-            6. Unggah Berkas Desain (PDF/AI/PSD/PNG/JPG, maks 25 MB)
+            {uploadStep}. Berkas Desain <span className="text-error text-[10px]">*</span>
           </label>
+          <p className="text-xs text-on-surface-variant">PDF, AI, PSD, PNG, JPG (maks. 25 MB)</p>
           <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition ${
+            className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition ${
               isDragging
                 ? "border-primary bg-primary-container/20"
-                : "border-outline-variant hover:border-slate-400 bg-slate-50/40"
+                : fileError
+                ? "border-rose-500 bg-rose-50/40"
+                : "border-outline-variant bg-surface-container-low hover:border-primary"
             }`}
           >
             <input
@@ -532,6 +548,7 @@ export default function OrderFormClient({
               type="file"
               accept=".pdf,.ai,.psd,.png,.jpg,.jpeg"
               className="hidden"
+              required
               onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
             />
             {file ? (
@@ -545,9 +562,9 @@ export default function OrderFormClient({
                   onClick={(e) => {
                     e.stopPropagation();
                     setFile(null);
-                    setFileError("");
+                    setFileError("Berkas desain wajib diunggah sebelum membuat pesanan");
                   }}
-                  className="p-1.5 rounded-lg bg-surface-container hover:bg-rose-100 text-on-surface-variant hover:text-rose-600 transition"
+                  className="rounded-lg bg-[#f5efe5] p-1.5 text-on-surface-variant transition hover:bg-rose-100 hover:text-rose-600"
                   aria-label="Hapus berkas"
                 >
                   <X className="w-4 h-4" />
@@ -555,7 +572,9 @@ export default function OrderFormClient({
               </div>
             ) : (
               <div className="space-y-1">
-                <Upload className="w-6 h-6 text-on-surface-variant/60 mx-auto" />
+                <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#f5df7a]/40">
+                  <Upload className="h-5 w-5 text-[#785c0b]" />
+                </span>
                 <p className="text-xs font-medium text-on-surface-variant">
                   Seret & letakkan berkas di sini, atau klik untuk memilih
                 </p>
@@ -566,22 +585,22 @@ export default function OrderFormClient({
             )}
           </div>
           {fileError && (
-            <p className="text-xs text-rose-600 font-medium">{fileError}</p>
+            <p className="text-xs text-rose-700 font-medium" role="alert">{fileError}</p>
           )}
         </div>
 
         {/* 7. Catatan Tambahan */}
-        <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0_4px_16px_rgba(188,148,120,0.06)] border border-outline-variant/50 space-y-2">
-          <label className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+        <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0_4px_16px_rgba(188,148,120,0.06)] border border-outline-variant/50 space-y-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-ink-800 flex items-center gap-2">
             <FileText className="w-4 h-4 text-primary" />
-            7. Catatan Khusus untuk Operator (Opsional)
+            {notesStep}. Catatan Khusus untuk Operator <span className="text-on-surface-variant text-[10px] normal-case">(Opsional)</span>
           </label>
           <textarea
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Contoh: Tolong lubang mata ayam di perbanyak di bagian atas..."
-            className="w-full p-3 text-xs border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary outline-none"
+            className="w-full rounded-xl border border-outline-variant bg-surface-container-low p-4 text-sm focus:ring-2 focus:ring-primary outline-none"
           />
         </div>
       </div>
@@ -589,17 +608,23 @@ export default function OrderFormClient({
       {/* Kolom Kanan: Live Price Breakdown & Submit CTA */}
       <div className="space-y-4">
         <div className="sticky top-24 space-y-4">
-          <PriceBreakdown
-            breakdown={breakdown}
-            productName={product.name}
-            materialName={materialName}
-            quantity={quantity}
-          />
+          {isM2 && (!width || !height || getDimensionError(width) || getDimensionError(height)) ? (
+            <div className="rounded-2xl border border-[#eee5d9] bg-white p-5 text-sm text-on-surface-variant shadow-sm">
+              Isi lebar dan tinggi minimal 1 meter untuk melihat estimasi harga.
+            </div>
+          ) : (
+            <PriceBreakdown
+              breakdown={breakdown}
+              productName={product.name}
+              materialName={materialName}
+              quantity={quantity}
+            />
+          )}
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-xl shadow-primary/30 transition flex items-center justify-center gap-2 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#bd3f16] px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#a93612] disabled:opacity-50"
           >
             {isLoading ? (
               <>
@@ -612,13 +637,13 @@ export default function OrderFormClient({
               </>
             ) : (
               <>
-                <span>Buat Pesanan</span>
+                <span>Lanjut ke Pembayaran</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
           <p className="text-[11px] text-on-surface-variant/60 text-center leading-tight">
-            Setelah submit, pesanan akan disimpan dan diteruskan ke sistem Alif.
+            Setelah pesanan disimpan dan desain diunggah, kamu akan diarahkan ke pembayaran.
           </p>
         </div>
       </div>

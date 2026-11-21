@@ -6,16 +6,78 @@ import { redirect } from "next/navigation";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
 import { ShoppingBag, Clock, CheckCircle2, ArrowRight, Printer, RefreshCw, AlertTriangle, Upload } from "lucide-react";
+import ProductCard from "@/components/ProductCard";
+import KatalogFilters from "@/components/katalog/KatalogFilters";
+import { SERVICE_CATEGORIES, KATALOG_CATEGORIES } from "@/lib/service-categories";
 
 export const dynamic = "force-dynamic";
 
-export default async function CustomerDashboardPage() {
+interface DashboardProps {
+  searchParams: {
+    category?: string;
+    kategori?: string;
+    search?: string;
+    sort?: string;
+  };
+}
+
+export default async function CustomerDashboardPage({ searchParams }: DashboardProps) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     redirect("/login");
   }
 
   const userId = (session.user as any).id;
+  const selectedCategory = searchParams.category || searchParams.kategori || "all";
+  const searchQuery = searchParams.search || "";
+  const sort = searchParams.sort || "newest";
+  const activeService = SERVICE_CATEGORIES.find((service) => service.category === selectedCategory);
+  const pageTitle = selectedCategory === "all"
+    ? "Katalog produk"
+    : activeService
+    ? activeService.label
+    : `Katalog: ${selectedCategory}`;
+  const pageDesc = selectedCategory === "all"
+    ? "Pilih kebutuhan cetak, bahan, dan finishing yang sesuai."
+    : activeService
+    ? activeService.description
+    : "Menampilkan produk untuk kategori yang dipilih.";
+
+  const allCategories = await prisma.product.findMany({
+    select: { category: true },
+    distinct: ["category"],
+  });
+  const sortedCategories = [...allCategories.map((category) => category.category)].sort((a, b) => {
+    const indexA = KATALOG_CATEGORIES.indexOf(a);
+    const indexB = KATALOG_CATEGORIES.indexOf(b);
+    if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
+  const categories = ["all", ...sortedCategories];
+
+  const productWhere: any = {};
+  if (selectedCategory !== "all" && activeService) {
+    productWhere.category = selectedCategory;
+  }
+  if (searchQuery) {
+    productWhere.OR = [
+      { name: { contains: searchQuery } },
+      { description: { contains: searchQuery } },
+    ];
+  }
+  let productOrderBy: any = { createdAt: "desc" };
+  if (sort === "price-asc") productOrderBy = { basePrice: "asc" };
+  else if (sort === "price-desc") productOrderBy = { basePrice: "desc" };
+  else if (sort === "name-asc") productOrderBy = { name: "asc" };
+  else if (sort === "name-desc") productOrderBy = { name: "desc" };
+
+  const products = await prisma.product.findMany({
+    where: productWhere,
+    orderBy: productOrderBy,
+    include: { materials: { include: { material: true } } },
+  });
 
   // Ambil pesanan milik user
   const orders = await prisma.order.findMany({
@@ -54,7 +116,75 @@ export default async function CustomerDashboardPage() {
   }
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-8">
+      {/* Katalog produk untuk memulai pesanan */}
+      <section className="w-full pt-2 pb-2 bg-background">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-surface-container-low rounded-3xl p-6 lg:p-8 relative overflow-hidden mb-8">
+          <div className="absolute -top-12 -right-12 w-56 h-56 bg-primary-container/40 rounded-full blur-3xl pointer-events-none" />
+          <div className="flex flex-col gap-2 max-w-2xl relative z-10">
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps tracking-widest uppercase shadow-[2px_2px_0px_#1c1c19] w-fit">
+              Studio Catalog
+            </span>
+            <h1 className="font-epilogue text-3xl lg:text-4xl font-bold text-on-surface tracking-tight">
+              {pageTitle}
+            </h1>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              {pageDesc}
+            </p>
+          </div>
+          <div className="text-right relative z-10 flex flex-col items-end gap-2">
+            <span className="font-label-caps text-label-caps px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold">
+              {products.length} varian produk tersedia
+            </span>
+            <span className="font-label-caps text-label-caps text-on-surface-variant uppercase">
+              100% Color-Accurate Proof
+            </span>
+          </div>
+        </div>
+
+        <KatalogFilters
+          categories={categories}
+          selectedCategory={selectedCategory}
+          searchQuery={searchQuery}
+          sort={sort}
+        />
+
+        {selectedCategory !== "all" && !activeService && (
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-lg p-3 mb-6">
+            Kategori &quot;{selectedCategory}&quot; tidak dikenal. Menampilkan semua produk.
+          </div>
+        )}
+
+        {products.length === 0 ? (
+          <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant p-8 sm:p-12 text-center shadow-[0_4px_16px_rgba(188,148,120,0.06)]">
+            <p className="text-base font-semibold text-on-surface">
+              {selectedCategory !== "all" && !activeService
+                ? `Kategori "${selectedCategory}" tidak dikenal. Menampilkan semua produk.`
+                : selectedCategory !== "all"
+                ? "Belum ada produk untuk kategori ini."
+                : "Tidak ada produk yang cocok dengan pencarian"}
+            </p>
+            <p className="text-xs text-on-surface-variant/60 mt-1">
+              {selectedCategory !== "all"
+                ? "Coba pilih kategori lain atau hapus filter."
+                : "Coba ganti kata kunci atau pilih kategori lain."}
+            </p>
+            <Link
+              href="/katalog"
+              className="mt-4 inline-block px-4 py-2 bg-primary-container text-on-primary-container rounded-full text-xs font-semibold transition shadow-[2px_2px_0px_#1c1c19]"
+            >
+              Reset Filter
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((product, index) => (
+              <ProductCard key={product.id} product={product} index={index} />
+            ))}
+          </div>
+        )}
+      </section>
+
       {/* Welcome Banner */}
       <div className="flex flex-col gap-5 rounded-md border border-stone-200 border-l-4 border-l-rose-700 bg-[#f2ecdf] p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8 sm:p-7">
         <div className="min-w-0">
@@ -263,11 +393,17 @@ export default async function CustomerDashboardPage() {
 
                     {/* Tombol Repeat Order */}
                     <Link
-                      href={`/order/${order.productId}?repeatOrderId=${order.id}`}
-                      title="Pesan Lagi dengan spek yang sama"
+                      href={order.status === "DESIGN_REJECTED"
+                        ? `/order/${order.id}/upload`
+                        : `/order/${order.productId}?repeatOrderId=${order.id}`}
+                      title={order.status === "DESIGN_REJECTED"
+                        ? "Unggah revisi desain"
+                        : "Pesan Lagi dengan spek yang sama"}
                       className="p-1.5 rounded-xl border border-slate-200 text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition"
                     >
-                      <RefreshCw className="w-4 h-4" />
+                      {order.status === "DESIGN_REJECTED"
+                        ? <Upload className="w-4 h-4" />
+                        : <RefreshCw className="w-4 h-4" />}
                     </Link>
                   </div>
                 </div>

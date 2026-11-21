@@ -39,6 +39,7 @@ export default async function UploadDesignPage({ params }: Props) {
   if (order.userId !== userId && userRole !== "ADMIN") {
     redirect("/dashboard");
   }
+  const isRevision = order.status === "DESIGN_REJECTED";
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -52,7 +53,7 @@ export default async function UploadDesignPage({ params }: Props) {
           <span>Kembali ke Pesanan</span>
         </Link>
         <span className="text-xs font-semibold text-slate-400">
-          Langkah 2 dari 3: Unggah Desain
+          {isRevision ? "Revisi desain untuk pesanan yang sama" : "Langkah 2 dari 3: Unggah Desain"}
         </span>
       </div>
 
@@ -60,10 +61,10 @@ export default async function UploadDesignPage({ params }: Props) {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold mb-2">
             <FileUp className="w-3.5 h-3.5" />
-            <span>Unggah File Siap Cetak</span>
+            <span>{isRevision ? "Unggah Desain Revisi" : "Unggah File Siap Cetak"}</span>
           </div>
           <h1 className="text-2xl font-black text-slate-900">
-            Unggah Desain: {order.orderNumber}
+            {isRevision ? "Revisi Desain" : "Unggah Desain"}: {order.orderNumber}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
             Produk: <span className="font-semibold text-slate-800">{order.product.name}</span>
@@ -79,6 +80,7 @@ export default async function UploadDesignPage({ params }: Props) {
           orderId={order.id}
           orderNumber={order.orderNumber}
           existingFileUrl={order.designFileUrl}
+          isRevision={isRevision}
         />
       </div>
     </div>

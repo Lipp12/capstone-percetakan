@@ -114,7 +114,7 @@ export default async function InvoicePage({ params }: Props) {
               </div>
               <div className="mt-2 text-xs text-on-surface-variant space-y-0.5 max-w-sm leading-relaxed">
                 <p className="font-medium text-on-surface">Jl. Pawon Raya Jl. Harapankita No.22A, Bencongan, Kecamatan Kelapa Dua, Kabupaten Tangerang, Banten 15810</p>
-                <p>Buka Setiap Hari: 10:00 â€“ 20:00 WIB</p>
+                <p>Buka Setiap Hari: 10:00 - 20:00 WIB</p>
                 <p className="text-on-surface font-semibold pt-0.5">WhatsApp CS: +62 812-3456-7890</p>
               </div>
             </div>
@@ -176,7 +176,7 @@ export default async function InvoicePage({ params }: Props) {
                   <td className="py-3.5 pr-2">
                     <div className="font-bold text-on-surface">{order.product.name}</div>
                     <div className="text-xs text-on-surface-variant">
-                      {order.material?.name || "Standard"} Â· {order.pickupMethod === "DELIVERY" ? "Delivery" : "Pickup"}
+                      {order.material?.name || "Standard"} · {order.pickupMethod === "DELIVERY" ? "Delivery" : "Pickup"}
                     </div>
                   </td>
                   <td className="py-3.5 px-2 text-center font-medium">
@@ -214,7 +214,7 @@ export default async function InvoicePage({ params }: Props) {
           <div className="bg-surface-container-low border border-outline-variant rounded-xl p-4 text-xs text-on-surface-variant space-y-1.5 leading-relaxed mx-6">
             <div className="flex items-center gap-2 font-mono text-[11px] text-outline">
               <span className="font-bold text-on-surface">No. pesanan: #{order.orderNumber}</span>
-              <span>â€¢</span>
+              <span>•</span>
               <span>
                 File desain:{" "}
                 <strong className="text-on-surface">
@@ -230,7 +230,7 @@ export default async function InvoicePage({ params }: Props) {
           {/* Watermark footer */}
           <div className="mt-6 pt-4 border-t border-surface-container-low flex flex-col sm:flex-row justify-between items-center text-[10px] text-outline gap-2 p-6">
             <span>Sistem Cetak Otomatis Faeyza Cloud OS v4.8</span>
-            <span className="font-mono">HASH: 9A81-22BC-44F0-E192 â€¢ DIGITAL PROOF SECURED</span>
+            <span className="font-mono">HASH: 9A81-22BC-44F0-E192 • DIGITAL PROOF SECURED</span>
           </div>
         </article>
 
@@ -273,7 +273,7 @@ export default async function InvoicePage({ params }: Props) {
           {/* Quality guarantee */}
           <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center flex-shrink-0 font-black text-sm shadow-xs">
-              âœ“
+              ✓
             </div>
             <div>
               <div className="text-xs font-bold uppercase tracking-wider text-amber-900">

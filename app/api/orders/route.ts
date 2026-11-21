@@ -108,6 +108,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Produk tidak ditemukan" }, { status: 404 });
     }
 
+    if (
+      product.unit.toLowerCase() === "m2" &&
+      (!width || width < 1 || !height || height < 1)
+    ) {
+      return NextResponse.json(
+        { error: "Lebar dan tinggi wajib di isi minimal 1 meter" },
+        { status: 400 }
+      );
+    }
+
     let materialAdditionalPrice = 0;
     if (materialId) {
       const prodMat = product.materials.find((pm) => pm.materialId === materialId);

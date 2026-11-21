@@ -57,7 +57,7 @@ export default function FaeyzaPrintingLanding() {
           <div className="flex-1 text-center font-medium" />
           {/* Hubungi / Lokasi Cepat */}
           <div className="text-right text-xs hidden md:block text-brand-navy/80 font-semibold">
-            <span>â±ï¸ Setiap Hari&nbsp; 10.00- 20.00 WIB</span>
+            <span>Setiap Hari&nbsp; 10.00- 20.00 WIB</span>
           </div>
         </div>
       </aside>
@@ -91,7 +91,7 @@ export default function FaeyzaPrintingLanding() {
             {/* Menu Navigasi */}
             <nav className="hidden md:flex items-center space-x-7 text-xs uppercase tracking-wider font-bold text-brand-navy/90">
               <a className="hover:text-coral-warm transition flex items-center gap-1" href="#layanan-cetak">
-                Layanan Cetak <span className="text-[9px] text-coral-warm">â–¾</span>
+                Layanan Cetak
               </a>
               <a className="hover:text-coral-warm transition" href="#cara-pesan">
                 Cara Pesan
@@ -225,16 +225,14 @@ export default function FaeyzaPrintingLanding() {
                   <div className="absolute right-2 sm:right-4 top-20 sm:top-24 w-52 sm:w-60 bg-white rounded-xl p-3.5 shadow-2xl border-2 border-pastel-pink transform rotate-3 hover:rotate-0 transition duration-300">
                     <div className="flex items-center justify-between border-b border-pink-100 pb-1.5 mb-2">
                       <span className="font-heading font-extrabold text-xs text-brand-navy">
-                        Kartu Nama Estetik
+                        Kartu Nama
                       </span>
                       <span className="text-[9px] bg-pastel-pink text-brand-navy font-bold px-1.5 py-0.5 rounded">
                         Foil Rose Gold
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-pastel-butter border border-amber-300 flex items-center justify-center text-xs">
-                        âœ¨
-                      </div>
+                      <div className="w-8 h-8 rounded-full bg-pastel-butter border border-amber-300" />
                       <div>
                         <div className="h-2 bg-gray-300 rounded-full w-20 mb-1" />
                         <div className="h-1.5 bg-gray-200 rounded-full w-14" />
@@ -253,7 +251,7 @@ export default function FaeyzaPrintingLanding() {
                       </p>
                     </div>
                     <span className="bg-white border border-brand-navy px-3 py-1 rounded-full text-xs font-bold text-brand-navy">
-                      âœ… Siap Kirim
+                      Siap Kirim
                     </span>
                   </div>
                 </div>
@@ -278,7 +276,7 @@ export default function FaeyzaPrintingLanding() {
           ].map((text) => (
             <span key={text} className="mx-4 flex items-center">
               {text}
-              <span className="mx-3 text-pastel-yellow">âœ¿</span>
+              <span className="mx-3 text-yellow-300" aria-hidden="true">✿</span>
             </span>
           ))}
         </div>
@@ -368,7 +366,7 @@ export default function FaeyzaPrintingLanding() {
               <span className="inline-block w-8 h-1 rounded-full bg-coral-warm" />
               <span className="inline-block w-2 h-1 rounded-full bg-amber-200" />
               <span className="inline-block w-2 h-1 rounded-full bg-amber-200" />
-              <span className="text-[11px] ml-2 text-brand-navy/70">Geser untuk melihat semua layanan âž”</span>
+              <span className="text-[11px] ml-2 text-brand-navy/70">Geser untuk melihat semua layanan</span>
             </div>
           </div>
 
@@ -376,7 +374,7 @@ export default function FaeyzaPrintingLanding() {
           <div className="mt-12 text-center">
             <a className="inline-flex items-center gap-2 bg-white hover:bg-pastel-pink/60 text-brand-navy border-2 border-brand-navy font-heading font-bold text-xs uppercase px-8 py-3 rounded-full hard-shadow transition duration-200" href="/katalog">
               <span>Lihat Daftar Harga &amp; Spesifikasi Lengkap</span>
-              <span>âž”</span>
+              
             </a>
           </div>
         </div>
@@ -393,9 +391,6 @@ export default function FaeyzaPrintingLanding() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 relative">
-            {/* Penghubung Garis (Desktop) */}
-            <div className="hidden lg:block absolute top-7 left-12 right-12 h-1 bg-amber-100 -z-0" />
-
             {steps.map((step, i) => (
               <div key={step.title} className="relative z-10 flex flex-col items-start bg-cream-bg/60 p-6 rounded-2xl border border-amber-200 hard-shadow-sm">
                 <div className={`w-14 h-14 rounded-full text-white font-heading font-bold text-xl flex items-center justify-center mb-4 hard-shadow-sm border-2 border-white ${step.bgClass}`}>
@@ -443,12 +438,12 @@ export default function FaeyzaPrintingLanding() {
 
             {/* Kolom Kanan: Penjelasan Material Kertas */}
             <div className="bg-pastel-pink/40 p-8 sm:p-12 flex flex-col justify-center items-start text-left">
-              <span className="text-xs uppercase tracking-widest font-bold text-coral-warm mb-2">
+              <h3 className="font-heading font-bold text-lg text-coral-warm mb-2">
                 Bahan &amp; Kualitas Terjamin
-              </span>
-              <h2 className="font-serif-title italic text-2xl sm:text-3xl lg:text-4xl text-brand-navy mb-4">
+              </h3>
+              <h3 className="font-heading font-bold text-lg text-brand-navy mb-4">
                 Bukan Sekadar Cetak, Kami Merawat Ceritamu.
-              </h2>
+              </h3>
               <p className="text-xs sm:text-sm text-gray-700 leading-relaxed mb-6">
                 Setiap pesanan dicetak menggunakan mesin digital production beresolusi ultra-HD dengan tinta pigmen anti-luntur. Pilihan material mulai dari Matte Paper Premium, Linen Jepang bertekstur, Stiker Vinyl Doff, hingga Art Carton tebal.
               </p>
@@ -520,7 +515,7 @@ export default function FaeyzaPrintingLanding() {
                 Percetakan digital printing dan studio percetakan independen. Mengombinasikan kemudahan pesan cetak online dengan hasil cetak rapi, teliti, dan estetik.
               </p>
               <a className="inline-flex items-center gap-2 bg-white hover:bg-pastel-pink/60 text-brand-navy border-2 border-brand-navy font-heading font-bold text-xs uppercase px-6 py-2.5 rounded-full hard-shadow transition" href="/register">
-                Daftar Sekarang <span>âž”</span>
+                Daftar Sekarang
               </a>
             </div>
 
@@ -564,7 +559,7 @@ export default function FaeyzaPrintingLanding() {
                   Studio Percetakan: Jl. Pawon Raya Jl. Harapankita No.22A, Bencongan, Kecamatan Kelapa Dua, Kabupaten Tangerang, Banten 15810
                 </p>
                 <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 text-[11px] text-emerald-800 flex items-center gap-2">
-                  <span className="text-sm">âœ¨</span>
+                  
                   <span className="text-xs">Kualitas Cetak Presisi &amp; Pilihan Kertas Premium</span>
                 </div>
               </div>
@@ -576,7 +571,7 @@ export default function FaeyzaPrintingLanding() {
                 Pembayaran
               </h4>
               <div className="flex flex-wrap gap-2">
-                {["QRIS", "BCA", "MANDIRI", "Dana", "OVO", "PayLater"].map((method) => (
+                {["QRIS", "BCA", "MANDIRI"].map((method) => (
                   <span key={method} className="bg-white px-3 py-1.5 rounded-full border border-gray-200 text-xs font-bold text-gray-700">
                     {method}
                   </span>
@@ -588,14 +583,6 @@ export default function FaeyzaPrintingLanding() {
           {/* Copyright */}
           <div className="pt-8 border-t border-amber-200/70 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4">
             <p>&copy; 2025 Faeyza Printing. Seluruh Hak Cipta Dilindungi.</p>
-            <div className="flex items-center space-x-3 text-brand-navy/60">
-              <span className="text-[10px] font-semibold">METODE PEMBAYARAN:</span>
-              {["QRIS", "BCA", "MANDIRI"].map((m) => (
-                <span key={m} className="bg-white px-2 py-1 rounded border border-gray-200 text-[10px] font-bold">
-                  {m}
-                </span>
-              ))}
-            </div>
           </div>
         </div>
       </footer>
@@ -671,7 +658,7 @@ const steps: StepItem[] = [
   },
   {
     title: "Bayar & Konfirmasi",
-    desc: "Selesaikan pembayaran praktis lewat QRIS, transfer bank BCA/Mandiri, atau kartu kredit secara instan dan aman.",
+    desc: "Selesaikan pembayaran praktis lewat QRIS atau transfer bank BCA/Mandiri secara instan dan aman.",
     bgClass: "bg-pastel-yellow",
   },
   {

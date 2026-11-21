@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -25,10 +25,11 @@ import {
 } from "lucide-react";
 
 type Tab = "login" | "register";
+type LoginMode = "contact" | "customer-id";
 type AccountType = "personal" | "business";
 
 interface LoginFormState {
-  email: string;
+  identifier: string;
   password: string;
   remember: boolean;
 }
@@ -47,14 +48,16 @@ export default function LoginPage() {
   const router = useRouter();
 
   const [tab, setTab] = useState<Tab>("login");
+  const [loginMode, setLoginMode] = useState<LoginMode>("contact");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [nameError, setNameError] = useState("");
 
   const [loginForm, setLoginForm] = useState<LoginFormState>({
-    email: "",
+    identifier: "",
     password: "",
     remember: false,
   });
@@ -69,10 +72,18 @@ export default function LoginPage() {
     agree: false,
   });
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setLoginMode(params.get("mode") === "customer-id" ? "customer-id" : "contact");
+    if (params.get("registered") === "1") {
+      setSuccess("Pendaftaran berhasil. Silakan masuk dengan akun baru.");
+    }
+  }, []);
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    if (!loginForm.email || !loginForm.password) {
-      setError("Silakan isi email dan password");
+    if (!loginForm.identifier || !loginForm.password) {
+      setError("Silakan isi email / nomor WhatsApp / ID pelanggan dan kata sandi");
       return;
     }
 
@@ -83,14 +94,14 @@ export default function LoginPage() {
     try {
       const res = await signIn("credentials", {
         redirect: false,
-        email: loginForm.email,
+        email: loginForm.identifier,
         password: loginForm.password,
       });
 
       if (res?.error) {
         setError(
           res.error === "CredentialsSignin"
-            ? "Email atau kata sandi salah. Silakan periksa kembali."
+            ? "Email / nomor WhatsApp / ID pelanggan atau kata sandi salah. Silakan periksa kembali."
             : res.error
         );
         setLoading(false);
@@ -101,12 +112,9 @@ export default function LoginPage() {
       const role = (session?.user as any)?.role;
 
       let destination = "/dashboard";
-      if (role === "ADMIN" || loginForm.email.toLowerCase().includes("admin")) {
+      if (role === "ADMIN") {
         destination = "/admin/dashboard";
-      } else if (
-        role === "OPERATOR" ||
-        loginForm.email.toLowerCase().includes("operator")
-      ) {
+      } else if (role === "OPERATOR") {
         destination = "/admin/production";
       }
 
@@ -123,6 +131,11 @@ export default function LoginPage() {
 
     if (!name || !phone || !email || !password || !confirmPassword) {
       setError("Silakan lengkapi semua field");
+      return;
+    }
+    if (!/^[\p{L}][\p{L}\s.'-]*$/u.test(name.trim())) {
+      setNameError("Nama Lengkap harus terdiri dari huruf");
+      setError("Nama Lengkap harus terdiri dari huruf");
       return;
     }
     if (password.length < 6) {
@@ -158,7 +171,7 @@ export default function LoginPage() {
 
       setSuccess("Registrasi berhasil! Silakan masuk dengan akun Anda.");
       setTab("login");
-      setLoginForm((prev) => ({ ...prev, email }));
+      setLoginForm((prev) => ({ ...prev, identifier: email }));
       setLoading(false);
     } catch (err) {
       setError("Terjadi kesalahan saat mendaftar. Silakan coba lagi.");
@@ -174,69 +187,55 @@ export default function LoginPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F9F8F3]">
-      {/* Background striped pattern */}
-      <div
-        className="fixed inset-0 -z-10 opacity-40"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(90deg, #FDE8EC 0px, #FDE8EC 2px, transparent 2px, transparent 18px)",
-        }}
-      />
-
+    <div className="min-h-screen flex flex-col bg-[#fcf9f4]">
       {/* Top bar */}
-      <div className="w-full bg-white/80 backdrop-blur border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div className="fixed top-0 left-0 right-0 z-50 w-full bg-[#fcf9f4]/95 backdrop-blur-md border-b border-[#ece7de]">
+        <div className="max-w-[1280px] mx-auto h-20 px-4 sm:px-10 flex items-center justify-between gap-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-rose-700 transition"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-[#f6f3ee] text-xs sm:text-sm font-semibold text-[#4b4639] hover:bg-[#ebe8e3] transition"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Kembali ke Beranda</span>
-            <span className="sm:hidden">Kembali</span>
+            <span>Kembali</span>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="absolute right-4 sm:right-10 flex items-center">
             <Image
               src="/logo.png"
               alt="Faeyza Printing"
-              width={160}
-              height={40}
-              className="h-8 w-auto"
+              width={280}
+              height={74}
+              className="h-16 w-auto"
               priority
             />
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/katalog"
-              className="hidden sm:inline-flex text-xs font-semibold text-slate-600 hover:text-rose-700 transition"
-            >
-              Katalog
-            </Link>
-            <Link
-              href="/chat"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-rose-700 transition"
-            >
-              <MessageCircle className="w-3.5 h-3.5" />
-              Bantuan
-            </Link>
           </div>
         </div>
       </div>
 
       {/* Ticker bar */}
-      <div className="w-full bg-[#FDE8EC] overflow-hidden">
-        <div className="whitespace-nowrap py-1.5 text-xs font-medium text-rose-700 animate-[marquee_20s_linear_infinite]">
-          ✨ Selamat datang di Faeyza Printing — cetak banner, poster, kartu nama, sticker &amp; spanduk berkualitas. Promo ongkir &amp; free konsultasi desain! ✨ Selamat datang di Faeyza Printing — cetak banner, poster, kartu nama, sticker &amp; spanduk berkualitas. Promo ongkir &amp; free konsultasi desain!
+      <div className="mt-20 w-full bg-[#fed9e1] overflow-hidden">
+        <div className="whitespace-nowrap py-2 text-[11px] font-extrabold uppercase tracking-widest text-[#795d64] animate-[marquee_28s_linear_infinite]">
+          <span className="mx-6">✦ Percetakan &amp; Digital Printing</span>
+          <span className="mx-6">Kertas Seni Impor 310gsm</span>
+          <span className="mx-6">Cetak Custom &amp; Kemasan Ramah Lingkungan</span>
+          <span className="mx-6">Garansi Presisi Warna 100%</span>
+          <span className="mx-6">Pengiriman Aman &amp; Cepat</span>
         </div>
       </div>
 
       {/* Main content */}
-      <main className="flex-1 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-2xl">
+      <main
+        className="flex-1 flex items-center justify-center px-4 sm:px-10 py-10 sm:py-14"
+        style={{
+          backgroundImage: "url('/login-pattern-stars.png')",
+          backgroundRepeat: "repeat",
+          backgroundSize: "360px auto",
+        }}
+      >
+        <div className="w-full max-w-[520px]">
           {/* Card */}
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-[0_12px_36px_rgba(0,0,0,0.08)] border border-[#cec6b4]/40 overflow-hidden">
             {/* Tab switcher */}
-            <div className="flex border-b border-slate-100">
+            <div className="flex items-center px-6 pt-6">
               <button
                 type="button"
                 onClick={() => {
@@ -244,49 +243,32 @@ export default function LoginPage() {
                   setError("");
                   setSuccess("");
                 }}
-                className={`flex-1 py-4 text-sm font-semibold transition ${
+                className={`px-4 py-2 text-sm font-semibold rounded-full transition ${
                   tab === "login"
-                    ? "text-rose-700 border-b-2 border-rose-600 bg-rose-50/40"
-                    : "text-slate-500 hover:text-slate-700"
+                    ? "text-[#1c1c19] bg-[#f6f3ee] shadow-sm"
+                    : "text-[#4b4639] hover:bg-[#f6f3ee]"
                 }`}
               >
                 Masuk
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setTab("register");
-                  setError("");
-                  setSuccess("");
-                }}
-                className={`flex-1 py-4 text-sm font-semibold transition ${
-                  tab === "register"
-                    ? "text-rose-700 border-b-2 border-rose-600 bg-rose-50/40"
-                    : "text-slate-500 hover:text-slate-700"
-                }`}
+              <Link
+                href="/register"
+                className="px-4 py-2 text-sm font-semibold rounded-full transition text-[#4b4639] hover:bg-[#f6f3ee]"
               >
                 Daftar Akun Baru
-              </button>
+              </Link>
             </div>
 
             <div className="p-6 sm:p-8 space-y-6">
-              {/* Logo & title */}
-              <div className="text-center">
-                <div className="mb-4 flex justify-center">
-                  <Image
-                    src="/logo.png"
-                    alt="Faeyza Printing"
-                    width={200}
-                    height={80}
-                    className="h-12 w-auto"
-                    priority
-                  />
-                </div>
-                <h2 className="text-xl font-bold tracking-tight text-slate-900">
+              {/* Title */}
+              <div>
+                <h2 className="text-2xl sm:text-[32px] leading-tight font-bold tracking-tight text-[#1c1c19]">
                   {tab === "login" ? "Masuk ke Akun Anda" : "Buat Akun Baru"}
                 </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  Sistem Percetakan Online Terpadu
+                <p className="mt-2 text-sm leading-5 text-[#4b4639]">
+                  {tab === "login"
+                    ? "Masuk untuk memantau status pesanan cetak dan mengelola berkas desain Anda."
+                    : "Daftar untuk mulai memesan cetakan dan melacak pesanan Anda."}
                 </p>
               </div>
 
@@ -313,13 +295,21 @@ export default function LoginPage() {
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                        Email / Nomor WhatsApp
+                        {loginMode === "customer-id"
+                          ? "ID Pelanggan"
+                          : "Email / Nomor WhatsApp"}
                       </label>
                       <Link
-                        href="/login?mode=customer-id"
+                        href={
+                          loginMode === "customer-id"
+                            ? "/login"
+                            : "/login?mode=customer-id"
+                        }
                         className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline"
                       >
-                        ID Pelanggan
+                        {loginMode === "customer-id"
+                          ? "Email / Nomor WhatsApp"
+                          : "ID Pelanggan"}
                       </Link>
                     </div>
                     <div className="relative">
@@ -327,15 +317,22 @@ export default function LoginPage() {
                         <Mail className="w-4 h-4" />
                       </div>
                       <input
-                        type="email"
-                        name="login_email"
+                        type="text"
+                        name="login_identifier"
                         autoComplete="off"
                         required
-                        value={loginForm.email}
+                        value={loginForm.identifier}
                         onChange={(e) =>
-                          setLoginForm((p) => ({ ...p, email: e.target.value }))
+                          setLoginForm((p) => ({
+                            ...p,
+                            identifier: e.target.value,
+                          }))
                         }
-                        placeholder="nama@gmail.com"
+                        placeholder={
+                          loginMode === "customer-id"
+                            ? "Masukkan ID Pelanggan"
+                            : "nama@gmail.com atau 081234567890"
+                        }
                         className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl bg-[#F9F8F3] focus:ring-2 focus:ring-rose-600 focus:border-transparent outline-none transition"
                       />
                     </div>
@@ -463,13 +460,28 @@ export default function LoginPage() {
                         type="text"
                         required
                         value={registerForm.name}
-                        onChange={(e) =>
-                          setRegisterForm((p) => ({ ...p, name: e.target.value }))
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setRegisterForm((p) => ({ ...p, name: value }));
+                          setNameError(
+                            value.trim() && !/^[\p{L}][\p{L}\s.'-]*$/u.test(value.trim())
+                              ? "Nama Lengkap harus terdiri dari huruf"
+                              : ""
+                          );
+                          if (error) setError("");
+                        }}
                         placeholder="Nama lengkap"
-                        className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl bg-[#F9F8F3] focus:ring-2 focus:ring-rose-600 focus:border-transparent outline-none transition"
+                        className={`w-full pl-10 pr-4 py-2.5 text-sm border rounded-xl bg-[#F9F8F3] focus:ring-2 focus:ring-rose-600 focus:border-transparent outline-none transition ${
+                          nameError ? "border-rose-500" : "border-slate-300"
+                        }`}
                       />
                     </div>
+                    {nameError && (
+                      <p className="mt-1.5 flex items-center gap-1.5 text-xs text-rose-700">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        {nameError}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -646,20 +658,9 @@ export default function LoginPage() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full border-t border-slate-200 bg-white/70 backdrop-blur">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-          <span>© {new Date().getFullYear()} Faeyza Printing. All rights reserved.</span>
-          <div className="flex items-center gap-4">
-            <Link href="/help" className="hover:text-rose-700 transition">
-              Help Center
-            </Link>
-            <Link href="/privacy" className="hover:text-rose-700 transition">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="hover:text-rose-700 transition">
-              Terms
-            </Link>
-          </div>
+      <footer className="w-full border-t border-[#ece7de] bg-[#f6f3ee] mt-auto">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-10 py-5 flex items-center justify-center text-xs text-[#4b4639]">
+          <span>© {new Date().getFullYear()} Faeyza Printing. Seluruh Hak Cipta Dilindungi.</span>
         </div>
       </footer>
 

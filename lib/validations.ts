@@ -45,6 +45,8 @@ export function validateCustomerField(name: string, value: string): string {
     case "name":
       if (!value.trim()) return "Nama lengkap wajib diisi.";
       if (value.trim().length < 3) return "Nama minimal 3 karakter.";
+      if (!/^[\p{L}][\p{L}\s.'-]*$/u.test(value.trim()))
+        return "Nama Lengkap harus terdiri dari huruf";
       return "";
     case "email":
       if (!value.trim()) return "Email wajib diisi.";
