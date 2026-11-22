@@ -9,6 +9,7 @@ import {
   BarChart2,
   DollarSign,
 } from "lucide-react";
+import AdminStatCard from "@/components/AdminStatCard";
 import {
   BarChart,
   Bar,
@@ -140,8 +141,8 @@ export default function RevenueClient({ initialOrders }: Props) {
   return (
     <div className="space-y-6">
       {/* Filter Periode */}
-      <div className="flex flex-wrap items-center gap-2 bg-white p-2 rounded-2xl border border-ink-200 shadow-xs w-fit">
-        <Calendar className="w-4 h-4 text-ink-400 ml-2" />
+      <div className="flex flex-wrap items-center gap-2 bg-surface-container-lowest p-2 rounded-xl shadow-sm w-fit">
+        <Calendar className="w-4 h-4 text-outline ml-2" />
         {(
           [
             { id: "today", label: "Hari Ini" },
@@ -157,8 +158,8 @@ export default function RevenueClient({ initialOrders }: Props) {
             onClick={() => setPeriod(tab.id)}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
               period === tab.id
-                ? "bg-emerald-600 text-white shadow-xs"
-                : "text-ink-600 hover:text-ink-900 hover:bg-ink-100"
+                ? "bg-primary text-on-primary shadow-sm"
+                : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
             }`}
           >
             {tab.label}
@@ -168,50 +169,33 @@ export default function RevenueClient({ initialOrders }: Props) {
 
       {/* 3 Cards Metrik Utama */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="p-5 bg-white rounded-3xl border border-ink-200 shadow-sm space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-ink-400 font-semibold uppercase tracking-wider">
-              Total Revenue
-            </span>
-            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-              <DollarSign className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-2xl font-black text-ink-900">{formatRupiah(totalRevenue)}</p>
-          <span className="text-[10px] text-ink-400">Pesanan selesai di periode ini</span>
-        </div>
-
-        <div className="p-5 bg-white rounded-3xl border border-ink-200 shadow-sm space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-ink-400 font-semibold uppercase tracking-wider">
-              Total Pesanan
-            </span>
-            <div className="p-2 bg-brand-50 text-brand-600 rounded-xl">
-              <ShoppingBag className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-2xl font-black text-ink-900">{totalOrders}</p>
-          <span className="text-[10px] text-ink-400">Transaksi completed</span>
-        </div>
-
-        <div className="p-5 bg-white rounded-3xl border border-ink-200 shadow-sm space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-ink-400 font-semibold uppercase tracking-wider">
-              Rata-rata / Pesanan
-            </span>
-            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
-              <TrendingUp className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-2xl font-black text-ink-900">{formatRupiah(Math.round(avgOrderValue))}</p>
-          <span className="text-[10px] text-ink-400">AOV (Average Order Value)</span>
-        </div>
+        <AdminStatCard
+          label="Total Revenue"
+          value={formatRupiah(totalRevenue)}
+          caption="Pesanan selesai di periode ini"
+          icon={DollarSign}
+          tone="yellow"
+        />
+        <AdminStatCard
+          label="Total Pesanan"
+          value={totalOrders}
+          caption="Transaksi completed"
+          icon={ShoppingBag}
+          tone="mint"
+        />
+        <AdminStatCard
+          label="Rata-rata / Pesanan"
+          value={formatRupiah(Math.round(avgOrderValue))}
+          caption="AOV (Average Order Value)"
+          icon={TrendingUp}
+          tone="lavender"
+        />
       </div>
 
       {/* Grafik Revenue */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-ink-200 shadow-sm space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b border-ink-100">
-          <h3 className="font-bold text-sm text-ink-800 flex items-center gap-2">
+      <div className="bg-surface-container-lowest p-6 sm:p-8 rounded-xl shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-surface-container">
+          <h3 className="font-bold text-sm text-on-surface flex items-center gap-2">
             <BarChart2 className="w-4 h-4 text-emerald-600" />
             <span>Tren Revenue {period === "today" ? "(Per Jam)" : period === "week" ? "(Per Hari)" : period === "month" ? "(Per Tanggal)" : period === "year" ? "(Per Bulan)" : ""}</span>
           </h3>
@@ -219,7 +203,7 @@ export default function RevenueClient({ initialOrders }: Props) {
 
         <div className="h-80 w-full pt-4">
           {chartData.length === 0 || chartData.every((d) => d.revenue === 0) ? (
-            <div className="h-full flex items-center justify-center text-xs text-ink-400">
+            <div className="h-full flex items-center justify-center text-xs text-outline">
               Belum ada data revenue pada periode ini.
             </div>
           ) : (
@@ -261,9 +245,9 @@ export default function RevenueClient({ initialOrders }: Props) {
       </div>
 
       {/* Top Produk by Revenue */}
-      <div className="bg-white rounded-3xl border border-ink-200 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-ink-100">
-          <h3 className="font-bold text-sm text-ink-900 flex items-center gap-2">
+      <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-surface-container">
+          <h3 className="font-bold text-sm text-on-surface flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-emerald-600" />
             <span>Top 10 Produk Paling Menguntungkan</span>
           </h3>
@@ -271,7 +255,7 @@ export default function RevenueClient({ initialOrders }: Props) {
 
         <div className="p-5">
           {productRevenue.length === 0 ? (
-            <div className="text-center py-8 text-xs text-ink-400">
+            <div className="text-center py-8 text-xs text-outline">
               Belum ada data produk pada periode ini.
             </div>
           ) : (
@@ -279,23 +263,23 @@ export default function RevenueClient({ initialOrders }: Props) {
               {productRevenue.map((item, idx) => (
                 <div
                   key={item.product}
-                  className="flex items-center justify-between p-3 bg-ink-50 rounded-2xl hover:bg-ink-100 transition"
+                  className="flex items-center justify-between p-3 bg-surface-container-low rounded-2xl hover:bg-surface-container transition"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <span className="w-6 text-center font-bold text-ink-500 text-xs">
+                    <span className="w-6 text-center font-bold text-outline text-xs">
                       {idx + 1}
                     </span>
                     <div className="min-w-0">
-                      <p className="font-medium text-ink-900 truncate text-sm">
+                      <p className="font-medium text-on-surface truncate text-sm">
                         {item.product}
                       </p>
-                      <p className="text-[10px] text-ink-400">
+                      <p className="text-[10px] text-outline">
                         {formatRupiah(item.revenue)}
                       </p>
                     </div>
                   </div>
                   <div className="w-40">
-                    <div className="h-2 bg-ink-200 rounded-full overflow-hidden">
+                    <div className="h-2 bg-[#ece3d4] rounded-full overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full transition-all duration-500"
                         style={{

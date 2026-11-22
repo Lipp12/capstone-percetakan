@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import ReviewsClient from "./ReviewsClient";
+import AdminPageHeader from "@/components/AdminPageHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -64,5 +65,14 @@ export default async function AdminReviewsPage() {
     console.warn("[AdminReviewsPage] Belum dapat memuat data ulasan:", err);
   }
 
-  return <ReviewsClient initialReviews={reviews} />;
+  return (
+    <div className="mx-auto w-full max-w-[1280px] space-y-6">
+      <AdminPageHeader
+        eyebrow="Kepuasan Pelanggan"
+        title="Ulasan Produk"
+        description="Pantau testimoni, penilaian bintang, dan masukan mutu cetakan dari pesanan selesai."
+      />
+      <ReviewsClient initialReviews={reviews} />
+    </div>
+  );
 }

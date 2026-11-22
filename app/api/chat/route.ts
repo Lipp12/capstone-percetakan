@@ -18,6 +18,9 @@ interface OpenRouterResponse {
   error?: {
     message?: string;
     code?: number | string;
+    metadata?: {
+      limit_source?: string;
+    };
   };
 }
 
@@ -88,8 +91,24 @@ export async function POST(req: NextRequest) {
       const errText = await res.text();
       console.error(`[OpenRouter API Error ${res.status}]:`, errText);
 
+      let providerError: OpenRouterResponse["error"];
+      try {
+        providerError = (JSON.parse(errText) as OpenRouterResponse).error;
+      } catch {
+        providerError = undefined;
+      }
+
+      const isFreeDailyLimit =
+        providerError?.metadata?.limit_source === "openrouter_free_tier_daily" ||
+        providerError?.message?.includes("free-models-per-day");
+      const message = isFreeDailyLimit
+        ? "Kuota harian model AI gratis OpenRouter sudah habis. Tunggu kuota direset atau gunakan model/API key berbayar pada konfigurasi AI."
+        : res.status === 429
+          ? "Layanan AI sedang membatasi permintaan. Silakan coba lagi nanti."
+          : "Gagal memanggil AI. Silakan coba beberapa saat lagi.";
+
       return NextResponse.json(
-        { error: "Gagal memanggil AI. Silakan coba beberapa saat lagi." },
+        { error: message },
         { status: res.status }
       );
     }

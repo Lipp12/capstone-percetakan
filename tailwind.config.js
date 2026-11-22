@@ -149,6 +149,13 @@ module.exports = {
         "portfolio-card-bg": "#D2B48C",
         cartBg: "#F0EEE9",
         "cart-bg": "#F0EEE9",
+        "cmyk-cyan": "#00b4d8",
+        "cmyk-magenta": "#e63946",
+        "cmyk-yellow": "#ffd166",
+        "pastel-bento-yellow": "#FEF7DA",
+        "pastel-bento-mint": "#E8F8F0",
+        "pastel-bento-rose": "#FDECEB",
+        "pastel-bento-lavender": "#F3EAFD",
       },
       fontFamily: {
         sans: [
@@ -201,6 +208,10 @@ module.exports = {
         "headline-lg-mobile": ["26px", { lineHeight: "32px", fontWeight: "600" }],
         "headline-md": ["24px", { lineHeight: "30px", fontWeight: "600" }],
         "headline-sm": ["20px", { lineHeight: "26px", fontWeight: "500" }],
+        "display-lg": ["48px", { lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "display-lg-mobile": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "700" }],
+        "title-md": ["18px", { lineHeight: "26px", fontWeight: "600" }],
+        "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.06em", fontWeight: "700" }],
       },
       borderRadius: {
         "4xl": "2rem",
@@ -222,6 +233,17 @@ module.exports = {
       spacing: {
         sidebar: "18.125rem", // 290px - sidebar expanded
         "sidebar-collapsed": "5.625rem", // 90px - sidebar collapsed
+        "space-xs": "0.25rem",
+        "space-sm": "0.5rem",
+        "space-md": "1rem",
+        "space-lg": "1.5rem",
+        "space-xl": "2.5rem",
+        gutter: "1rem",
+        "gutter-tablet": "1.5rem",
+        "gutter-desktop": "2rem",
+        margin: "1rem",
+        "margin-tablet": "2rem",
+        "margin-desktop": "3rem",
       },
       keyframes: {
         "fade-in": {

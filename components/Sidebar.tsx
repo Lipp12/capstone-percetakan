@@ -1,14 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  LayoutDashboard,
+  Receipt,
+  FileCheck,
+  Layers,
+  BookOpen,
+  Package,
+  BarChart3,
+  CreditCard,
+  Bot,
+  MessageSquare,
   ChevronDown,
   LogOut,
-  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { adminNav, type NavChild, type NavItem } from "@/components/nav-config";
@@ -23,19 +31,14 @@ export default function Sidebar() {
   const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
   const [openMenus, setOpenMenus] = useState<string[]>([]);
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
-    {},
-  );
+  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
 
   const badgeValue = useCallback(
     (key?: NavChild["badgeKey"]) => (key === "lowStock" ? lowStockCount : 0),
     [lowStockCount],
   );
 
-  const isActivePath = useCallback(
-    (href: string) => pathname === href,
-    [pathname],
-  );
+  const isActivePath = useCallback((href: string) => pathname === href, [pathname]);
 
   const isItemActive = useCallback(
     (item: NavItem) => {
@@ -45,26 +48,22 @@ export default function Sidebar() {
     [isActivePath],
   );
 
-  // Tutup drawer mobile & reset indikator pending setiap kali route berubah.
   useEffect(() => {
     setNavigatingTo(null);
     closeMobile();
   }, [pathname, closeMobile]);
 
-  // Buka submenu yang memuat route aktif.
   useEffect(() => {
     const activeParents = adminNav
       .flatMap((group) => group.items)
       .filter((item) => item.children?.some((child) => isActivePath(child.href)))
       .map((item) => item.label);
-
     setOpenMenus((prev) => {
       const merged = Array.from(new Set([...prev, ...activeParents]));
       return merged.length === prev.length ? prev : merged;
     });
   }, [pathname, isActivePath]);
 
-  // Hitung tinggi submenu untuk animasi buka/tutup.
   useEffect(() => {
     const heights: Record<string, number> = {};
     openMenus.forEach((key) => {
@@ -74,7 +73,6 @@ export default function Sidebar() {
     setSubMenuHeight((prev) => ({ ...prev, ...heights }));
   }, [openMenus]);
 
-  // Jumlah material stok rendah ( polled, sama seperti sebelumnya).
   useEffect(() => {
     let isMounted = true;
     async function checkLowStock() {
@@ -84,9 +82,7 @@ export default function Sidebar() {
           const data = await res.json();
           setLowStockCount(data.materials?.length || 0);
         }
-      } catch {
-        // Abaikan — kegagalan fetch tidak boleh menggagalkan render sidebar.
-      }
+      } catch {}
     }
     checkLowStock();
     const timer = setInterval(checkLowStock, 60000);
@@ -103,76 +99,18 @@ export default function Sidebar() {
 
   const toggleMenu = (label: string) => {
     setOpenMenus((prev) =>
-      prev.includes(label)
-        ? prev.filter((key) => key !== label)
-        : [...prev, label],
+      prev.includes(label) ? prev.filter((key) => key !== label) : [...prev, label],
     );
   };
 
-  const renderIcon = (
-    Icon: LucideIcon,
-    isActive: boolean,
-    className?: string,
-  ) => (
-    <span
-      className={cn(
-        "flex h-5 w-5 shrink-0 items-center justify-center",
-        isActive ? "menu-item-icon-active" : "menu-item-icon-inactive",
-        className,
-      )}
-    >
-      <Icon className="h-[18px] w-[18px]" aria-hidden />
-    </span>
-  );
-
-  const renderChild = (child: NavChild) => {
-    const isActive = isActivePath(child.href);
-    const isPending = navigatingTo === child.href;
-    const count = badgeValue(child.badgeKey);
-
-    return (
-      <li key={child.href}>
-        <Link
-          href={child.href}
-          onClick={() => handleNavigate(child.href)}
-          aria-current={isActive ? "page" : undefined}
-          className={cn(
-            "group menu-dropdown-item",
-            isActive
-              ? "menu-dropdown-item-active"
-              : "menu-dropdown-item-inactive",
-          )}
-        >
-          <span className="flex h-4 w-4 shrink-0 items-center justify-center">
-            <child.icon
-              className={cn(
-                "h-4 w-4",
-                isActive ? "text-brand-600" : "text-ink-400",
-              )}
-              aria-hidden
-            />
-          </span>
-          <span className="truncate">{child.label}</span>
-          {isPending ? (
-            <span className="ms-auto text-[10px] font-medium text-brand-500">
-              Memuat…
-            </span>
-          ) : count > 0 ? (
-            <span
-              className={cn(
-                "menu-dropdown-badge",
-                isActive
-                  ? "menu-dropdown-badge-active"
-                  : "menu-dropdown-badge-inactive",
-              )}
-            >
-              {count}
-            </span>
-          ) : null}
-        </Link>
-      </li>
-    );
-  };
+  const userName = session?.user?.name || "Admin Studio MK";
+  const userRole = (session?.user as { role?: string })?.role || "Super Admin Print";
+  const initials = userName
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   const renderItem = (item: NavItem) => {
     const hasChildren = Boolean(item.children?.length);
@@ -180,7 +118,6 @@ export default function Sidebar() {
     if (!hasChildren && item.href) {
       const isActive = isActivePath(item.href);
       const isPending = navigatingTo === item.href;
-
       return (
         <li key={item.href}>
           <Link
@@ -188,14 +125,18 @@ export default function Sidebar() {
             onClick={() => handleNavigate(item.href as string)}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "group menu-item",
-              isActive ? "menu-item-active" : "menu-item-inactive",
+              "flex items-center justify-between px-space-md py-2.5 rounded-lg transition-all",
+              isActive
+                ? "bg-primary text-on-primary font-semibold shadow-[0_2px_6px_rgba(99,58,37,0.08)]"
+                : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
             )}
           >
-            {renderIcon(item.icon, isActive)}
-            <span className="truncate">{item.label}</span>
+            <div className="flex items-center gap-space-sm">
+              <item.icon className="text-[20px] shrink-0" aria-hidden />
+              <span className="font-label-lg text-label-lg">{item.label}</span>
+            </div>
             {isPending ? (
-              <span className="ms-auto h-2 w-2 animate-pulse rounded-full bg-brand-500" />
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
             ) : null}
           </Link>
         </li>
@@ -212,33 +153,65 @@ export default function Sidebar() {
           type="button"
           onClick={() => toggleMenu(item.label)}
           aria-expanded={isOpenMenu}
-          aria-controls={`submenu-${item.label}`}
           className={cn(
-            "group menu-item",
-            isParentActive ? "menu-item-active" : "menu-item-inactive",
+            "w-full flex items-center justify-between px-space-md py-2.5 rounded-lg transition-all",
+            isParentActive
+              ? "bg-primary text-on-primary font-semibold shadow-[0_2px_6px_rgba(99,58,37,0.08)]"
+              : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
           )}
         >
-          {renderIcon(item.icon, isParentActive)}
-          <span className="truncate">{item.label}</span>
+          <div className="flex items-center gap-space-sm">
+            <item.icon className="text-[20px] shrink-0" aria-hidden />
+            <span className="font-label-lg text-label-lg">{item.label}</span>
+          </div>
           <ChevronDown
             className={cn(
-              "menu-item-chevron ms-auto hidden xl:block",
-              isOpenMenu ? "menu-item-chevron-active" : "menu-item-chevron-inactive",
+              "h-4 w-4 shrink-0 transition-transform duration-200",
+              isOpenMenu ? "rotate-180 text-on-primary" : "text-outline",
             )}
             aria-hidden
           />
         </button>
-
         <div
-          id={`submenu-${item.label}`}
           ref={(el) => {
             subMenuRefs.current[item.label] = el;
           }}
-          className="no-scrollbar overflow-hidden transition-[height] duration-300 ease-in-out"
+          className="overflow-hidden transition-[height] duration-300 ease-in-out"
           style={{ height: isOpenMenu ? `${height}px` : "0px" }}
         >
-          <ul className="mt-1 space-y-1 ps-3 xl:ps-9">
-            {(item.children ?? []).map(renderChild)}
+          <ul className="mt-1 space-y-1 ps-3">
+            {(item.children ?? []).map((child) => {
+              const isActive = isActivePath(child.href);
+              const isPending = navigatingTo === child.href;
+              const count = badgeValue(child.badgeKey);
+              return (
+                <li key={child.href}>
+                  <Link
+                    href={child.href}
+                    onClick={() => handleNavigate(child.href)}
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "flex items-center justify-between px-space-md py-2 rounded-lg transition-all",
+                      isActive
+                        ? "bg-surface-container text-primary font-semibold"
+                        : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
+                    )}
+                  >
+                    <div className="flex items-center gap-space-sm">
+                      <child.icon className="text-[18px] shrink-0" aria-hidden />
+                      <span className="font-label-md text-label-md">{child.label}</span>
+                    </div>
+                    {isPending ? (
+                      <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                    ) : count > 0 ? (
+                      <span className="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-error text-on-error">
+                        {count}
+                      </span>
+                    ) : null}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </li>
@@ -248,75 +221,72 @@ export default function Sidebar() {
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 start-0 z-50 flex h-screen flex-col overflow-hidden border-e border-ink-200 bg-white transition-[width,transform] duration-300 ease-in-out dark:border-ink-800 dark:bg-ink-900",
-        // Saat dipinjamkan di desktop, sidebar benar-benar hilang (bukan rail ikon).
-        isOpen ? "w-sidebar" : "w-0",
+        "fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)] transition-transform duration-300 ease-in-out",
         isMobileOpen ? "translate-x-0" : "-translate-x-full",
         "xl:translate-x-0",
-        !isOpen && "xl:pointer-events-none border-e-0",
+        !isOpen && "xl:-translate-x-full xl:pointer-events-none",
       )}
       aria-label="Navigasi admin"
-      // `inert` membuat link di dalam sidebar yang tersembunyi tidak bisa di-tab.
       {...(!isOpen ? ({ inert: "" } as Record<string, string>) : {})}
     >
-      {/* Brand */}
-      <div className="flex h-16 shrink-0 items-center border-b border-ink-200 px-5 dark:border-ink-800">
-        <Link
-          href="/admin/dashboard"
-          onClick={() => closeMobile()}
-          className="flex items-center gap-3"
-        >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center">
-            <Image
-              src="/logo-icon.png"
-              alt="Logo Faeyza"
-              width={36}
-              height={40}
-              className="h-8 w-auto"
-              priority
-            />
-          </span>
-          <span className="min-w-0">
-            <span className="block truncate text-theme-sm font-semibold tracking-tight text-ink-900 dark:text-white">
-              Faeyza Printing
-            </span>
-            <span className="block truncate text-[10px] font-medium uppercase tracking-wider text-brand-600 dark:text-brand-400">
-              Sistem Manajemen
-            </span>
-          </span>
-        </Link>
+      <div className="flex flex-col">
+        {/* Brand */}
+        <div className="px-space-lg pt-space-lg pb-space-md">
+          <div className="flex items-center gap-space-sm">
+            <div className="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary font-display-lg text-headline-sm font-bold shadow-[0_2px_6px_rgba(99,58,37,0.06)]">
+              F
+            </div>
+            <div className="flex flex-col">
+              <span className="font-headline-sm text-headline-sm text-primary tracking-tight font-bold leading-none">
+                Faeyza Printing
+              </span>
+              <span className="font-label-sm text-label-sm tracking-wider text-outline uppercase mt-1">
+                Studio Percetakan Digital
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <div className="custom-scrollbar max-h-[calc(100vh-12rem)] overflow-y-auto px-space-md py-space-xs">
+          <nav className="flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary font-semibold shadow-[0_2px_6px_rgba(99,58,37,0.08)]">
+            {adminNav.map((group) => (
+              <div key={group.title}>
+                <div className="px-space-md py-2">
+                  <span className="font-label-sm text-label-sm tracking-wider text-outline uppercase">
+                    {group.title}
+                  </span>
+                </div>
+                <ul className="flex flex-col gap-1">
+                  {group.items.map(renderItem)}
+                </ul>
+              </div>
+            ))}
+          </nav>
+        </div>
       </div>
 
-      {/* Menu */}
-      <nav className="no-scrollbar flex-1 overflow-y-auto overflow-x-hidden px-5 py-6">
-        <div className="flex flex-col gap-8">
-          {adminNav.map((group) => (
-            <div key={group.title}>
-              <h2 className="menu-group-label">{group.title}</h2>
-              <ul className="flex flex-col gap-1">
-                {group.items.map(renderItem)}
-              </ul>
+      {/* User Profile Card */}
+      <div className="p-space-md">
+        <div className="p-space-sm rounded-xl bg-surface-container flex items-center justify-between shadow-[0_1px_2px_rgba(99,58,37,0.06)]">
+          <div className="flex items-center gap-space-sm">
+            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+              <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
             </div>
-          ))}
-        </div>
-      </nav>
-
-      {/* Footer: user aktif + keluar */}
-      <div className="shrink-0 border-t border-ink-200 p-4 dark:border-ink-800">
-        <div className="flex items-center justify-between rounded-xl border border-ink-200 bg-ink-50 p-3 dark:border-ink-800 dark:bg-white/5">
-          <div className="min-w-0 text-start leading-tight">
-            <span className="block truncate text-theme-xs font-semibold text-ink-900 dark:text-white">
-              {session?.user?.name || "Admin"}
-            </span>
-            <span className="block truncate text-[10px] font-medium uppercase tracking-wider text-ink-400">
-              {(session?.user as { role?: string })?.role || "Admin"}
-            </span>
+            <div className="flex flex-col">
+              <span className="font-label-md text-label-md text-on-surface font-semibold">
+                {userName}
+              </span>
+              <span className="font-body-sm text-body-sm text-outline">
+                {userRole}
+              </span>
+            </div>
           </div>
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/login" })}
             title="Keluar"
-            className="ms-2 shrink-0 rounded-lg p-1.5 text-ink-400 transition-colors hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-white/10"
+            className="shrink-0 rounded-lg p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-primary"
           >
             <LogOut className="h-4 w-4" aria-hidden />
             <span className="sr-only">Keluar</span>

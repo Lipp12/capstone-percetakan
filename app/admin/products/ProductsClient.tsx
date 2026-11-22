@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { formatRupiah } from "@/lib/utils";
-import { Package, Plus, Trash2, Edit, X, Loader2, CheckCircle2, AlertCircle, Upload } from "lucide-react";
+import { Package, Plus, Trash2, Edit, X, Loader2, AlertCircle, Upload, ShoppingBag, Tags } from "lucide-react";
+import AdminStatCard from "@/components/AdminStatCard";
 
 interface Props {
   initialProducts: any[];
@@ -144,23 +145,42 @@ export default function ProductsClient({ initialProducts }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <span className="text-xs font-bold text-brand-600 uppercase tracking-wider">
-            Master Data
-          </span>
-          <h1 className="text-2xl font-black text-ink-900 mt-1">
-            Kelola Katalog Produk
-          </h1>
-          <p className="text-xs text-ink-500 mt-0.5">
-            Daftar produk cetak yang dapat dipesan oleh pelanggan di web.
-          </p>
-        </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <AdminStatCard
+          label="Total produk"
+          value={products.length}
+          caption="Produk aktif dalam katalog"
+          icon={Package}
+          tone="yellow"
+        />
+        <AdminStatCard
+          label="Kategori"
+          value={new Set(products.map((product) => product.category)).size}
+          caption="Kelompok layanan cetak"
+          icon={Tags}
+          tone="mint"
+        />
+        <AdminStatCard
+          label="Total pesanan"
+          value={products.reduce((sum, product) => sum + (product._count?.orders || 0), 0)}
+          caption="Pemakaian seluruh produk"
+          icon={ShoppingBag}
+          tone="rose"
+        />
+        <AdminStatCard
+          label="Harga dasar rata-rata"
+          value={formatRupiah(products.length ? Math.round(products.reduce((sum, product) => sum + product.basePrice, 0) / products.length) : 0)}
+          caption="Rata-rata tarif katalog"
+          icon={Plus}
+          tone="lavender"
+        />
+      </div>
+
+      <div className="flex justify-end">
         <button
           type="button"
           onClick={openCreateModal}
-          className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/20 transition flex items-center gap-1.5 self-start sm:self-auto"
+          className="px-4 py-2.5 bg-primary text-on-primary rounded-lg font-bold text-xs shadow-sm transition flex items-center gap-1.5"
         >
           <Plus className="w-4 h-4" />
           <span>Tambah Produk Baru</span>
@@ -168,10 +188,10 @@ export default function ProductsClient({ initialProducts }: Props) {
       </div>
 
       {/* Tabel Produk */}
-      <div className="bg-white rounded-3xl border border-ink-200 shadow-sm overflow-hidden">
+      <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-ink-700">
-            <thead className="bg-ink-50 border-b border-ink-200 text-ink-500 font-bold uppercase tracking-wider text-[10px]">
+          <table className="w-full text-left text-xs text-on-surface-variant">
+            <thead className="bg-surface-container-low border-b border-outline-variant text-outline font-bold uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="py-3.5 px-4">Produk</th>
                 <th className="py-3.5 px-4">Kategori</th>
@@ -183,9 +203,9 @@ export default function ProductsClient({ initialProducts }: Props) {
             </thead>
             <tbody className="divide-y divide-ink-100">
               {products.map((p) => (
-                <tr key={p.id} className="hover:bg-ink-50/80 transition">
-                  <td className="py-3.5 px-4 font-bold text-ink-900 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-ink-100 overflow-hidden shrink-0">
+                <tr key={p.id} className="hover:bg-surface-container-low/80 transition">
+                  <td className="py-3.5 px-4 font-bold text-on-surface flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-surface-container overflow-hidden shrink-0">
                       {p.imageUrl ? (
                         <img
                           src={p.imageUrl}
@@ -193,28 +213,28 @@ export default function ProductsClient({ initialProducts }: Props) {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-ink-400">
+                        <div className="w-full h-full flex items-center justify-center text-outline">
                           <Package className="w-5 h-5" />
                         </div>
                       )}
                     </div>
                     <div>
                       <span className="block">{p.name}</span>
-                      <span className="text-[10px] text-ink-400 font-normal">
+                      <span className="text-[10px] text-outline font-normal">
                         slug: /{p.slug}
                       </span>
                     </div>
                   </td>
                   <td className="py-3.5 px-4">
-                    <span className="px-2 py-0.5 rounded-md bg-ink-100 font-medium">
+                    <span className="px-2 py-0.5 rounded-md bg-surface-container font-medium">
                       {p.category}
                     </span>
                   </td>
                   <td className="py-3.5 px-4 font-semibold uppercase">{p.unit}</td>
-                  <td className="py-3.5 px-4 text-right font-extrabold text-brand-600">
+                  <td className="py-3.5 px-4 text-right font-extrabold text-primary">
                     {formatRupiah(p.basePrice)}
                   </td>
-                  <td className="py-3.5 px-4 text-center font-bold text-ink-700">
+                  <td className="py-3.5 px-4 text-center font-bold text-on-surface-variant">
                     {p._count?.orders || 0}
                   </td>
                   <td className="py-3.5 px-4 text-center">
@@ -222,7 +242,7 @@ export default function ProductsClient({ initialProducts }: Props) {
                       <button
                         type="button"
                         onClick={() => openEditModal(p)}
-                        className="p-1.5 text-ink-500 hover:text-brand-600 hover:bg-ink-100 rounded-lg transition"
+                        className="p-1.5 text-outline hover:text-primary hover:bg-surface-container rounded-lg transition"
                         title="Edit Produk"
                       >
                         <Edit className="w-4 h-4" />
@@ -230,7 +250,7 @@ export default function ProductsClient({ initialProducts }: Props) {
                       <button
                         type="button"
                         onClick={() => handleDelete(p.id)}
-                        className="p-1.5 text-ink-500 hover:text-brand-600 hover:bg-ink-100 rounded-lg transition"
+                        className="p-1.5 text-outline hover:text-primary hover:bg-surface-container rounded-lg transition"
                         title="Hapus Produk"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -247,21 +267,21 @@ export default function ProductsClient({ initialProducts }: Props) {
       {/* Modal Tambah/Edit Produk */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-ink-100">
-            <div className="flex items-center justify-between pb-3 border-b border-ink-100">
-              <h3 className="font-bold text-sm text-ink-900">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-surface-container">
+            <div className="flex items-center justify-between pb-3 border-b border-surface-container">
+              <h3 className="font-bold text-sm text-on-surface">
                 {editingProduct ? "Edit Produk" : "Tambah Produk Baru"}
               </h3>
               <button
                 onClick={() => setModalOpen(false)}
-                className="p-1 text-ink-400 hover:text-ink-700 rounded-lg"
+                className="p-1 text-outline hover:text-on-surface-variant rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {error && (
-              <div className="p-3 bg-brand-50 text-brand-700 text-xs rounded-xl flex items-center gap-2">
+              <div className="p-3 bg-surface-container text-primary text-xs rounded-xl flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -269,7 +289,7 @@ export default function ProductsClient({ initialProducts }: Props) {
 
             <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
               <div>
-                <label className="font-bold text-ink-700 block mb-1">Nama Produk *</label>
+                <label className="font-bold text-on-surface-variant block mb-1">Nama Produk *</label>
                 <input
                   type="text"
                   required
@@ -291,7 +311,7 @@ export default function ProductsClient({ initialProducts }: Props) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-ink-700 block mb-1">Slug URL *</label>
+                  <label className="font-bold text-on-surface-variant block mb-1">Slug URL *</label>
                   <input
                     type="text"
                     required
@@ -301,7 +321,7 @@ export default function ProductsClient({ initialProducts }: Props) {
                   />
                 </div>
                 <div>
-                  <label className="font-bold text-ink-700 block mb-1">Kategori *</label>
+                  <label className="font-bold text-on-surface-variant block mb-1">Kategori *</label>
                   <input
                     type="text"
                     required
@@ -315,7 +335,7 @@ export default function ProductsClient({ initialProducts }: Props) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-ink-700 block mb-1">Harga Dasar (Rp) *</label>
+                  <label className="font-bold text-on-surface-variant block mb-1">Harga Dasar (Rp) *</label>
                   <input
                     type="number"
                     required
@@ -326,7 +346,7 @@ export default function ProductsClient({ initialProducts }: Props) {
                   />
                 </div>
                 <div>
-                  <label className="font-bold text-ink-700 block mb-1">Satuan Hitung *</label>
+                  <label className="font-bold text-on-surface-variant block mb-1">Satuan Hitung *</label>
                   <select
                     value={unit}
                     onChange={(e) => setUnit(e.target.value as "m2" | "pcs")}
@@ -339,18 +359,18 @@ export default function ProductsClient({ initialProducts }: Props) {
               </div>
 
               <div>
-                <label className="font-bold text-ink-700 block mb-1.5">
+                <label className="font-bold text-on-surface-variant block mb-1.5">
                   Foto / Gambar Produk
                 </label>
                 {imagePreview ? (
-                  <div className="relative w-full h-40 rounded-2xl border border-ink-200 overflow-hidden group bg-ink-50 flex items-center justify-center">
+                  <div className="relative w-full h-40 rounded-2xl border border-outline-variant overflow-hidden group bg-surface-container-low flex items-center justify-center">
                     <img
                       src={imagePreview}
                       alt="Preview Produk"
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-ink-900/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
-                      <label className="px-3 py-1.5 bg-white text-ink-800 text-xs font-semibold rounded-xl cursor-pointer hover:bg-ink-100 shadow-sm transition">
+                      <label className="px-3 py-1.5 bg-white text-on-surface text-xs font-semibold rounded-xl cursor-pointer hover:bg-surface-container shadow-sm transition">
                         Ganti Foto
                         <input
                           type="file"
@@ -372,19 +392,19 @@ export default function ProductsClient({ initialProducts }: Props) {
                           setImagePreview("");
                           setImageUrl("");
                         }}
-                        className="px-3 py-1.5 bg-brand-600 text-white text-xs font-semibold rounded-xl hover:bg-brand-700 shadow-sm transition"
+                        className="px-3 py-1.5 bg-primary-container text-white text-xs font-semibold rounded-xl hover:bg-primary-container shadow-sm transition"
                       >
                         Hapus
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <label className="border-2 border-dashed border-ink-300 hover:border-brand-500 rounded-2xl p-5 flex flex-col items-center justify-center cursor-pointer transition bg-ink-50/60 hover:bg-brand-50/30">
-                    <Upload className="w-6 h-6 text-ink-400 mb-1" />
-                    <span className="text-xs font-semibold text-ink-700">
+                  <label className="border-2 border-dashed border-ink-300 hover:border-brand-500 rounded-2xl p-5 flex flex-col items-center justify-center cursor-pointer transition bg-surface-container-low/60 hover:bg-surface-container/30">
+                    <Upload className="w-6 h-6 text-outline mb-1" />
+                    <span className="text-xs font-semibold text-on-surface-variant">
                       Klik untuk unggah foto produk
                     </span>
-                    <span className="text-[10px] text-ink-400">
+                    <span className="text-[10px] text-outline">
                       Format: JPG, PNG, atau WEBP (Maks. 5MB)
                     </span>
                     <input
@@ -404,7 +424,7 @@ export default function ProductsClient({ initialProducts }: Props) {
               </div>
 
               <div>
-                <label className="font-bold text-ink-700 block mb-1">Deskripsi Produk *</label>
+                <label className="font-bold text-on-surface-variant block mb-1">Deskripsi Produk *</label>
                 <textarea
                   required
                   rows={3}
@@ -418,14 +438,14 @@ export default function ProductsClient({ initialProducts }: Props) {
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 border border-ink-200 text-ink-600 font-semibold rounded-xl hover:bg-ink-50"
+                  className="px-4 py-2 border border-outline-variant text-on-surface-variant font-semibold rounded-xl hover:bg-surface-container-low"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 flex items-center gap-1.5"
+                  className="px-4 py-2 bg-primary-container text-white font-bold rounded-xl hover:bg-primary-container flex items-center gap-1.5"
                 >
                   {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>{editingProduct ? "Simpan Perubahan" : "Buat Produk"}</span>

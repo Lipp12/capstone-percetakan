@@ -88,11 +88,10 @@ export default function OrderDetailClient({ order: initialOrder }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         <Link
           href="/admin/orders"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant/70 hover:text-on-surface"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-surface-container-lowest px-3 py-2 text-xs font-semibold text-on-surface-variant shadow-sm hover:text-on-surface"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Kembali ke Daftar Pesanan</span>
@@ -120,7 +119,12 @@ export default function OrderDetailClient({ order: initialOrder }: Props) {
       )}
 
       {/* Main Info Card */}
-      <div className="bg-surface-container-lowest rounded-3xl p-6 sm:p-8 shadow-[0_4px_16px_rgba(188,148,120,0.06)] border border-outline-variant/50 space-y-6">
+      <div className="relative overflow-hidden bg-surface-container-lowest rounded-xl p-6 sm:p-8 shadow-sm space-y-6">
+        <div className="absolute left-0 right-0 top-0 flex h-1">
+          <div className="h-full w-1/3 bg-cmyk-cyan" />
+          <div className="h-full w-1/3 bg-cmyk-magenta" />
+          <div className="h-full w-1/3 bg-cmyk-yellow" />
+        </div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-outline-variant/30">
           <div>
             <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
@@ -274,7 +278,7 @@ export default function OrderDetailClient({ order: initialOrder }: Props) {
 
 
         {/* Panel Update Status & Pengiriman */}
-        <div className="p-6 bg-surface-container text-white rounded-3xl space-y-4">
+        <div className="p-6 bg-surface-container rounded-xl space-y-4">
           <h3 className="font-bold text-sm tracking-tight flex items-center gap-2">
             <Clock className="w-4 h-4 text-brand-400" />
             <span>Perbarui Status & Pengiriman Pesanan</span>
@@ -286,7 +290,7 @@ export default function OrderDetailClient({ order: initialOrder }: Props) {
               <select
                 value={newStatus}
                 onChange={(e) => setNewStatus(e.target.value)}
-                className="w-full p-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-white outline-none focus:ring-2 focus:ring-brand-500"
+                className="w-full p-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-on-surface outline-none focus:ring-1 focus:ring-primary"
               >
                 {ALL_STATUSES.map((st) => (
                   <option key={st} value={st}>
@@ -304,7 +308,7 @@ export default function OrderDetailClient({ order: initialOrder }: Props) {
                   value={courier}
                   onChange={(e) => setCourier(e.target.value)}
                   placeholder="Contoh: JNE / SiCepat / Kurir Internal"
-                  className="w-full p-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-white outline-none focus:ring-2 focus:ring-brand-500"
+                  className="w-full p-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-on-surface outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
             )}
@@ -319,7 +323,7 @@ export default function OrderDetailClient({ order: initialOrder }: Props) {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Contoh: Paket sudah diserahkan ke kurir JNE..."
-              className="w-full p-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-white text-xs outline-none focus:ring-2 focus:ring-brand-500"
+              className="w-full p-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-on-surface text-xs outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
 
@@ -327,7 +331,7 @@ export default function OrderDetailClient({ order: initialOrder }: Props) {
             type="button"
             disabled={loading}
             onClick={() => handleUpdateStatus()}
-            className="py-3 px-6 bg-primary hover:bg-primary text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50"
+            className="py-3 px-6 bg-primary hover:bg-primary/90 text-on-primary font-bold text-xs rounded-lg shadow-sm transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />

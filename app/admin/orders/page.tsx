@@ -2,7 +2,9 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
-import { Search, ShoppingBag, Eye, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ShoppingBag, Eye, ExternalLink, ChevronLeft, ChevronRight, ReceiptText, Clock3, CheckCircle2 } from "lucide-react";
+import AdminPageHeader from "@/components/AdminPageHeader";
+import AdminStatCard from "@/components/AdminStatCard";
 
 export const dynamic = "force-dynamic";
 
@@ -73,23 +75,46 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="w-full max-w-[1280px] mx-auto px-4 lg:px-10 pt-8 pb-8 bg-background min-h-screen">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <span className="text-xs font-bold text-brand-600 uppercase tracking-wider">
-            Manajemen Penjualan
-          </span>
-          <h1 className="text-2xl font-black text-ink-900 mt-1">
-            Semua Pesanan Masuk
-          </h1>
-          <p className="text-xs text-ink-500 mt-0.5">
-            Kelola status pesanan, pembayaran, dan informasi pengiriman.
-          </p>
-        </div>
+    <div className="w-full max-w-[1280px] mx-auto space-y-6">
+      <AdminPageHeader
+        eyebrow="Manajemen Penjualan"
+        title="Kelola Pesanan"
+        description="Kelola status pesanan, pembayaran, desain, dan informasi pengiriman."
+      />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <AdminStatCard
+          label="Total pesanan"
+          value={total}
+          caption="Seluruh pesanan tersimpan"
+          icon={ReceiptText}
+          tone="yellow"
+        />
+        <AdminStatCard
+          label="Hasil halaman"
+          value={orders.length}
+          caption={`Halaman ${page} dari ${totalPages}`}
+          icon={ShoppingBag}
+          tone="mint"
+        />
+        <AdminStatCard
+          label="Menunggu aksi"
+          value={orders.filter((order) => ["PENDING_PAYMENT", "DESIGN_CHECKING", "PAID"].includes(order.status)).length}
+          caption="Pada halaman saat ini"
+          icon={Clock3}
+          tone="rose"
+        />
+        <AdminStatCard
+          label="Siap / selesai"
+          value={orders.filter((order) => ["READY", "COMPLETED"].includes(order.status)).length}
+          caption="Pada halaman saat ini"
+          icon={CheckCircle2}
+          tone="lavender"
+        />
       </div>
 
       {/* Filter Status & Search Bar */}
-      <div className="bg-surface-container-lowest p-4 rounded-3xl border border-outline-variant/50 shadow-[0_4px_16px_rgba(188,148,120,0.06)] flex flex-col lg:flex-row items-center justify-between gap-4">
+      <div className="flex flex-col items-center justify-between gap-4 rounded-xl bg-surface-container-lowest p-4 shadow-sm lg:flex-row">
         <div className="flex flex-wrap items-center gap-1.5 w-full lg:w-auto">
           {statuses.map((st) => (
             <Link
@@ -97,8 +122,8 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
               href={`/admin/orders?status=${st.value}${searchQuery ? `&search=${searchQuery}` : ""}`}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
                 statusFilter === st.value
-                  ? "bg-brand-600 text-white shadow-sm"
-                  : "bg-ink-100 text-ink-600 hover:bg-ink-200"
+                  ? "bg-primary text-on-primary shadow-sm"
+                  : "bg-surface-container text-on-surface-variant hover:bg-[#ece3d4]"
               }`}
             >
               {st.label}
@@ -108,26 +133,26 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
 
         <form method="GET" action="/admin/orders" className="relative w-full lg:w-72">
           <input type="hidden" name="status" value={statusFilter} />
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-outline" />
           <input
             type="text"
             name="search"
             defaultValue={searchQuery}
             placeholder="Cari no. pesanan / pelanggan..."
-            className="w-full pl-9 pr-3 py-2 text-xs border border-ink-200 rounded-xl focus:ring-2 focus:ring-brand-600 outline-none"
+            className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-2 pl-9 pr-3 text-xs outline-none focus:ring-1 focus:ring-primary"
           />
         </form>
       </div>
 
       {/* Tabel Pesanan */}
-      <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/50 shadow-[0_4px_16px_rgba(188,148,120,0.06)] overflow-hidden">
+      <div className="overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm">
         {orders.length === 0 ? (
-          <div className="p-12 text-center text-ink-400 text-xs">
+          <div className="p-12 text-center text-outline text-xs">
             Tidak ada pesanan yang sesuai kriteria pencarian.
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-ink-700">
+            <table className="w-full text-left text-xs text-on-surface-variant">
               <thead className="bg-surface-container border-b border-outline-variant/50 text-on-surface-variant font-bold uppercase tracking-wider text-[10px]">
                 <tr>
                   <th className="py-3.5 px-4">No. Pesanan</th>
@@ -172,13 +197,13 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
                           href={o.designFileUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-brand-600 hover:underline font-semibold"
+                          className="inline-flex items-center gap-1 text-primary hover:underline font-semibold"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                           <span>Lihat</span>
                         </a>
                       ) : (
-                        <span className="text-ink-400">-</span>
+                        <span className="text-outline">-</span>
                       )}
                     </td>
                     <td className="py-3.5 px-4">
@@ -195,7 +220,7 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
                     <td className="py-3.5 px-4 text-center">
                       <Link
                         href={`/admin/orders/${o.id}`}
-                        className="p-1.5 inline-flex items-center gap-1 bg-ink-100 hover:bg-brand-50 text-ink-700 hover:text-brand-600 rounded-lg font-semibold text-[11px] transition"
+                        className="p-1.5 inline-flex items-center gap-1 bg-surface-container hover:bg-surface-container text-on-surface-variant hover:text-primary rounded-lg font-semibold text-[11px] transition"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span>Detail</span>
@@ -210,26 +235,26 @@ export default async function AdminOrdersListPage({ searchParams }: Props) {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-ink-100 text-xs">
-            <span className="text-ink-400">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-surface-container text-xs">
+            <span className="text-outline">
               Halaman {page} dari {totalPages} ({total} pesanan)
             </span>
             <div className="flex items-center gap-2">
               {page > 1 ? (
-                <Link href={pageHref(page - 1)} className="p-1.5 rounded-lg bg-ink-100 hover:bg-ink-200">
+                <Link href={pageHref(page - 1)} className="p-1.5 rounded-lg bg-surface-container hover:bg-[#ece3d4]">
                   <ChevronLeft className="w-4 h-4" />
                 </Link>
               ) : (
-                <span className="p-1.5 rounded-lg bg-ink-50 text-ink-300">
+                <span className="p-1.5 rounded-lg bg-surface-container-low text-outline">
                   <ChevronLeft className="w-4 h-4" />
                 </span>
               )}
               {page < totalPages ? (
-                <Link href={pageHref(page + 1)} className="p-1.5 rounded-lg bg-ink-100 hover:bg-ink-200">
+                <Link href={pageHref(page + 1)} className="p-1.5 rounded-lg bg-surface-container hover:bg-[#ece3d4]">
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               ) : (
-                <span className="p-1.5 rounded-lg bg-ink-50 text-ink-300">
+                <span className="p-1.5 rounded-lg bg-surface-container-low text-outline">
                   <ChevronRight className="w-4 h-4" />
                 </span>
               )}

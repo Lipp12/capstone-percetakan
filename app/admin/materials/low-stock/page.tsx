@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import MaterialsClient from "../MaterialsClient";
 import { AlertTriangle } from "lucide-react";
+import AdminPageHeader from "@/components/AdminPageHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -12,19 +13,24 @@ export default async function LowStockAlertPage() {
   const lowStockMaterials = allMaterials.filter((m) => m.stock < m.minStock);
 
   return (
-    <div className="space-y-6">
-      <div className="p-6 bg-brand-50 border border-brand-200 rounded-3xl text-brand-900 flex items-start gap-4">
-        <div className="p-3 bg-brand-600 text-white rounded-2xl shrink-0 mt-0.5">
+    <div className="mx-auto w-full max-w-[1280px] space-y-6">
+      <AdminPageHeader
+        eyebrow="Inventaris Kritis"
+        title="Stok Rendah"
+        description="Daftar material di bawah ambang batas minimum yang memerlukan restock segera."
+      />
+      <div className="flex items-start gap-4 rounded-xl bg-error-container/40 p-5 text-on-error-container shadow-sm">
+        <div className="p-3 bg-error text-on-error rounded-lg shrink-0 mt-0.5">
           <AlertTriangle className="w-6 h-6" />
         </div>
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-brand-700 bg-brand-100 px-2.5 py-0.5 rounded-full">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-brand-100 px-2.5 py-0.5 rounded-full">
             Peringatan Kritis
           </span>
-          <h1 className="text-xl font-black mt-1">
+          <p className="mt-1 text-lg font-bold">
             Peringatan Stok Bahan Menipis ({lowStockMaterials.length} Item)
-          </h1>
-          <p className="text-xs text-brand-700 mt-1 leading-relaxed">
+          </p>
+          <p className="text-xs text-primary mt-1 leading-relaxed">
             Daftar material berikut berada di bawah ambang batas minimal stok fisik. Segera lakukan pemesanan ke supplier atau klik 'Restock' untuk memperbarui kuantitas.
           </p>
         </div>

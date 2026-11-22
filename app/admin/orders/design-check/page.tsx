@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import DesignCheckClient from "./DesignCheckClient";
+import AdminPageHeader from "@/components/AdminPageHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -17,18 +18,12 @@ export default async function AdminDesignCheckPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <span className="text-xs font-bold text-brand-600 uppercase tracking-wider">
-          Quality Gate & Pra-Cetak
-        </span>
-        <h1 className="text-2xl font-black text-ink-900 mt-1">
-          Validasi Desain Pelanggan
-        </h1>
-        <p className="text-xs text-ink-500 mt-0.5">
-          Periksa resolusi, warna, dan proporsi file cetak sebelum masuk ke antrean mesin produksi.
-        </p>
-      </div>
+    <div className="mx-auto w-full max-w-[1280px] space-y-6">
+      <AdminPageHeader
+        eyebrow="Quality Gate & Pra-Cetak"
+        title="Validasi Desain"
+        description="Periksa resolusi, warna, dan proporsi file cetak sebelum masuk ke antrean mesin produksi."
+      />
 
       <DesignCheckClient initialOrders={checkingOrders} />
     </div>

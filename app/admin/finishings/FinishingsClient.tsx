@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { formatRupiah } from "@/lib/utils";
 import { Scissors, Plus, Trash2, Edit, X, Loader2 } from "lucide-react";
+import AdminStatCard from "@/components/AdminStatCard";
 
 interface Props {
   initialFinishings: any[];
@@ -100,32 +101,45 @@ export default function FinishingsClient({ initialFinishings }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <span className="text-xs font-bold text-brand-600 uppercase tracking-wider">
-            Layanan Tambahan
-          </span>
-          <h1 className="text-2xl font-black text-ink-900 mt-1">
-            Kelola Opsi Finishing
-          </h1>
-          <p className="text-xs text-ink-500 mt-0.5">
-            Daftar pekerjaan finishing pasca-cetak (mata ayam, laminasi, lipat, box).
-          </p>
-        </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <AdminStatCard
+          label="Opsi finishing"
+          value={finishings.length}
+          caption="Layanan pasca-cetak tersedia"
+          icon={Scissors}
+          tone="yellow"
+        />
+        <AdminStatCard
+          label="Total penggunaan"
+          value={finishings.reduce((sum, finishing) => sum + (finishing._count?.orders || 0), 0)}
+          caption="Pemakaian pada pesanan"
+          icon={Plus}
+          tone="mint"
+        />
+        <AdminStatCard
+          label="Tarif rata-rata"
+          value={formatRupiah(finishings.length ? Math.round(finishings.reduce((sum, finishing) => sum + finishing.price, 0) / finishings.length) : 0)}
+          caption="Rata-rata biaya finishing"
+          icon={Scissors}
+          tone="lavender"
+        />
+      </div>
+
+      <div className="flex justify-end">
         <button
           type="button"
           onClick={openCreateModal}
-          className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/20 transition flex items-center gap-1.5 self-start sm:self-auto"
+          className="px-4 py-2.5 bg-primary text-on-primary rounded-lg font-bold text-xs shadow-sm transition flex items-center gap-1.5"
         >
           <Plus className="w-4 h-4" />
           <span>Tambah Finishing Baru</span>
         </button>
       </div>
 
-      <div className="bg-white rounded-3xl border border-ink-200 shadow-sm overflow-hidden">
+      <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-ink-700">
-            <thead className="bg-ink-50 border-b border-ink-200 text-ink-500 font-bold uppercase tracking-wider text-[10px]">
+          <table className="w-full text-left text-xs text-on-surface-variant">
+            <thead className="bg-surface-container-low border-b border-outline-variant text-outline font-bold uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="py-3.5 px-4">Nama Layanan Finishing</th>
                 <th className="py-3.5 px-4">Biaya</th>
@@ -136,15 +150,15 @@ export default function FinishingsClient({ initialFinishings }: Props) {
             </thead>
             <tbody className="divide-y divide-ink-100">
               {finishings.map((f) => (
-                <tr key={f.id} className="hover:bg-ink-50/80 transition">
-                  <td className="py-3.5 px-4 font-bold text-ink-900">{f.name}</td>
-                  <td className="py-3.5 px-4 font-extrabold text-brand-600">
+                <tr key={f.id} className="hover:bg-surface-container-low/80 transition">
+                  <td className="py-3.5 px-4 font-bold text-on-surface">{f.name}</td>
+                  <td className="py-3.5 px-4 font-extrabold text-primary">
                     {formatRupiah(f.price)}
                   </td>
-                  <td className="py-3.5 px-4 uppercase font-semibold text-ink-700">
+                  <td className="py-3.5 px-4 uppercase font-semibold text-on-surface-variant">
                     Per {f.unit}
                   </td>
-                  <td className="py-3.5 px-4 text-center font-bold text-ink-700">
+                  <td className="py-3.5 px-4 text-center font-bold text-on-surface-variant">
                     {f._count?.orders || 0}
                   </td>
                   <td className="py-3.5 px-4 text-center">
@@ -152,7 +166,7 @@ export default function FinishingsClient({ initialFinishings }: Props) {
                       <button
                         type="button"
                         onClick={() => openEditModal(f)}
-                        className="p-1.5 text-ink-500 hover:text-brand-600 hover:bg-ink-100 rounded-lg transition"
+                        className="p-1.5 text-outline hover:text-primary hover:bg-surface-container rounded-lg transition"
                         title="Edit"
                       >
                         <Edit className="w-3.5 h-3.5" />
@@ -160,7 +174,7 @@ export default function FinishingsClient({ initialFinishings }: Props) {
                       <button
                         type="button"
                         onClick={() => handleDelete(f.id)}
-                        className="p-1.5 text-ink-500 hover:text-brand-600 hover:bg-ink-100 rounded-lg transition"
+                        className="p-1.5 text-outline hover:text-primary hover:bg-surface-container rounded-lg transition"
                         title="Hapus"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -176,26 +190,26 @@ export default function FinishingsClient({ initialFinishings }: Props) {
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl border border-ink-100">
-            <div className="flex items-center justify-between pb-3 border-b border-ink-100">
-              <h3 className="font-bold text-sm text-ink-900">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl border border-surface-container">
+            <div className="flex items-center justify-between pb-3 border-b border-surface-container">
+              <h3 className="font-bold text-sm text-on-surface">
                 {editingFinishing ? "Edit Finishing" : "Tambah Finishing Baru"}
               </h3>
               <button
                 onClick={() => setModalOpen(false)}
-                className="p-1 text-ink-400 hover:text-ink-700"
+                className="p-1 text-outline hover:text-on-surface-variant"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {error && (
-              <p className="text-xs text-brand-600 bg-brand-50 p-2.5 rounded-xl">{error}</p>
+              <p className="text-xs text-primary bg-surface-container p-2.5 rounded-xl">{error}</p>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-ink-700 block mb-1">Nama Finishing *</label>
+                <label className="font-bold text-on-surface-variant block mb-1">Nama Finishing *</label>
                 <input
                   type="text"
                   required
@@ -208,7 +222,7 @@ export default function FinishingsClient({ initialFinishings }: Props) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-ink-700 block mb-1">Biaya (Rp) *</label>
+                  <label className="font-bold text-on-surface-variant block mb-1">Biaya (Rp) *</label>
                   <input
                     type="number"
                     required
@@ -219,7 +233,7 @@ export default function FinishingsClient({ initialFinishings }: Props) {
                   />
                 </div>
                 <div>
-                  <label className="font-bold text-ink-700 block mb-1">Satuan *</label>
+                  <label className="font-bold text-on-surface-variant block mb-1">Satuan *</label>
                   <input
                     type="text"
                     required
@@ -235,14 +249,14 @@ export default function FinishingsClient({ initialFinishings }: Props) {
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 border border-ink-200 text-ink-600 rounded-xl font-semibold"
+                  className="px-4 py-2 border border-outline-variant text-on-surface-variant rounded-xl font-semibold"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-brand-600 text-white rounded-xl font-bold flex items-center gap-1.5"
+                  className="px-4 py-2 bg-primary-container text-white rounded-xl font-bold flex items-center gap-1.5"
                 >
                   {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>{editingFinishing ? "Simpan" : "Tambah"}</span>

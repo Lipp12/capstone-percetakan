@@ -15,6 +15,7 @@ import {
   ThumbsUp,
   FileText,
 } from "lucide-react";
+import AdminStatCard from "@/components/AdminStatCard";
 
 interface ReviewItem {
   id: string;
@@ -121,96 +122,39 @@ export default function ReviewsClient({ initialReviews }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Header Halaman (Identik dengan format Header Semua Pesanan) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <span className="text-xs font-bold text-brand-600 uppercase tracking-wider">
-            Kepuasan Pelanggan
-          </span>
-          <h1 className="text-2xl font-black text-ink-900 mt-1 flex items-center gap-2">
-            <span>Ulasan & Penilaian Pelanggan</span>
-          </h1>
-          <p className="text-xs text-ink-500 mt-0.5">
-            Daftar testimoni, penilaian bintang, dan masukan mutu cetakan dari pesanan yang telah selesai.
-          </p>
-        </div>
-        <span className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-ink-100 text-ink-600 self-start sm:self-auto">
-          {reviews.length} Total Ulasan Masuk
-        </span>
-      </div>
-
-      {/* 4 Cards Metrik Ringkasan (Identik dengan Dashboard Admin) */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
-        {/* Rata-rata Skor */}
-        <div className="p-4 sm:p-5 bg-white rounded-3xl border border-ink-200 shadow-sm space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-ink-400 font-semibold uppercase tracking-wider">
-              Rata-rata Rating
-            </span>
-            <div className="p-2 bg-amber-50 text-amber-600 rounded-md">
-              <Star className="w-4 h-4 fill-amber-400" />
-            </div>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <p className="text-lg sm:text-2xl font-bold text-ink-900">
-              {stats.average}
-            </p>
-            <span className="text-xs font-semibold text-amber-600">/ 5.0</span>
-          </div>
-          <span className="text-[10px] text-ink-400">Dari seluruh pesanan selesai</span>
-        </div>
-
-        {/* Tingkat Kepuasan Positif */}
-        <div className="p-4 sm:p-5 bg-white rounded-3xl border border-ink-200 shadow-sm space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-ink-400 font-semibold uppercase tracking-wider">
-              Tingkat Kepuasan
-            </span>
-            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-md">
-              <ThumbsUp className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-lg sm:text-2xl font-bold text-emerald-600">
-            {stats.positivePercentage}%
-          </p>
-          <span className="text-[10px] text-ink-400">Rating bintang 4 & 5</span>
-        </div>
-
-        {/* Ulasan Sempurna 5 Bintang */}
-        <div className="p-4 sm:p-5 bg-white rounded-3xl border border-ink-200 shadow-sm space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-ink-400 font-semibold uppercase tracking-wider">
-              Bintang 5 Penuh
-            </span>
-            <div className="p-2 bg-brand-50 text-brand-600 rounded-md">
-              <Award className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-lg sm:text-2xl font-bold text-ink-900">
-            {stats.fiveStarCount}
-          </p>
-          <span className="text-[10px] text-ink-400">Pesanan dinilai sempurna</span>
-        </div>
-
-        {/* Total Ulasan Masuk */}
-        <div className="p-4 sm:p-5 bg-white rounded-3xl border border-ink-200 shadow-sm space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-ink-400 font-semibold uppercase tracking-wider">
-              Total Ulasan
-            </span>
-            <div className="p-2 bg-cyan-50 text-cyan-700 rounded-md">
-              <MessageSquare className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-lg sm:text-2xl font-bold text-ink-900">
-            {stats.total}
-          </p>
-          <span className="text-[10px] text-ink-400">Ulasan tercatat di database</span>
-        </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <AdminStatCard
+          label="Rata-rata Rating"
+          value={`${stats.average} / 5.0`}
+          caption="Dari seluruh pesanan selesai"
+          icon={Star}
+          tone="yellow"
+        />
+        <AdminStatCard
+          label="Tingkat Kepuasan"
+          value={`${stats.positivePercentage}%`}
+          caption="Rating bintang 4 & 5"
+          icon={ThumbsUp}
+          tone="mint"
+        />
+        <AdminStatCard
+          label="Bintang 5 Penuh"
+          value={stats.fiveStarCount}
+          caption="Pesanan dinilai sempurna"
+          icon={Award}
+          tone="rose"
+        />
+        <AdminStatCard
+          label="Total Ulasan"
+          value={stats.total}
+          caption="Ulasan tercatat di database"
+          icon={MessageSquare}
+          tone="lavender"
+        />
       </div>
 
       {/* Filter Status Bintang & Search Bar (Identik dengan Tabel Pesanan Masuk) */}
-      <div className="bg-white p-4 rounded-3xl border border-ink-200 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
+      <div className="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-1.5 w-full lg:w-auto">
           {ratingTabs.map((st) => (
             <button
@@ -219,8 +163,8 @@ export default function ReviewsClient({ initialReviews }: Props) {
               onClick={() => setFilterRating(st.value)}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
                 filterRating === st.value
-                  ? "bg-brand-600 text-white shadow-sm"
-                  : "bg-ink-100 text-ink-600 hover:bg-ink-200"
+                  ? "bg-primary text-on-primary shadow-sm"
+                  : "bg-surface-container text-on-surface-variant hover:bg-[#ece3d4]"
               }`}
             >
               {st.label}
@@ -229,31 +173,31 @@ export default function ReviewsClient({ initialReviews }: Props) {
         </div>
 
         <div className="relative w-full lg:w-72">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-outline" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari pelanggan / produk / no order..."
-            className="w-full pl-9 pr-3 py-2 text-xs border border-ink-200 rounded-xl focus:ring-2 focus:ring-brand-600 outline-none transition"
+            className="w-full pl-9 pr-3 py-2 text-xs border border-outline-variant rounded-xl focus:ring-2 focus:ring-brand-600 outline-none transition"
           />
         </div>
       </div>
 
       {/* Tabel Rekap Ulasan (Identik dengan Format Tabel Admin Pesanan) */}
-      <div className="bg-white rounded-3xl border border-ink-200 shadow-sm overflow-hidden">
+      <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
         {filteredReviews.length === 0 ? (
-          <div className="p-12 text-center text-ink-400 text-xs">
-            <MessageSquare className="w-8 h-8 text-ink-300 mx-auto mb-2" />
-            <p className="font-semibold text-ink-600">Tidak ada ulasan yang sesuai kriteria.</p>
-            <p className="text-[11px] text-ink-400 mt-0.5">
+          <div className="p-12 text-center text-outline text-xs">
+            <MessageSquare className="w-8 h-8 text-outline mx-auto mb-2" />
+            <p className="font-semibold text-on-surface-variant">Tidak ada ulasan yang sesuai kriteria.</p>
+            <p className="text-[11px] text-outline mt-0.5">
               Ulasan akan otomatis tercatat saat pelanggan mengisi penilaian pesanan selesai.
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-ink-700">
-              <thead className="bg-ink-50 border-b border-ink-200 text-ink-500 font-bold uppercase tracking-wider text-[10px]">
+            <table className="w-full text-left text-xs text-on-surface-variant">
+              <thead className="bg-surface-container-low border-b border-outline-variant text-outline font-bold uppercase tracking-wider text-[10px]">
                 <tr>
                   <th className="py-3.5 px-4">No. Pesanan & Tanggal</th>
                   <th className="py-3.5 px-4">Pelanggan</th>
@@ -265,27 +209,27 @@ export default function ReviewsClient({ initialReviews }: Props) {
               </thead>
               <tbody className="divide-y divide-ink-100">
                 {filteredReviews.map((rev) => (
-                  <tr key={rev.id} className="hover:bg-ink-50/80 transition">
+                  <tr key={rev.id} className="hover:bg-surface-container-low/80 transition">
                     {/* No. Pesanan & Tanggal */}
-                    <td className="py-3.5 px-4 font-bold text-ink-900 align-top">
-                      <span className="block font-bold text-ink-900">
+                    <td className="py-3.5 px-4 font-bold text-on-surface align-top">
+                      <span className="block font-bold text-on-surface">
                         {rev.order.orderNumber}
                       </span>
-                      <span className="block text-[10px] text-ink-400 font-normal mt-0.5">
+                      <span className="block text-[10px] text-outline font-normal mt-0.5">
                         {formatDateTime(rev.createdAt)}
                       </span>
                     </td>
 
                     {/* Pelanggan */}
                     <td className="py-3.5 px-4 align-top">
-                      <span className="font-semibold text-ink-900 block">
+                      <span className="font-semibold text-on-surface block">
                         {rev.user.name}
                       </span>
-                      <span className="text-[10px] text-ink-400 block">
+                      <span className="text-[10px] text-outline block">
                         {rev.user.email}
                       </span>
                       {rev.user.phone && (
-                        <span className="text-[10px] text-ink-400 block">
+                        <span className="text-[10px] text-outline block">
                           {rev.user.phone}
                         </span>
                       )}
@@ -293,7 +237,7 @@ export default function ReviewsClient({ initialReviews }: Props) {
 
                     {/* Produk */}
                     <td className="py-3.5 px-4 align-top">
-                      <span className="font-medium text-ink-800 block">
+                      <span className="font-medium text-on-surface block">
                         {rev.product.name}
                       </span>
                     </td>
@@ -311,7 +255,7 @@ export default function ReviewsClient({ initialReviews }: Props) {
                             }`}
                           />
                         ))}
-                        <span className="text-xs font-bold text-ink-900 ml-1">
+                        <span className="text-xs font-bold text-on-surface ml-1">
                           {rev.rating}/5
                         </span>
                       </div>
@@ -320,11 +264,11 @@ export default function ReviewsClient({ initialReviews }: Props) {
                     {/* Komentar Ulasan */}
                     <td className="py-3.5 px-4 align-top max-w-sm">
                       {rev.comment ? (
-                        <p className="text-xs text-ink-700 leading-relaxed bg-ink-50 p-2.5 rounded-xl border border-ink-100/80">
+                        <p className="text-xs text-on-surface-variant leading-relaxed bg-surface-container-low p-2.5 rounded-xl border border-surface-container/80">
                           &ldquo;{rev.comment}&rdquo;
                         </p>
                       ) : (
-                        <span className="text-[11px] text-ink-400 italic">
+                        <span className="text-[11px] text-outline italic">
                           (Tanpa ulasan tertulis)
                         </span>
                       )}
@@ -334,7 +278,7 @@ export default function ReviewsClient({ initialReviews }: Props) {
                     <td className="py-3.5 px-4 align-top text-center whitespace-nowrap">
                       <Link
                         href={`/admin/orders/${rev.order.id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-ink-200 text-ink-700 hover:text-brand-600 hover:border-brand-300 hover:bg-brand-50/50 font-semibold text-[11px] transition shadow-2xs"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-outline-variant text-on-surface-variant hover:text-primary hover:border-brand-300 hover:bg-surface-container/50 font-semibold text-[11px] transition shadow-2xs"
                         title="Buka detail pesanan di panel admin"
                       >
                         <span>Lihat Order</span>

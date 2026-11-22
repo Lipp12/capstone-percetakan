@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import RevenueClient from "./RevenueClient";
+import AdminPageHeader from "@/components/AdminPageHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -17,20 +18,12 @@ export default async function AdminRevenuePage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
-            Analisis Revenue
-          </span>
-          <h1 className="text-2xl font-black text-ink-900 mt-1">
-            Laporan Pendapatan Percetakan
-          </h1>
-          <p className="text-xs text-ink-500 mt-0.5">
-            Pantau performa penjualan, tren revenue, dan produk paling menguntungkan.
-          </p>
-        </div>
-      </div>
+    <div className="mx-auto w-full max-w-[1280px] space-y-6">
+      <AdminPageHeader
+        eyebrow="Analisis Revenue"
+        title="Laporan Pendapatan"
+        description="Pantau performa penjualan, tren revenue, dan produk paling menguntungkan."
+      />
 
       <RevenueClient initialOrders={completedOrders as any} />
     </div>

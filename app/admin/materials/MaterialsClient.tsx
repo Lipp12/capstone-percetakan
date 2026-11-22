@@ -13,6 +13,7 @@ import {
   ArrowUpCircle,
   CheckCircle2,
 } from "lucide-react";
+import AdminStatCard from "@/components/AdminStatCard";
 
 interface Props {
   initialMaterials: any[];
@@ -165,23 +166,42 @@ export default function MaterialsClient({ initialMaterials }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <span className="text-xs font-bold text-brand-600 uppercase tracking-wider">
-            Inventaris & Bahan Baku
-          </span>
-          <h1 className="text-2xl font-black text-ink-900 mt-1">
-            Manajemen Material & Stok
-          </h1>
-          <p className="text-xs text-ink-500 mt-0.5">
-            Pantau ketersediaan stok fisik dan batas aman minimal (min stock).
-          </p>
-        </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <AdminStatCard
+          label="Total bahan"
+          value={materials.length}
+          caption="Material dalam inventaris"
+          icon={Layers}
+          tone="yellow"
+        />
+        <AdminStatCard
+          label="Stok aman"
+          value={materials.filter((material) => material.stock >= material.minStock).length}
+          caption="Di atas ambang minimum"
+          icon={CheckCircle2}
+          tone="mint"
+        />
+        <AdminStatCard
+          label="Stok rendah"
+          value={materials.filter((material) => material.stock < material.minStock).length}
+          caption="Perlu restock"
+          icon={AlertTriangle}
+          tone="rose"
+        />
+        <AdminStatCard
+          label="Nilai stok"
+          value={formatRupiah(materials.reduce((sum, material) => sum + material.stock * material.pricePerUnit, 0))}
+          caption="Estimasi nilai inventaris"
+          icon={ArrowUpCircle}
+          tone="lavender"
+        />
+      </div>
+
+      <div className="flex justify-end">
         <button
           type="button"
           onClick={openCreateModal}
-          className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/20 transition flex items-center gap-1.5 self-start sm:self-auto"
+          className="px-4 py-2.5 bg-primary text-on-primary rounded-lg font-bold text-xs shadow-sm transition flex items-center gap-1.5"
         >
           <Plus className="w-4 h-4" />
           <span>Tambah Material Baru</span>
@@ -189,10 +209,10 @@ export default function MaterialsClient({ initialMaterials }: Props) {
       </div>
 
       {/* Tabel Material */}
-      <div className="bg-white rounded-3xl border border-ink-200 shadow-sm overflow-hidden">
+      <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-ink-700">
-            <thead className="bg-ink-50 border-b border-ink-200 text-ink-500 font-bold uppercase tracking-wider text-[10px]">
+          <table className="w-full text-left text-xs text-on-surface-variant">
+            <thead className="bg-surface-container-low border-b border-outline-variant text-outline font-bold uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="py-3.5 px-4">Nama Material</th>
                 <th className="py-3.5 px-4">Satuan</th>
@@ -209,35 +229,35 @@ export default function MaterialsClient({ initialMaterials }: Props) {
                 return (
                   <tr
                     key={m.id}
-                    className={`transition ${isLow ? "bg-brand-50/50" : "hover:bg-ink-50/80"}`}
+                    className={`transition ${isLow ? "bg-surface-container/50" : "hover:bg-surface-container-low/80"}`}
                   >
                     <td className="py-3.5 px-4">
-                      <span className="font-bold text-ink-900 block">{m.name}</span>
+                      <span className="font-bold text-on-surface block">{m.name}</span>
                       {m.description && (
-                        <span className="text-[10px] text-ink-400">{m.description}</span>
+                        <span className="text-[10px] text-outline">{m.description}</span>
                       )}
                     </td>
                     <td className="py-3.5 px-4 uppercase font-semibold">{m.unit}</td>
                     <td className="py-3.5 px-4 text-right font-medium">
                       {formatRupiah(m.pricePerUnit)}
                     </td>
-                    <td className="py-3.5 px-4 text-center font-extrabold text-ink-900">
+                    <td className="py-3.5 px-4 text-center font-extrabold text-on-surface">
                       <span
                         className={`inline-block px-2.5 py-1 rounded-xl text-xs ${
                           isLow
-                            ? "bg-brand-600 text-white animate-pulse"
-                            : "bg-ink-100 text-ink-800"
+                            ? "bg-error-container text-on-error-container animate-pulse"
+                            : "bg-surface-container text-on-surface"
                         }`}
                       >
                         {m.stock} {m.unit}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-center text-ink-500 font-medium">
+                    <td className="py-3.5 px-4 text-center text-outline font-medium">
                       {m.minStock} {m.unit}
                     </td>
                     <td className="py-3.5 px-4 text-center">
                       {isLow ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-brand-100 text-brand-700 border border-brand-200">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-brand-100 text-primary border border-brand-200">
                           <AlertTriangle className="w-3 h-3" />
                           <span>Stok Rendah</span>
                         </span>
@@ -262,7 +282,7 @@ export default function MaterialsClient({ initialMaterials }: Props) {
                         <button
                           type="button"
                           onClick={() => openEditModal(m)}
-                          className="p-1.5 text-ink-500 hover:text-brand-600 hover:bg-ink-100 rounded-lg transition"
+                          className="p-1.5 text-outline hover:text-primary hover:bg-surface-container rounded-lg transition"
                           title="Edit"
                         >
                           <Edit className="w-3.5 h-3.5" />
@@ -270,7 +290,7 @@ export default function MaterialsClient({ initialMaterials }: Props) {
                         <button
                           type="button"
                           onClick={() => handleDelete(m.id)}
-                          className="p-1.5 text-ink-500 hover:text-brand-600 hover:bg-ink-100 rounded-lg transition"
+                          className="p-1.5 text-outline hover:text-primary hover:bg-surface-container rounded-lg transition"
                           title="Hapus"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -288,26 +308,26 @@ export default function MaterialsClient({ initialMaterials }: Props) {
       {/* Modal Tambah/Edit Material */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-ink-100">
-            <div className="flex items-center justify-between pb-3 border-b border-ink-100">
-              <h3 className="font-bold text-sm text-ink-900">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-surface-container">
+            <div className="flex items-center justify-between pb-3 border-b border-surface-container">
+              <h3 className="font-bold text-sm text-on-surface">
                 {editingMaterial ? "Edit Material" : "Tambah Material Baru"}
               </h3>
               <button
                 onClick={() => setModalOpen(false)}
-                className="p-1 text-ink-400 hover:text-ink-700"
+                className="p-1 text-outline hover:text-on-surface-variant"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {error && (
-              <p className="text-xs text-brand-600 bg-brand-50 p-2.5 rounded-xl">{error}</p>
+              <p className="text-xs text-primary bg-surface-container p-2.5 rounded-xl">{error}</p>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-ink-700 block mb-1">Nama Material *</label>
+                <label className="font-bold text-on-surface-variant block mb-1">Nama Material *</label>
                 <input
                   type="text"
                   required
@@ -319,7 +339,7 @@ export default function MaterialsClient({ initialMaterials }: Props) {
               </div>
 
               <div>
-                <label className="font-bold text-ink-700 block mb-1">Deskripsi</label>
+                <label className="font-bold text-on-surface-variant block mb-1">Deskripsi</label>
                 <input
                   type="text"
                   value={description}
@@ -331,7 +351,7 @@ export default function MaterialsClient({ initialMaterials }: Props) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-ink-700 block mb-1">Harga Beli / Unit (Rp)</label>
+                  <label className="font-bold text-on-surface-variant block mb-1">Harga Beli / Unit (Rp)</label>
                   <input
                     type="number"
                     required
@@ -342,7 +362,7 @@ export default function MaterialsClient({ initialMaterials }: Props) {
                   />
                 </div>
                 <div>
-                  <label className="font-bold text-ink-700 block mb-1">Satuan *</label>
+                  <label className="font-bold text-on-surface-variant block mb-1">Satuan *</label>
                   <input
                     type="text"
                     required
@@ -356,7 +376,7 @@ export default function MaterialsClient({ initialMaterials }: Props) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-ink-700 block mb-1">Stok Awal</label>
+                  <label className="font-bold text-on-surface-variant block mb-1">Stok Awal</label>
                   <input
                     type="number"
                     min="0"
@@ -366,7 +386,7 @@ export default function MaterialsClient({ initialMaterials }: Props) {
                   />
                 </div>
                 <div>
-                  <label className="font-bold text-ink-700 block mb-1">Batas Minimal Stok</label>
+                  <label className="font-bold text-on-surface-variant block mb-1">Batas Minimal Stok</label>
                   <input
                     type="number"
                     min="0"
@@ -381,14 +401,14 @@ export default function MaterialsClient({ initialMaterials }: Props) {
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 border border-ink-200 text-ink-600 rounded-xl font-semibold"
+                  className="px-4 py-2 border border-outline-variant text-on-surface-variant rounded-xl font-semibold"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-brand-600 text-white rounded-xl font-bold flex items-center gap-1.5"
+                  className="px-4 py-2 bg-primary-container text-white rounded-xl font-bold flex items-center gap-1.5"
                 >
                   {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>{editingMaterial ? "Simpan" : "Tambah"}</span>
@@ -402,29 +422,29 @@ export default function MaterialsClient({ initialMaterials }: Props) {
       {/* Modal Restock Cepat */}
       {restockModalOpen && targetRestock && (
         <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl border border-ink-100">
-            <div className="flex items-center justify-between pb-3 border-b border-ink-100">
-              <h3 className="font-bold text-sm text-ink-900">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl border border-surface-container">
+            <div className="flex items-center justify-between pb-3 border-b border-surface-container">
+              <h3 className="font-bold text-sm text-on-surface">
                 Restock: {targetRestock.name}
               </h3>
               <button
                 onClick={() => setRestockModalOpen(false)}
-                className="p-1 text-ink-400 hover:text-ink-700"
+                className="p-1 text-outline hover:text-on-surface-variant"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleRestock} className="space-y-4 text-xs">
-              <div className="p-3 bg-ink-50 rounded-xl space-y-1">
-                <span className="text-ink-500">Stok Saat Ini:</span>
-                <p className="font-extrabold text-sm text-ink-900">
+              <div className="p-3 bg-surface-container-low rounded-xl space-y-1">
+                <span className="text-outline">Stok Saat Ini:</span>
+                <p className="font-extrabold text-sm text-on-surface">
                   {targetRestock.stock} {targetRestock.unit}
                 </p>
               </div>
 
               <div>
-                <label className="font-bold text-ink-700 block mb-1">
+                <label className="font-bold text-on-surface-variant block mb-1">
                   Jumlah Tambahan Stok ({targetRestock.unit}) *
                 </label>
                 <input
@@ -441,7 +461,7 @@ export default function MaterialsClient({ initialMaterials }: Props) {
                 <button
                   type="button"
                   onClick={() => setRestockModalOpen(false)}
-                  className="px-4 py-2 border border-ink-200 text-ink-600 rounded-xl font-semibold"
+                  className="px-4 py-2 border border-outline-variant text-on-surface-variant rounded-xl font-semibold"
                 >
                   Batal
                 </button>

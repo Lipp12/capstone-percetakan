@@ -79,7 +79,7 @@ export default function ChatView({
   return (
     <div
       className={cn(
-        "flex flex-col bg-ink-50/60",
+        "flex flex-col bg-surface",
         fill
           ? "h-full w-full"
           : "min-h-screen items-center justify-center p-3 sm:p-6",

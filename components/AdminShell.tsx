@@ -23,7 +23,7 @@ export default function AdminShell({
   const isChatRoute = pathname.startsWith("/admin/chat");
 
   return (
-    <div className="h-screen overflow-hidden bg-ink-50">
+    <div className="h-screen overflow-hidden bg-surface">
       <Sidebar />
 
       {/* Backdrop untuk drawer mobile */}
@@ -31,7 +31,7 @@ export default function AdminShell({
         onClick={closeMobile}
         aria-hidden
         className={cn(
-          "fixed inset-0 z-40 bg-ink-900/50 backdrop-blur-[2px] transition-opacity duration-300 xl:hidden",
+          "fixed inset-0 z-40 bg-on-surface/50 backdrop-blur-[2px] transition-opacity duration-300 xl:hidden",
           isMobileOpen
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0",
@@ -41,7 +41,7 @@ export default function AdminShell({
       <div
         className={cn(
           "flex h-full flex-col transition-[padding] duration-300 ease-in-out",
-          isOpen ? "xl:ps-sidebar" : "xl:ps-0",
+          isOpen ? "xl:ps-72" : "xl:ps-0",
         )}
       >
         <AdminHeader />

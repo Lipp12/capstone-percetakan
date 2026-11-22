@@ -97,8 +97,8 @@ function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col bg-ink-100/80 rounded-lg p-3 sm:p-4 min-h-[420px] border transition snap-start ${
-        isOver ? "border-brand-600 bg-brand-50/50" : "border-ink-200"
+      className={`flex flex-col bg-surface-container-low rounded-xl p-3 sm:p-4 min-h-[420px] border transition snap-start ${
+        isOver ? "border-primary bg-primary-fixed/20" : "border-outline-variant/50"
       }`}
     >
       {/* Header Kolom */}
@@ -143,7 +143,7 @@ function KanbanCard({
   onMoveQuick: (orderId: string, targetStatus: string) => void;
 }) {
   return (
-    <div className="bg-white p-4 rounded-lg border border-ink-200 shadow-sm hover:shadow-md transition space-y-2.5">
+    <div className="bg-surface-container-lowest p-4 rounded-xl shadow-sm hover:shadow-md transition space-y-2.5">
       <div className="flex items-center justify-between">
         <span className="font-extrabold text-xs text-ink-900">
           {order.orderNumber}
