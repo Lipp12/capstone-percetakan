@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { formatRupiah } from "@/lib/utils";
-import { ArrowRight, Layers } from "lucide-react";
+import { ArrowRight, MessageCircle } from "lucide-react";
 import ProductImage from "./ProductImage";
 
 interface ProductProps {
@@ -106,13 +106,22 @@ export default function ProductCard({ product, index = 0 }: ProductProps) {
               {formatRupiah(product.basePrice)}
             </span>
           </div>
-          <Link
-            href={`/order/${product.id}`}
-            className="px-4 py-2 rounded-xl bg-cetak-orange hover:bg-cetak-orange-hover text-white font-label-md text-label-md shadow-hard-shadow-offset active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center gap-1 shrink-0"
-          >
-            <span>Pesan</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Link
+              href={`/chat?mode=ai&productId=${product.id}`}
+              title="Tanya produk ini ke Chatbot AI"
+              className="p-2 rounded-xl border border-outline-variant bg-surface-container-lowest text-primary hover:bg-primary-container/40 transition"
+            >
+              <MessageCircle className="w-4 h-4" />
+            </Link>
+            <Link
+              href={`/order/${product.id}`}
+              className="px-4 py-2 rounded-xl bg-cetak-orange hover:bg-cetak-orange-hover text-white font-label-md text-label-md shadow-hard-shadow-offset active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center gap-1"
+            >
+              <span>Pesan</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </div>
     </div>

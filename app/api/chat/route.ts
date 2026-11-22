@@ -18,9 +18,6 @@ interface OpenRouterResponse {
   error?: {
     message?: string;
     code?: number | string;
-    metadata?: {
-      limit_source?: string;
-    };
   };
 }
 
@@ -91,26 +88,8 @@ export async function POST(req: NextRequest) {
       const errText = await res.text();
       console.error(`[OpenRouter API Error ${res.status}]:`, errText);
 
-      let providerError: OpenRouterResponse["error"];
-      try {
-        providerError = (JSON.parse(errText) as OpenRouterResponse).error;
-      } catch {
-        providerError = undefined;
-      }
-
-      const isFreeDailyLimit =
-        providerError?.metadata?.limit_source === "openrouter_free_tier_daily" ||
-        providerError?.message?.includes("free-models-per-day");
-      const message = isFreeDailyLimit
-        ? "Kuota harian model AI gratis OpenRouter sudah habis. Tunggu kuota direset atau gunakan model/API key berbayar pada konfigurasi AI."
-        : res.status === 429
-          ? "Layanan AI sedang membatasi permintaan. Silakan coba lagi nanti."
-          : "Gagal memanggil AI. Silakan coba beberapa saat lagi.";
-
-      return NextResponse.json(
-        { error: message },
-        { status: res.status }
-      );
+      const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content || "";
+      return NextResponse.json({ reply: localReply(lastUser) });
     }
 
     const data = (await res.json()) as OpenRouterResponse;
@@ -120,13 +99,37 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ reply });
   } catch (err: unknown) {
-    // 6. Tangani error tak terduga (misal jaringan / internal server)
     const errorMessage = err instanceof Error ? err.message : String(err);
     console.error("[Chat Route Server Error]:", errorMessage);
-
-    return NextResponse.json(
-      { error: "Terjadi kesalahan di server", detail: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ reply: localReply("") });
   }
+}
+
+function localReply(question: string): string {
+  const q = question.toLowerCase();
+  if (q.includes("bahan") || q.includes("kertas")) {
+    return "Untuk percetakan, pilihan bahan umum: Art Paper (poster/brosur), Art Carton (kemasan), HVS (dokumen), Vinyl (stiker outdoor). Rekomendasi spesifik tergantung penggunaan indoor/outdoor dan ketahanan air. Silakan cek kalkulator harga untuk estimasi.";
+  }
+  if (q.includes("harga") || q.includes("estimasi") || q.includes("biaya")) {
+    return "Estimasi harga tergantung produk, ukuran, bahan, dan finishing. Gunakan kalkulator harga di halaman produk atau hubungi Admin CS untuk penawaran pasti.";
+  }
+  if (q.includes("stiker") || q.includes("sticker")) {
+    return "Stiker tersedia dalam berbagai bahan (vinyl, chrome, transparan). Proses cetak biasanya 1-3 hari kerja setelah desain disetujui. Ukuran dan jumlah memengaruhi harga.";
+  }
+  if (q.includes("banner") || q.includes("spanduk")) {
+    return "Banner/spanduk umumnya cetak flexi (indoor/outdoor) dengan finishing mata ayam/lipat. Waktu pengerjaan 1-2 hari kerja. Ukuran custom bisa dihitung di kalkulator.";
+  }
+  if (q.includes("kartu nama")) {
+    return "Kartu nama biasanya cetak 1 sisi/2 sisi pada Art Paper/Carton dengan laminasi. Minimal order 1 box (100 lembar), pengerjaan 1-2 hari kerja.";
+  }
+  if (q.includes("poster")) {
+    return "Poster dicetak pada Art Paper dengan berbagai ukuran (A3, A2, A1, dll). Bisa ditambah laminasi. Estimasi 1-2 hari kerja.";
+  }
+  if (q.includes("status") || q.includes("pesanan") || q.includes("tracking")) {
+    return "Cek status pesanan di halaman 'Riwayat Pesanan' atau tracking pesanan. Untuk detail lebih lanjut, hubungi Admin CS.";
+  }
+  if (q.includes("file") || q.includes("desain") || q.includes("revisi")) {
+    return "File desain sebaiknya PDF/CMYK resolusi tinggi. Revisi desain bisa diajukan melalui chat CS dengan menyertakan nomor pesanan.";
+  }
+  return "Maaf, layanan AI sedang sibuk. Saya bisa bantu topik percetakan umum (bahan, harga, stiker, banner, kartu nama, poster, status pesanan, file desain). Silakan tanyakan salah satu, atau gunakan Live Chat Admin untuk bantuan langsung.";
 }

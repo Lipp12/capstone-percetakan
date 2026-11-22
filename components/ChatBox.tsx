@@ -1,15 +1,28 @@
-// components/ChatBox.tsx
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import type { Role } from "@/lib/ai";
-import { cn } from "@/lib/utils";
+import { cn, formatRupiah } from "@/lib/utils";
+import {
+  Bot,
+  CheckCircle2,
+  Clock3,
+  Menu,
+  MessageCircle,
+  Package,
+  Plus,
+  Search,
+  Send,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 
-export type Msg = {
-  role: "user" | "assistant";
-  content: string;
-};
+export type Msg = { role: "user" | "assistant"; content: string };
 
 export type ChatSession = {
   id: string;
@@ -22,22 +35,21 @@ export type ChatSession = {
 
 interface ChatBoxProps {
   role?: Role;
+  channel?: "cs" | "ai";
   onRoleChange?: (role: Role) => void;
   onClose?: () => void;
-  /**
-   * Isi penuh area induk (hanya tinggi & lebar), bukan kolom terpusat.
-   * Dipakai halaman admin yang berada di dalam shell `h-screen`.
-   */
   fill?: boolean;
 }
 
-const getStorageKey = (r: Role) => `capstone_chat_sessions_${r}_v3`;
-const getActiveKey = (r: Role) => `capstone_chat_active_id_${r}_v3`;
+const getStorageKey = (role: Role, channel: "cs" | "ai") =>
+  `capstone_chat_sessions_${role}_${channel}_v4`;
+const getActiveKey = (role: Role, channel: "cs" | "ai") =>
+  `capstone_chat_active_id_${role}_${channel}_v4`;
 
-function createNewSession(role: Role = "customer"): ChatSession {
+function createNewSession(role: Role): ChatSession {
   const now = Date.now();
   return {
-    id: `chat_${now}_${Math.random().toString(36).substring(2, 7)}`,
+    id: `chat_${now}_${Math.random().toString(36).slice(2, 7)}`,
     title: "Percakapan Baru",
     role,
     messages: [],
@@ -46,891 +58,572 @@ function createNewSession(role: Role = "customer"): ChatSession {
   };
 }
 
-function deriveTitle(content: string): string {
-  const cleaned = content.replace(/\s+/g, " ").trim();
-  if (cleaned.length <= 26) return cleaned;
-  return cleaned.slice(0, 26) + "...";
+function deriveTitle(content: string) {
+  const clean = content.replace(/\s+/g, " ").trim();
+  return clean.length <= 26 ? clean : `${clean.slice(0, 26)}...`;
 }
 
-function formatTimestamp(timestamp: number): string {
+function formatTimestamp(timestamp: number) {
   const date = new Date(timestamp);
   const now = new Date();
-  const isToday =
+  const today =
     date.getDate() === now.getDate() &&
     date.getMonth() === now.getMonth() &&
     date.getFullYear() === now.getFullYear();
-
-  if (isToday) {
-    return date.toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
-  return date.toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "short",
-  });
+  return today
+    ? date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+    : date.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
 }
 
 export default function ChatBox({
   role = "customer",
+  channel = "cs",
   onRoleChange,
   onClose,
   fill = false,
 }: ChatBoxProps) {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
-  const [activeSessionId, setActiveSessionId] = useState<string>("");
+  const [activeSessionId, setActiveSessionId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  // State untuk modal konfirmasi hapus
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [deleteModal, setDeleteModal] = useState<{
-    isOpen: boolean;
+    open: boolean;
     mode: "single" | "all";
-    sessionId?: string;
-    sessionTitle?: string;
-  }>({
-    isOpen: false,
-    mode: "single",
-  });
-
+    id?: string;
+    title?: string;
+  }>({ open: false, mode: "single" });
+  const searchParams = useSearchParams();
+  const [chatContext, setChatContext] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 1. Muat data dari localStorage khusus untuk role ini (Admin / Customer terpisah)
   useEffect(() => {
-    setIsMounted(true);
-    const storageKey = getStorageKey(role);
-    const activeKey = getActiveKey(role);
-
+    setMounted(true);
     try {
-      const saved = localStorage.getItem(storageKey);
+      const saved = localStorage.getItem(getStorageKey(role, channel));
       if (saved) {
-        const parsed: ChatSession[] = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        const parsed = JSON.parse(saved) as ChatSession[];
+        if (Array.isArray(parsed) && parsed.length) {
           setSessions(parsed);
-          const savedActiveId = localStorage.getItem(activeKey);
-          const exists = parsed.some((s) => s.id === savedActiveId);
-          const activeId = exists && savedActiveId ? savedActiveId : parsed[0].id;
-          setActiveSessionId(activeId);
+          const savedActive = localStorage.getItem(getActiveKey(role, channel));
+          setActiveSessionId(parsed.some((item) => item.id === savedActive) && savedActive
+            ? savedActive
+            : parsed[0].id);
           return;
         }
       }
-    } catch (e) {
-      console.error("Gagal membaca history dari localStorage:", e);
+    } catch (error) {
+      console.error("Gagal membaca riwayat chat:", error);
     }
-
-    // Default jika belum ada riwayat sama sekali untuk role ini
     const initial = createNewSession(role);
     setSessions([initial]);
     setActiveSessionId(initial.id);
-  }, [role]);
+  }, [role, channel]);
 
-  // 2. Simpan ke localStorage khusus untuk role ini
   useEffect(() => {
-    if (!isMounted || sessions.length === 0) return;
-    const storageKey = getStorageKey(role);
-    const activeKey = getActiveKey(role);
-
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(sessions));
-      if (activeSessionId) {
-        localStorage.setItem(activeKey, activeSessionId);
-      }
-    } catch (e) {
-      console.error("Gagal menyimpan history ke localStorage:", e);
+    const orderId = searchParams.get("orderId");
+    const productId = searchParams.get("productId");
+    if (!orderId && !productId) {
+      setChatContext(null);
+      return;
     }
-  }, [sessions, activeSessionId, isMounted, role]);
 
-  // Sesi aktif saat ini
-  const activeSession = useMemo(() => {
-    return (
-      sessions.find((s) => s.id === activeSessionId) || sessions[0] || null
-    );
-  }, [sessions, activeSessionId]);
+    const params = new URLSearchParams();
+    if (orderId) params.set("orderId", orderId);
+    if (productId) params.set("productId", productId);
 
-  // Auto-scroll ke bawah saat ada pesan baru atau loading
+    fetch(`/api/chat/context?${params.toString()}`)
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => setChatContext(data))
+      .catch(() => setChatContext(null));
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!mounted || !sessions.length) return;
+    localStorage.setItem(getStorageKey(role, channel), JSON.stringify(sessions));
+    if (activeSessionId) localStorage.setItem(getActiveKey(role, channel), activeSessionId);
+  }, [sessions, activeSessionId, mounted, role, channel]);
+
+  const activeSession = useMemo(
+    () => sessions.find((item) => item.id === activeSessionId) || sessions[0] || null,
+    [sessions, activeSessionId],
+  );
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeSession?.messages, loading]);
 
-  // Filter daftar history berdasarkan search query (mencari judul & isi pesan)
   const filteredSessions = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
-    if (!q) return sessions;
-    return sessions.filter((s) => {
-      const titleMatch = s.title.toLowerCase().includes(q);
-      const messageMatch = s.messages.some((m) =>
-        m.content.toLowerCase().includes(q)
-      );
-      return titleMatch || messageMatch;
-    });
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return sessions;
+    return sessions.filter(
+      (session) =>
+        session.title.toLowerCase().includes(query) ||
+        session.messages.some((message) => message.content.toLowerCase().includes(query)),
+    );
   }, [sessions, searchQuery]);
 
-  // Buat sesi chat baru
   function handleNewChat() {
-    const newSession = createNewSession(role);
-    setSessions((prev) => [newSession, ...prev]);
-    setActiveSessionId(newSession.id);
-    setIsSidebarOpen(false);
-    setInput("");
+    const fresh = createNewSession(role);
+    setSessions((previous) => [fresh, ...previous]);
+    setActiveSessionId(fresh.id);
+    setSidebarOpen(false);
   }
 
-  // Pilih sesi percakapan dari daftar history
-  function handleSelectSession(session: ChatSession) {
-    setActiveSessionId(session.id);
-    if (onRoleChange && session.role) {
-      onRoleChange(session.role);
-    }
-    setIsSidebarOpen(false);
-  }
-
-  // Buka dialog konfirmasi hapus 1 sesi
-  function handleOpenDeleteSingle(session: ChatSession, e: React.MouseEvent) {
-    e.stopPropagation();
-    setDeleteModal({
-      isOpen: true,
-      mode: "single",
-      sessionId: session.id,
-      sessionTitle: session.title,
-    });
-  }
-
-  // Buka dialog konfirmasi hapus semua sesi
-  function handleOpenDeleteAll() {
-    setDeleteModal({
-      isOpen: true,
-      mode: "all",
-    });
-  }
-
-  // Eksekusi penghapusan setelah user konfirmasi "Ya, Hapus"
   function confirmDelete() {
-    if (deleteModal.mode === "single" && deleteModal.sessionId) {
-      const targetId = deleteModal.sessionId;
-      const updated = sessions.filter((s) => s.id !== targetId);
-
-      if (updated.length === 0) {
-        const fresh = createNewSession(role);
-        setSessions([fresh]);
-        setActiveSessionId(fresh.id);
-      } else {
-        setSessions(updated);
-        if (activeSessionId === targetId) {
-          setActiveSessionId(updated[0].id);
-          if (onRoleChange && updated[0].role) {
-            onRoleChange(updated[0].role);
-          }
-        }
-      }
-    } else if (deleteModal.mode === "all") {
+    if (deleteModal.mode === "all") {
       const fresh = createNewSession(role);
       setSessions([fresh]);
       setActiveSessionId(fresh.id);
       setSearchQuery("");
+    } else if (deleteModal.id) {
+      const remaining = sessions.filter((session) => session.id !== deleteModal.id);
+      if (!remaining.length) {
+        const fresh = createNewSession(role);
+        setSessions([fresh]);
+        setActiveSessionId(fresh.id);
+      } else {
+        setSessions(remaining);
+        if (activeSessionId === deleteModal.id) setActiveSessionId(remaining[0].id);
+      }
     }
-
-    setDeleteModal({ isOpen: false, mode: "single" });
+    setDeleteModal({ open: false, mode: "single" });
   }
 
-  // Kirim pesan ke API AI
   async function send() {
     if (!input.trim() || loading || !activeSession) return;
-
     const userText = input.trim();
-    const userMsg: Msg = { role: "user", content: userText };
+    const userMessage: Msg = { role: "user", content: userText };
     const currentMessages = activeSession.messages;
-    const newMessages = [...currentMessages, userMsg];
-
-    // Otomatis ubah judul sesi dari pesan pertama
-    const updatedTitle =
-      activeSession.title === "Percakapan Baru" || currentMessages.length === 0
+    const nextMessages = [...currentMessages, userMessage];
+    const nextTitle =
+      activeSession.title === "Percakapan Baru" || !currentMessages.length
         ? deriveTitle(userText)
         : activeSession.title;
 
-    // Perbarui state secara optimistik
-    setSessions((prev) =>
-      prev.map((s) =>
-        s.id === activeSession.id
-          ? {
-              ...s,
-              title: updatedTitle,
-              role,
-              messages: newMessages,
-              updatedAt: Date.now(),
-            }
-          : s
-      )
+    setSessions((previous) =>
+      previous.map((session) =>
+        session.id === activeSession.id
+          ? { ...session, title: nextTitle, role, messages: nextMessages, updatedAt: Date.now() }
+          : session,
+      ),
     );
-
     setInput("");
+
+    if (channel === "cs" && role === "customer") {
+      const adminPendingMessage: Msg = {
+        role: "assistant",
+        content:
+          "Pesan Anda sudah diterima oleh sistem. Admin CS akan membalas percakapan ini pada jam operasional.",
+      };
+      setSessions((previous) =>
+        previous.map((session) =>
+          session.id === activeSession.id
+            ? {
+                ...session,
+                messages: [...nextMessages, adminPendingMessage],
+                updatedAt: Date.now(),
+              }
+            : session,
+        ),
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const res = await fetch("/api/chat", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages, role }),
+        body: JSON.stringify({ messages: nextMessages, role }),
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        const errMsg: Msg = {
-          role: "assistant",
-          content: `**Kendala:** ${
-            data.error || "Gagal mendapatkan respon dari AI."
-          }`,
-        };
-        setSessions((prev) =>
-          prev.map((s) =>
-            s.id === activeSession.id
-              ? {
-                  ...s,
-                  messages: [...newMessages, errMsg],
-                  updatedAt: Date.now(),
-                }
-              : s
-          )
-        );
-      } else {
-        const replyMsg: Msg = {
-          role: "assistant",
-          content: data.reply || "Maaf, tidak ada balasan dari asisten.",
-        };
-        setSessions((prev) =>
-          prev.map((s) =>
-            s.id === activeSession.id
-              ? {
-                  ...s,
-                  messages: [...newMessages, replyMsg],
-                  updatedAt: Date.now(),
-                }
-              : s
-          )
-        );
-      }
-    } catch (err) {
-      console.error("Chat error:", err);
-      const failMsg: Msg = {
-        role: "assistant",
-        content:
-          "⚠️ **Koneksi ke AI gagal.** Periksa koneksi internet atau periksa API Key OpenRouter Anda di `.env.local`.",
-      };
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === activeSession.id
+      const data = await response.json();
+      const reply: Msg = response.ok
+        ? { role: "assistant", content: data.reply || "Maaf, tidak ada balasan dari asisten." }
+        : { role: "assistant", content: `**Kendala:** ${data.error || "Gagal mendapatkan respon dari AI."}` };
+      setSessions((previous) =>
+        previous.map((session) =>
+          session.id === activeSession.id
+            ? { ...session, messages: [...nextMessages, reply], updatedAt: Date.now() }
+            : session,
+        ),
+      );
+    } catch (error) {
+      console.error("Chat error:", error);
+      setSessions((previous) =>
+        previous.map((session) =>
+          session.id === activeSession.id
             ? {
-                ...s,
-                messages: [...newMessages, failMsg],
-                updatedAt: Date.now(),
+                ...session,
+                messages: [
+                  ...nextMessages,
+                  { role: "assistant", content: "⚠️ **Koneksi ke AI gagal.** Periksa koneksi internet atau konfigurasi API AI." },
+                ],
               }
-            : s
-        )
+            : session,
+        ),
       );
     } finally {
       setLoading(false);
     }
   }
 
-  const isAdmin = (activeSession?.role || role) === "admin";
+  const isAdmin = role === "admin";
+  const quickPrompts = isAdmin
+    ? ["Buatkan draft konfirmasi pesanan", "Bagaimana status produksi pesanan?", "Ringkas pesanan yang perlu diproses"]
+    : channel === "ai"
+      ? ["Rekomendasikan bahan untuk brosur outdoor", "Berapa lama cetak stiker?", "Bantu hitung estimasi cetak"]
+      : ["Lihat status pesanan saya", "Ajukan revisi desain", "Tanya konfirmasi pembayaran"];
 
   return (
-    <div
-      className={cn(
-        "relative flex flex-col overflow-hidden border border-outline-variant/50 bg-surface-container-lowest md:flex-row",
-        fill
-          ? "h-full w-full"
-          : "h-[620px] w-full max-w-5xl rounded-2xl shadow-xl",
-      )}
-    >
-      {/* ===================== SIDEBAR RIWAYAT CHAT ===================== */}
-      <aside
-        className={`absolute md:static inset-y-0 left-0 z-30 w-72 sm:w-80 bg-surface-container-low border-r border-outline-variant/50 flex flex-col transition-transform duration-300 ease-in-out ${
-          isSidebarOpen
-            ? "translate-x-0 shadow-2xl md:shadow-none"
-            : "-translate-x-full md:translate-x-0"
-        }`}
-      >
-        {/* Header Sidebar: Judul & Tombol Chat Baru */}
-        <div className="p-4 border-b border-outline-variant/50 bg-surface-container-lowest">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="p-1.5 bg-primary-fixed text-primary rounded-lg">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                  />
-                </svg>
-              </span>
-              <h2 className="font-semibold text-ink-800 text-sm">
-                Riwayat Chat
+    <div className={cn(
+      "relative grid min-h-0 overflow-hidden border border-outline-variant/50 bg-surface-container-lowest shadow-[0_8px_24px_rgba(160,120,100,0.10)]",
+      fill ? "h-full w-full rounded-2xl" : "h-[620px] w-full max-w-5xl rounded-2xl",
+      role === "customer" && channel === "cs" && "sm:grid-cols-[180px_minmax(0,1fr)_180px]",
+      role === "customer" && channel === "ai" && "sm:grid-cols-[180px_minmax(0,1fr)_220px]",
+      role === "admin" && "md:grid-cols-[260px_minmax(0,1fr)]",
+    )}>
+      {role === "customer" && (channel === "cs" || channel === "ai") && (
+        <aside className={cn(
+          "absolute inset-y-0 left-0 z-30 w-72 flex-col border-r border-outline-variant/40 bg-surface-container-low sm:static sm:w-[180px] sm:flex",
+          sidebarOpen ? "flex" : "hidden",
+          !fill && "md:flex",
+        )}>
+          <div className="border-b border-outline-variant/40 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-sm font-bold text-on-surface">
+                <MessageCircle className="h-4 w-4 text-primary" /> Riwayat Chat
               </h2>
+              <button type="button" onClick={() => setSidebarOpen(false)} className="p-1 md:hidden" aria-label="Tutup riwayat">
+                <X className="h-4 w-4" />
+              </button>
             </div>
-
-            {/* Tombol Tutup Sidebar di Layar Mobile */}
-            <button
-              type="button"
-              onClick={() => setIsSidebarOpen(false)}
-              className="md:hidden p-1 text-ink-400 hover:text-ink-600 rounded-md"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+            <button type="button" onClick={handleNewChat} className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-3 py-2.5 text-xs font-bold text-on-primary-container shadow-[2px_2px_0px_#2D2926]">
+              <Plus className="h-4 w-4" /> Chat Baru
             </button>
           </div>
+          <div className="p-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-outline" />
+              <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Cari percakapan..." className="w-full rounded-lg border border-outline-variant/50 bg-surface-container-lowest py-2 pl-9 pr-3 text-xs outline-none" />
+            </div>
+          </div>
+          <div className="flex-1 space-y-1 overflow-y-auto px-2 pb-2">
+            {filteredSessions.map((session) => (
+              <div key={session.id} onClick={() => { setActiveSessionId(session.id); onRoleChange?.(session.role); setSidebarOpen(false); }} className={cn(
+                "group flex cursor-pointer items-center justify-between rounded-xl border p-3",
+                activeSessionId === session.id ? "border-primary-fixed-dim bg-primary-container/30" : "border-transparent hover:bg-surface-container-lowest",
+              )}>
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-bold text-on-surface">{session.title}</p>
+                  <p className="mt-1 text-[10px] text-on-surface-variant">{formatTimestamp(session.updatedAt)} • {session.messages.length} pesan</p>
+                </div>
+                <button type="button" onClick={(event) => { event.stopPropagation(); setDeleteModal({ open: true, mode: "single", id: session.id, title: session.title }); }} className="ml-2 p-1.5 text-outline opacity-60 hover:text-error" aria-label="Hapus percakapan">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+          {sessions.length > 0 && (
+            <button type="button" onClick={() => setDeleteModal({ open: true, mode: "all" })} className="m-3 flex items-center justify-center gap-2 rounded-lg border border-error/20 py-2 text-[11px] font-bold text-error hover:bg-error-container/30">
+              <Trash2 className="h-3.5 w-3.5" /> Hapus Semua Riwayat
+            </button>
+          )}
+        </aside>
+      )}
 
-          {/* Tombol Chat Baru */}
-          <button
-            type="button"
-            onClick={handleNewChat}
-            className="w-full bg-primary hover:bg-primary/90 active:scale-[0.99] text-on-primary font-medium py-2 px-3 rounded-lg shadow-sm transition duration-150 flex items-center justify-center gap-2 text-sm"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2.5"
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            <span>Chat Baru</span>
-          </button>
-        </div>
+      {sidebarOpen && role === "customer" && (channel === "cs" || channel === "ai") && (
+        <button type="button" className="absolute inset-0 z-20 bg-inverse-surface/20 sm:hidden" onClick={() => setSidebarOpen(false)} aria-label="Tutup overlay" />
+      )}
 
-        {/* Search Bar untuk Cari History Chat */}
-        <div className="p-3 border-b border-outline-variant/50 bg-surface-container-low">
-          <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-ink-400">
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari history chat..."
-              className="w-full pl-9 pr-8 py-1.5 text-xs bg-surface-container-lowest border border-outline-variant rounded-lg focus:outline-none focus:ring-1 focus:ring-primary transition"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-ink-400 hover:text-ink-600"
-              >
-                <svg
-                  className="w-3.5 h-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+      {role === "admin" && (
+        <aside className="hidden flex-col border-r border-outline-variant/40 bg-surface-container-low md:flex">
+          <div className="border-b border-outline-variant/40 p-4">
+            <button type="button" onClick={handleNewChat} className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 py-2.5 text-xs font-bold text-white">
+              <Plus className="h-4 w-4" /> Percakapan Baru
+            </button>
+          </div>
+          <div className="flex-1 space-y-1 overflow-y-auto p-2">
+            {sessions.map((session) => (
+              <button key={session.id} type="button" onClick={() => setActiveSessionId(session.id)} className={cn("w-full rounded-lg p-3 text-left", activeSessionId === session.id ? "bg-white shadow-sm" : "hover:bg-white/70")}>
+                <p className="truncate text-xs font-bold text-on-surface">{session.title}</p>
+                <p className="mt-1 text-[10px] text-on-surface-variant">{formatTimestamp(session.updatedAt)}</p>
+              </button>
+            ))}
+          </div>
+        </aside>
+      )}
+
+      <section className="flex min-h-0 flex-col overflow-hidden bg-surface-container-lowest">
+        <header className="flex items-center justify-between border-b border-outline-variant/40 px-4 py-3">
+          <div className="flex items-center gap-3">
+            {role === "customer" && (channel === "cs" || channel === "ai") && (
+              <button type="button" onClick={() => setSidebarOpen(true)} className="rounded-lg p-2 hover:bg-surface-container sm:hidden" aria-label="Buka riwayat">
+                <Menu className="h-4 w-4" />
               </button>
             )}
-          </div>
-          {searchQuery && (
-            <div className="text-[11px] text-ink-500 mt-1.5 px-1">
-              Ditemukan {filteredSessions.length} percakapan
-            </div>
-          )}
-        </div>
-
-        {/* Daftar Sesi Riwayat Chat */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {filteredSessions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 text-center text-ink-400 px-4">
-              <svg
-                className="w-8 h-8 mb-2 text-ink-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.5"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            {channel === "ai" ? (
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-container text-primary">
+                <Bot className="h-5 w-5" />
+              </div>
+            ) : (
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary-container p-1.5">
+                <Image
+                  src="/cs-support-avatar.png"
+                  alt="Faeyza CS"
+                  width={44}
+                  height={44}
+                  className="h-full w-full object-contain"
+                  priority
                 />
-              </svg>
-              <p className="text-xs">
-                {searchQuery
-                  ? "Tidak ada riwayat yang cocok"
-                  : "Belum ada riwayat chat"}
-              </p>
-            </div>
-          ) : (
-            filteredSessions.map((session) => {
-              const isActive = session.id === activeSession?.id;
-              const isCust = session.role === "customer";
-
-              return (
-                <div
-                  key={session.id}
-                  onClick={() => handleSelectSession(session)}
-                  className={`group relative flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition text-left border ${
-                    isActive
-                      ? "bg-surface-container-lowest border-primary shadow-sm"
-                      : "bg-transparent border-transparent hover:bg-surface-container-lowest/80 hover:border-outline-variant text-on-surface-variant"
-                  }`}
-                >
-                  <div className="flex-1 min-w-0 pr-2">
-                    <div className="flex items-center gap-1.5">
-                      <span
-                        className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md uppercase tracking-wider ${
-                          isCust
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-brand-100 text-brand-700"
-                        }`}
-                      >
-                        {isCust ? "Customer" : "Admin"}
-                      </span>
-                      <span className="text-[11px] text-ink-400">
-                        {formatTimestamp(session.updatedAt || session.createdAt)}
-                      </span>
-                    </div>
-
-                    <p
-                      className={`text-xs font-medium truncate mt-1 ${
-                        isActive ? "text-brand-900" : "text-ink-800"
-                      }`}
-                    >
-                      {session.title}
-                    </p>
-
-                    <p className="text-[11px] text-ink-400 truncate mt-0.5">
-                      {session.messages.length > 0
-                        ? `${session.messages.length} pesan`
-                        : "Percakapan kosong"}
-                    </p>
-                  </div>
-
-                  {/* Tombol Hapus per Item Riwayat */}
-                  <button
-                    type="button"
-                    title="Hapus history chat ini"
-                    onClick={(e) => handleOpenDeleteSingle(session, e)}
-                    className="p-1.5 rounded-lg text-ink-400 hover:text-red-600 hover:bg-red-50 transition opacity-80 group-hover:opacity-100"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="1.8"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              );
-            })
-          )}
-        </div>
-
-        {/* Footer Sidebar: Tombol Hapus Semua History */}
-        {sessions.length > 0 && (
-          <div className="p-3 border-t border-outline-variant/50 bg-surface-container-lowest">
-            <button
-              type="button"
-              onClick={handleOpenDeleteAll}
-              className="w-full py-1.5 px-3 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 font-medium rounded-lg transition flex items-center justify-center gap-1.5"
-            >
-              <svg
-                className="w-3.5 h-3.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
-              <span>Hapus Semua Riwayat</span>
-            </button>
-          </div>
-        )}
-      </aside>
-
-      {/* Backdrop overlay saat sidebar terbuka di mobile */}
-      {isSidebarOpen && (
-        <div
-          onClick={() => setIsSidebarOpen(false)}
-          className="fixed inset-0 z-20 bg-black/30 backdrop-blur-2xs md:hidden"
-        />
-      )}
-
-      {/* ===================== AREA UTAMA CHAT ===================== */}
-      <section className="flex-1 flex flex-col h-full overflow-hidden bg-surface-container-lowest">
-        {/* Header Chat */}
-        <header className="flex items-center justify-between px-4 py-3 bg-surface-container-lowest border-b border-outline-variant/50">
-          <div className="flex items-center gap-2.5">
-            {/* Tombol buka drawer riwayat di mobile */}
-            <button
-              type="button"
-              onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden p-1.5 text-ink-500 hover:text-ink-800 hover:bg-ink-100 rounded-lg transition"
-              title="Buka Riwayat Chat"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h7"
-                />
-              </svg>
-            </button>
-
+              </div>
+            )}
             <div>
               <div className="flex items-center gap-2">
-                <span
-                  className={`w-2.5 h-2.5 rounded-full ${
-                    isAdmin ? "bg-primary" : "bg-cmyk-cyan animate-pulse"
-                  }`}
-                />
-                <h3 className="text-sm font-semibold text-ink-800 line-clamp-1">
-                  {activeSession?.title || "Percakapan Baru"}
+                <h3 className="text-sm font-bold text-on-surface">
+                  {isAdmin ? "Faeyza Copilot" : channel === "ai" ? "Chatbot AI Faeyza" : "Faeyza CS"}
                 </h3>
+                <span className="h-2 w-2 rounded-full bg-tertiary" />
               </div>
-              <p className="text-[11px] text-ink-400">
-                {isAdmin ? "Mode Admin Copilot" : "Mode Customer Assistant"}
+              <p className="mt-0.5 text-[10px] font-bold text-tertiary">
+                {channel === "ai" ? "AI aktif • bantuan otomatis 24/7" : "Online • biasanya membalas 1-2 menit"}
               </p>
             </div>
           </div>
-
-          {/* Tombol Tutup / Close (X) */}
           {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-2.5 py-1.5 text-ink-500 hover:text-ink-900 hover:bg-ink-100 rounded-xl transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer border border-ink-200/80 shadow-2xs shrink-0"
-              title="Tutup Chat"
-            >
-              <span className="hidden sm:inline">Tutup</span>
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2.5"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+            <button type="button" onClick={onClose} className="rounded-lg border border-outline-variant/50 px-2.5 py-2 text-xs font-bold text-on-surface-variant">
+              <X className="h-4 w-4" />
             </button>
           )}
         </header>
 
-        {/* Area Pesan Chat */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 bg-surface">
+        <div className="chat-scroll flex-1 overflow-y-auto px-4 py-5 sm:px-5">
           {(!activeSession || activeSession.messages.length === 0) && (
-            <div className="flex flex-col items-center justify-center h-full text-center text-ink-400 px-4 py-8">
-              <div className="w-14 h-14 rounded-xl bg-primary-fixed text-primary flex items-center justify-center mb-3 shadow-inner">
-                <svg
-                  className="w-7 h-7"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.8"
-                    d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
-                  />
-                </svg>
+            <div className="flex h-full flex-col items-center justify-center text-center">
+              <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-container/60 text-primary">
+                <Bot className="h-7 w-7" />
               </div>
-
-              <h4 className="font-semibold text-ink-700 text-sm mb-1">
+              <h4 className="font-epilogue text-sm font-bold text-on-surface">
                 {isAdmin
                   ? "Admin Copilot Siap Membantu"
-                  : "Halo! Butuh bantuan cetak apa hari ini?"}
+                  : channel === "ai"
+                    ? "Halo! Saya asisten AI Faeyza"
+                    : "Halo! Ada yang bisa Admin CS bantu?"}
               </h4>
-
-              <p className="text-xs text-ink-400 max-w-sm mb-4">
-                {isAdmin
-                  ? "Tanyakan ringkasan pesanan, draft balasan ke pelanggan, atau tips kelola stok cetak."
-                  : "Tanyakan rekomendasi bahan spanduk/banner, estimasi pengerjaan, atau panduan ukuran cetak."}
+              <p className="mt-1 max-w-sm text-xs text-on-surface-variant">
+                Tanyakan rekomendasi bahan, estimasi pengerjaan, atau panduan ukuran cetak.
               </p>
-
-              {/* Rekomendasi Pertanyaan Cepat */}
-              <div className="flex flex-wrap justify-center gap-1.5 max-w-md">
-                {(isAdmin
-                  ? [
-                      "Buatkan draft konfirmasi pesanan banner",
-                      "Bagaimana cara tracking pengiriman cetak?",
-                    ]
-                  : [
-                      "Bahan apa yang tahan air untuk outdoor?",
-                      "Berapa ukuran standar kartu nama?",
-                      "Berapa lama proses cetak spanduk?",
-                    ]
-                ).map((prompt, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      setInput(prompt);
-                    }}
-                    className="text-xs bg-surface-container-lowest hover:bg-primary-fixed/40 text-on-surface-variant hover:text-primary border border-outline-variant/60 px-2.5 py-1.5 rounded-lg transition shadow-sm text-left"
-                  >
-                    💬 {prompt}
+              <div className="mt-4 flex max-w-lg flex-wrap justify-center gap-2">
+                {quickPrompts.map((prompt) => (
+                  <button key={prompt} type="button" onClick={() => setInput(prompt)} className="rounded-full border border-outline-variant/50 bg-surface-container-lowest px-3 py-2 text-[11px] font-bold text-on-surface-variant hover:bg-primary-container/30">
+                    {prompt}
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {activeSession?.messages.map((m, i) => {
-            const isUser = m.role === "user";
-
+          {activeSession?.messages.map((message, index) => {
+            const isUser = message.role === "user";
             return (
-              <div
-                key={i}
-                className={`flex flex-col ${
-                  isUser ? "items-end" : "items-start"
-                }`}
-              >
-                <div
-                  className={`p-3.5 rounded-2xl text-sm leading-relaxed max-w-[88%] sm:max-w-[80%] break-words shadow-2xs ${
-                    isUser
-                      ? "bg-primary text-on-primary rounded-br-xs"
-                      : "bg-surface-container-lowest text-on-surface border border-outline-variant/50 rounded-bl-xs"
-                  }`}
-                >
+              <div key={index} className={cn("mb-3 flex", isUser ? "justify-end" : "justify-start")}>
+                <div className={cn(
+                  "max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-relaxed sm:max-w-[78%]",
+                  isUser ? "rounded-br-md bg-primary text-on-primary" : "rounded-bl-md border border-outline-variant/40 bg-surface-container-low text-on-surface",
+                )}>
                   {isUser ? (
-                    <p className="whitespace-pre-wrap">{m.content}</p>
+                    <p className="whitespace-pre-wrap">{message.content}</p>
                   ) : (
-                    <div className="prose prose-sm max-w-none text-ink-800 leading-relaxed">
-                      <ReactMarkdown
-                        components={{
-                          p: ({ children }) => (
-                            <p className="mb-2 last:mb-0">{children}</p>
-                          ),
-                          strong: ({ children }) => (
-                            <strong className="font-semibold text-ink-900">
-                              {children}
-                            </strong>
-                          ),
-                          ul: ({ children }) => (
-                            <ul className="list-disc pl-4 mb-2 space-y-0.5">
-                              {children}
-                            </ul>
-                          ),
-                          ol: ({ children }) => (
-                            <ol className="list-decimal pl-4 mb-2 space-y-0.5">
-                              {children}
-                            </ol>
-                          ),
-                          li: ({ children }) => (
-                            <li className="leading-snug">{children}</li>
-                          ),
-                          code: ({ children }) => (
-                            <code className="bg-ink-100 text-brand-700 text-xs px-1 py-0.5 rounded font-mono">
-                              {children}
-                            </code>
-                          ),
-                        }}
-                      >
-                        {m.content.replace(/\[EXPORT:excel:[a-zA-Z0-9_-]+\]/g, "")}
-                      </ReactMarkdown>
-
-                      {/* Deteksi tag [EXPORT:excel:period] */}
-                      {(() => {
-                        const exportMatch = m.content.match(/\[EXPORT:excel:([a-zA-Z0-9_-]+)\]/);
-                        if (exportMatch) {
-                          const period = exportMatch[1];
-                          return (
-                            <div className="mt-3 pt-2.5 border-t border-ink-100">
-                              <a
-                                href={`/api/export/excel?period=${period}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                </svg>
-                                <span>Unduh Laporan Excel ({period})</span>
-                              </a>
-                            </div>
-                          );
-                        }
-                        return null;
-                      })()}
+                    <div className="prose prose-sm max-w-none">
+                      <ReactMarkdown>{message.content.replace(/\[EXPORT:excel:[a-zA-Z0-9_-]+\]/g, "")}</ReactMarkdown>
                     </div>
                   )}
                 </div>
               </div>
             );
           })}
-
           {loading && (
-            <div className="flex items-center gap-2 text-ink-400 text-xs italic py-1 px-2">
-              <span className="inline-flex gap-1 items-center">
-                <span className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" />
+            <div className="mb-3 flex items-center gap-2 rounded-full bg-surface-container px-3 py-2 text-[11px] text-on-surface-variant w-fit">
+              <span className="flex gap-1">
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:.15s]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:.3s]" />
               </span>
-              <span>AI sedang mengetik...</span>
+              {channel === "ai" ? "AI Faeyza sedang menjawab" : "Pesan dikirim ke Admin CS"}
             </div>
           )}
-
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Pesan */}
-        <div className="p-3 sm:p-4 border-t border-outline-variant/50 bg-surface-container-lowest">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              send();
-            }}
-            className="flex items-center gap-2"
-          >
+        <div className="border-t border-outline-variant/40 bg-surface-container-lowest p-3 sm:p-4">
+          <form onSubmit={(event) => { event.preventDefault(); send(); }} className="flex items-center gap-2">
+            <button type="button" className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-outline-variant/50 text-outline sm:flex" title="Lampirkan file">
+              <Upload className="h-4 w-4" />
+            </button>
             <input
-              className="flex-1 border border-outline-variant rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition bg-surface-container-low"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(event) => setInput(event.target.value)}
               disabled={loading}
-              placeholder={
-                isAdmin
-                  ? "Tanyakan ringkasan pesanan atau draft admin..."
-                  : "Tanya produk atau bahan cetak..."
-              }
+              placeholder={channel === "ai" ? "Tanya Chatbot AI Faeyza..." : "Ketik pesan untuk Admin CS..."}
+              className="min-w-0 flex-1 rounded-lg border border-outline-variant/50 bg-surface-container-low px-4 py-3 text-sm text-on-surface outline-none focus:border-primary"
             />
-
-            <button
-              type="submit"
-              disabled={loading || !input.trim()}
-              className="bg-primary hover:bg-primary/90 active:scale-[0.98] text-on-primary font-medium px-4 sm:px-5 py-2.5 rounded-lg text-sm transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
-            >
-              <span>Kirim</span>
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                />
-              </svg>
+            <button type="submit" disabled={loading || !input.trim()} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-cetak-orange text-white shadow-[3px_3px_0px_#2D2926] disabled:opacity-50" aria-label="Kirim pesan">
+              <Send className="h-4 w-4" />
             </button>
           </form>
         </div>
       </section>
 
-      {/* ===================== MODAL KONFIRMASI HAPUS ===================== */}
-      {deleteModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-2xs animate-fade-in">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-ink-100 transform transition-all">
-            {/* Icon Tempat Sampah / Alert */}
-            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4 text-red-600">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
+      {role === "customer" && channel === "cs" && (
+        <aside className="hidden flex-col gap-3 border-l border-outline-variant/40 bg-surface-container-low p-3 sm:flex">
+          {chatContext && (
+            <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4">
+              <div className="mb-3 flex items-center gap-2">
+                <Package className="h-4 w-4 text-primary" />
+                <span className="text-[11px] font-bold text-on-surface">
+                  {chatContext.type === "order" ? "Pesanan Terkait" : "Produk Terkait"}
+                </span>
+              </div>
+              <div className="rounded-xl border border-outline-variant/40 bg-surface-container-low p-3">
+                <p className="text-[10px] font-bold text-primary">
+                  {chatContext.type === "order"
+                    ? `#${chatContext.orderNumber}`
+                    : "Produk Cetak"}
+                </p>
+                <p className="mt-1 text-xs font-bold leading-snug text-on-surface">
+                  {chatContext.productName}
+                </p>
+                {chatContext.materialName && (
+                  <p className="mt-1 text-[10px] text-on-surface-variant">
+                    {chatContext.materialName}
+                  </p>
+                )}
+                {chatContext.quantity != null && (
+                  <p className="mt-1 text-[10px] text-on-surface-variant">
+                    {chatContext.quantity} {chatContext.unit}
+                    {chatContext.width && chatContext.height
+                      ? ` • ${chatContext.width} × ${chatContext.height} m`
+                      : ""}
+                  </p>
+                )}
+                {chatContext.status && (
+                  <span className="mt-2 inline-flex rounded-full bg-primary-container/60 px-2 py-1 text-[9px] font-bold text-on-primary-container">
+                    {chatContext.status.replaceAll("_", " ")}
+                  </span>
+                )}
+                {(chatContext.totalPrice || chatContext.basePrice) && (
+                  <p className="mt-2 text-sm font-bold text-on-surface">
+                    {formatRupiah(chatContext.totalPrice || chatContext.basePrice)}
+                  </p>
+                )}
+                <Link
+                  href={chatContext.detailUrl}
+                  className="mt-3 block rounded-lg border border-outline-variant/50 bg-surface-container-lowest px-3 py-2 text-center text-[10px] font-bold text-on-surface"
+                >
+                  {chatContext.type === "order" ? "Lihat Pesanan" : "Lihat Detail Produk"}
+                </Link>
+              </div>
             </div>
+          )}
+          <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <Package className="h-4 w-4 text-primary" />
+              <span className="text-[11px] font-bold text-on-surface">Topik Cepat Konsultasi</span>
+            </div>
+            <div className="space-y-2">
+              {["Status Pesanan Aktif", "Revisi & Desain", "Bahan & Kuantitas Kertas", "Konfirmasi Workshop"].map((topic, index) => (
+                <button key={topic} type="button" onClick={() => setInput(topic)} className={cn(
+                  "w-full rounded-lg px-3 py-2 text-left text-[11px] font-bold",
+                  ["bg-primary-container/60 text-on-primary-container", "bg-secondary-fixed/70 text-on-secondary-fixed", "bg-tertiary-container/60 text-on-tertiary-container", "bg-secondary-container/50 text-on-secondary-container"][index],
+                )}>
+                  {topic}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4">
+            <div className="flex items-center gap-2 text-[11px] font-bold text-on-surface">
+              <Clock3 className="h-4 w-4 text-tertiary" /> Jam Layanan Studio
+            </div>
+            <p className="mt-3 text-xs font-bold text-on-surface">10.00 - 20.00 WIB</p>
+            <p className="mt-2 text-[10px] leading-relaxed text-on-surface-variant">Pesan di luar jam kerja akan dibalas pada hari operasional berikutnya.</p>
+          </div>
+        </aside>
+      )}
 
-            <h3 className="text-base font-bold text-ink-900 text-center mb-1.5">
-              {deleteModal.mode === "all"
-                ? "Hapus Semua Riwayat Chat?"
-                : "Hapus Riwayat Chat?"}
-            </h3>
-
-            <p className="text-xs text-ink-500 text-center mb-6 leading-relaxed">
-              {deleteModal.mode === "all"
-                ? "Apakah Anda yakin ingin menghapus seluruh history chat? Semua riwayat percakapan akan dihapus secara permanen."
-                : `Apakah Anda yakin ingin menghapus history chat "${
-                    deleteModal.sessionTitle || "percakapan ini"
-                  }"? Percakapan yang sudah dihapus tidak dapat dipulihkan.`}
+      {role === "customer" && channel === "ai" && (
+        <aside className="hidden flex-col gap-3 border-l border-outline-variant/40 bg-surface-container-low p-3 sm:flex">
+          {chatContext && (
+            <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4">
+              <div className="mb-3 flex items-center gap-2">
+                <Package className="h-4 w-4 text-primary" />
+                <span className="text-[11px] font-bold text-on-surface">
+                  {chatContext.type === "order" ? "Pesanan Terkait" : "Produk Terkait"}
+                </span>
+              </div>
+              <p className="text-[10px] font-bold text-primary">
+                {chatContext.type === "order" ? `#${chatContext.orderNumber}` : "Produk Cetak"}
+              </p>
+              <p className="mt-1 text-xs font-bold leading-snug text-on-surface">
+                {chatContext.productName}
+              </p>
+              {chatContext.materialName && (
+                <p className="mt-1 text-[10px] text-on-surface-variant">{chatContext.materialName}</p>
+              )}
+              <Link
+                href={chatContext.detailUrl}
+                className="mt-3 block rounded-lg border border-outline-variant/50 px-3 py-2 text-center text-[10px] font-bold text-on-surface"
+              >
+                Lihat Detail
+              </Link>
+            </div>
+          )}
+          <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <Bot className="h-4 w-4 text-primary" />
+              <span className="text-[11px] font-bold text-on-surface">Topik Cepat AI</span>
+            </div>
+            <div className="space-y-2">
+              {["Rekomendasi Bahan", "Estimasi Pengerjaan", "Ukuran Produk", "Panduan File Cetak"].map((topic, index) => (
+                <button
+                  key={topic}
+                  type="button"
+                  onClick={() => setInput(topic)}
+                  className={cn(
+                    "w-full rounded-lg px-3 py-2 text-left text-[11px] font-bold",
+                    ["bg-primary-container/60 text-on-primary-container", "bg-secondary-fixed/70 text-on-secondary-fixed", "bg-tertiary-container/60 text-on-tertiary-container", "bg-secondary-container/50 text-on-secondary-container"][index],
+                  )}
+                >
+                  {topic}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4">
+            <p className="text-[11px] font-bold text-on-surface">Layanan AI Faeyza</p>
+            <p className="mt-2 text-[10px] leading-relaxed text-on-surface-variant">
+              Membantu secara otomatis 24/7 untuk pertanyaan umum percetakan.
             </p>
+          </div>
+        </aside>
+      )}
 
-            <div className="flex gap-2.5">
-              <button
-                type="button"
-                onClick={() => setDeleteModal({ isOpen: false, mode: "single" })}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-ink-300 text-ink-700 hover:bg-ink-100 font-medium text-xs transition"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                onClick={confirmDelete}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-medium text-xs shadow-md shadow-red-200 transition"
-              >
-                Ya, Hapus
-              </button>
+      {deleteModal.open && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-inverse-surface/30 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-surface-container-lowest p-6 text-center shadow-2xl">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-error-container text-error">
+              <Trash2 className="h-5 w-5" />
+            </div>
+            <h3 className="mt-4 font-epilogue text-base font-bold text-on-surface">
+              {deleteModal.mode === "all" ? "Hapus Semua Riwayat Chat?" : "Hapus Riwayat Chat?"}
+            </h3>
+            <p className="mt-2 text-xs text-on-surface-variant">Percakapan yang dihapus tidak dapat dipulihkan.</p>
+            <div className="mt-5 flex gap-2">
+              <button type="button" onClick={() => setDeleteModal({ open: false, mode: "single" })} className="flex-1 rounded-lg border border-outline-variant/50 py-2.5 text-xs font-bold">Batal</button>
+              <button type="button" onClick={confirmDelete} className="flex-1 rounded-lg bg-error py-2.5 text-xs font-bold text-on-error">Ya, Hapus</button>
             </div>
           </div>
         </div>
