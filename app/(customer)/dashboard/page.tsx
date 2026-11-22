@@ -5,10 +5,30 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
-import { ShoppingBag, Clock, CheckCircle2, ArrowRight, Printer, RefreshCw, AlertTriangle, Upload } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
-import KatalogFilters from "@/components/katalog/KatalogFilters";
-import { SERVICE_CATEGORIES, KATALOG_CATEGORIES } from "@/lib/service-categories";
+import {
+  ShoppingBag,
+  Clock,
+  CheckCircle2,
+  ArrowRight,
+  Printer,
+  RefreshCw,
+  AlertTriangle,
+  Upload,
+  Search,
+  BadgeCheck,
+  CalendarDays,
+  Image as ImageIcon,
+  Contact,
+  Flag,
+  Tag,
+  BookOpen,
+  Package,
+  Gift,
+  CloudUpload,
+  Sparkles,
+  ChevronRight,
+} from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -23,50 +43,22 @@ interface DashboardProps {
 
 export default async function CustomerDashboardPage({ searchParams }: DashboardProps) {
   const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    redirect("/login");
-  }
+  if (!session?.user) redirect("/login");
 
   const userId = (session.user as any).id;
   const selectedCategory = searchParams.category || searchParams.kategori || "all";
   const searchQuery = searchParams.search || "";
   const sort = searchParams.sort || "newest";
-  const activeService = SERVICE_CATEGORIES.find((service) => service.category === selectedCategory);
-  const pageTitle = selectedCategory === "all"
-    ? "Katalog produk"
-    : activeService
-    ? activeService.label
-    : `Katalog: ${selectedCategory}`;
-  const pageDesc = selectedCategory === "all"
-    ? "Pilih kebutuhan cetak, bahan, dan finishing yang sesuai."
-    : activeService
-    ? activeService.description
-    : "Menampilkan produk untuk kategori yang dipilih.";
-
-  const allCategories = await prisma.product.findMany({
-    select: { category: true },
-    distinct: ["category"],
-  });
-  const sortedCategories = [...allCategories.map((category) => category.category)].sort((a, b) => {
-    const indexA = KATALOG_CATEGORIES.indexOf(a);
-    const indexB = KATALOG_CATEGORIES.indexOf(b);
-    if (indexA === -1 && indexB === -1) return a.localeCompare(b);
-    if (indexA === -1) return 1;
-    if (indexB === -1) return -1;
-    return indexA - indexB;
-  });
-  const categories = ["all", ...sortedCategories];
 
   const productWhere: any = {};
-  if (selectedCategory !== "all" && activeService) {
-    productWhere.category = selectedCategory;
-  }
+  if (selectedCategory !== "all") productWhere.category = selectedCategory;
   if (searchQuery) {
     productWhere.OR = [
       { name: { contains: searchQuery } },
       { description: { contains: searchQuery } },
     ];
   }
+
   let productOrderBy: any = { createdAt: "desc" };
   if (sort === "price-asc") productOrderBy = { basePrice: "asc" };
   else if (sort === "price-desc") productOrderBy = { basePrice: "desc" };
@@ -79,339 +71,334 @@ export default async function CustomerDashboardPage({ searchParams }: DashboardP
     include: { materials: { include: { material: true } } },
   });
 
-  // Ambil pesanan milik user
   const orders = await prisma.order.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
-    include: {
-      product: true,
-      material: true,
-    },
+    include: { product: true, material: true },
   });
 
   const totalOrders = orders.length;
-  const activeOrders = orders.filter(
-    (o) => !["COMPLETED", "CANCELLED"].includes(o.status)
+  const activeOrders = orders.filter((order) =>
+    !["COMPLETED", "CANCELLED"].includes(order.status)
   ).length;
-  const completedOrders = orders.filter((o) => o.status === "COMPLETED").length;
-  const rejectedDesignOrders = orders.filter(
-    (o) => o.status === "DESIGN_REJECTED"
-  );
+  const completedOrders = orders.filter((order) => order.status === "COMPLETED").length;
+  const rejectedDesignOrders = orders.filter((order) => order.status === "DESIGN_REJECTED");
 
-  // Alasan penolakan terbaru per pesanan (dari statusHistory)
   const rejectionReasons = await prisma.orderStatusHistory.findMany({
     where: {
-      orderId: { in: rejectedDesignOrders.map((o) => o.id) },
+      orderId: { in: rejectedDesignOrders.map((order) => order.id) },
       status: "DESIGN_REJECTED",
     },
     orderBy: { createdAt: "desc" },
-    select: { orderId: true, notes: true, createdAt: true },
+    select: { orderId: true, notes: true },
   });
 
   const reasonByOrder = new Map<string, string>();
-  for (const r of rejectionReasons) {
-    if (!reasonByOrder.has(r.orderId)) {
-      reasonByOrder.set(r.orderId, r.notes || "");
+  for (const reason of rejectionReasons) {
+    if (!reasonByOrder.has(reason.orderId)) {
+      reasonByOrder.set(reason.orderId, reason.notes || "");
     }
   }
 
+  const categoryItems = [
+    { label: "ID Card & Lanyard", icon: BadgeCheck, color: "bg-primary-container/50 text-primary" },
+    { label: "Cetak Kalender", icon: CalendarDays, color: "bg-tertiary-container/70 text-tertiary" },
+    { label: "Poster & Cetak Foto", icon: ImageIcon, color: "bg-secondary-container/60 text-secondary" },
+    { label: "Brosur & Flyer", icon: Contact, color: "bg-primary-container/35 text-primary" },
+    { label: "Banner & Spanduk", icon: Flag, color: "bg-tertiary-container/50 text-tertiary" },
+    { label: "Stiker & Label", icon: Tag, color: "bg-secondary-container/60 text-secondary" },
+    { label: "Cetak Dokumen", icon: BookOpen, color: "bg-primary-container/40 text-primary" },
+    { label: "Packaging & Box", icon: Package, color: "bg-tertiary-container/60 text-tertiary" },
+  ];
+
   return (
-    <div className="space-y-8">
-      {/* Katalog produk untuk memulai pesanan */}
-      <section className="w-full pt-2 pb-2 bg-background">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-surface-container-low rounded-3xl p-6 lg:p-8 relative overflow-hidden mb-8">
-          <div className="absolute -top-12 -right-12 w-56 h-56 bg-primary-container/40 rounded-full blur-3xl pointer-events-none" />
-          <div className="flex flex-col gap-2 max-w-2xl relative z-10">
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps tracking-widest uppercase shadow-[2px_2px_0px_#1c1c19] w-fit">
-              Studio Catalog
-            </span>
-            <h1 className="font-epilogue text-3xl lg:text-4xl font-bold text-on-surface tracking-tight">
-              {pageTitle}
-            </h1>
-            <p className="font-body-md text-body-md text-on-surface-variant">
-              {pageDesc}
+    <div className="-mx-4 sm:-mx-6 lg:-mx-8 space-y-0">
+      {/* Compact account and status strip */}
+      <section className="px-4 sm:px-6 lg:px-8 py-5 border-b border-outline-variant/40">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="font-label-caps text-label-caps uppercase text-primary">
+              Halo kembali
             </p>
+            <h1 className="mt-1 font-epilogue text-2xl sm:text-3xl font-bold text-on-surface">
+              Selamat datang, {session.user.name?.split(" ")[0] || "Pelanggan"}
+            </h1>
           </div>
-          <div className="text-right relative z-10 flex flex-col items-end gap-2">
-            <span className="font-label-caps text-label-caps px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold">
-              {products.length} varian produk tersedia
-            </span>
-            <span className="font-label-caps text-label-caps text-on-surface-variant uppercase">
-              100% Color-Accurate Proof
-            </span>
+          <div className="grid grid-cols-3 gap-2 sm:flex sm:gap-3">
+            <div className="rounded-xl bg-surface-container-lowest border border-outline-variant/50 px-3 py-2.5 sm:min-w-32">
+              <div className="flex items-center gap-2 text-on-surface-variant">
+                <ShoppingBag className="h-4 w-4" />
+                <span className="text-[11px]">Pesanan</span>
+              </div>
+              <p className="mt-1 text-lg font-bold text-on-surface">{totalOrders}</p>
+            </div>
+            <div className="rounded-xl bg-primary-container/35 border border-primary-fixed-dim/30 px-3 py-2.5 sm:min-w-32">
+              <div className="flex items-center gap-2 text-on-primary-fixed-variant">
+                <Clock className="h-4 w-4" />
+                <span className="text-[11px]">Berjalan</span>
+              </div>
+              <p className="mt-1 text-lg font-bold text-on-surface">{activeOrders}</p>
+            </div>
+            <div className="rounded-xl bg-tertiary-container/50 border border-tertiary-fixed-dim/40 px-3 py-2.5 sm:min-w-32">
+              <div className="flex items-center gap-2 text-tertiary">
+                <CheckCircle2 className="h-4 w-4" />
+                <span className="text-[11px]">Selesai</span>
+              </div>
+              <p className="mt-1 text-lg font-bold text-on-surface">{completedOrders}</p>
+            </div>
           </div>
         </div>
+      </section>
 
-        <KatalogFilters
-          categories={categories}
-          selectedCategory={selectedCategory}
-          searchQuery={searchQuery}
-          sort={sort}
-        />
-
-        {selectedCategory !== "all" && !activeService && (
-          <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-lg p-3 mb-6">
-            Kategori &quot;{selectedCategory}&quot; tidak dikenal. Menampilkan semua produk.
+      {/* Search */}
+      <section className="px-4 sm:px-6 lg:px-8 py-5">
+        <form action="/dashboard" method="get" className="mx-auto max-w-[860px]">
+          <div className="flex items-center rounded-full border border-outline-variant/30 bg-surface-container-lowest p-1 shadow-[3px_3px_0px_#2D2926]">
+            <Search className="ml-4 h-5 w-5 shrink-0 text-secondary" />
+            <input
+              name="search"
+              defaultValue={searchQuery}
+              placeholder="Cari cetak ID Card, kalender, banner, poster..."
+              className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-sm text-on-surface outline-none placeholder:text-on-surface-variant/60"
+            />
+            {selectedCategory !== "all" && (
+              <input type="hidden" name="category" value={selectedCategory} />
+            )}
+            <button
+              type="submit"
+              className="hidden sm:flex h-10 items-center rounded-full bg-primary-container px-5 text-xs font-bold text-on-primary-container shadow-sm transition hover:bg-primary hover:text-on-primary"
+            >
+              Cari Produk
+            </button>
           </div>
-        )}
+        </form>
+      </section>
+
+      {/* Categories */}
+      <section className="bg-surface-container-low px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Package className="h-5 w-5 text-primary" />
+            <h2 className="font-epilogue text-xl font-semibold text-on-surface">
+              Kategori Produk Cetak
+            </h2>
+          </div>
+          <Link href="/katalog" className="hidden sm:flex items-center gap-1 text-xs font-bold text-primary">
+            Lihat Semua <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+          {categoryItems.map((item) => {
+            const Icon = item.icon;
+            const categoryParam = item.label === "Cetak Kalender"
+              ? null
+              : item.label;
+            return (
+              <Link
+                key={item.label}
+                href={categoryParam ? `/dashboard?category=${encodeURIComponent(categoryParam)}` : "/katalog"}
+                className="flex min-w-0 flex-col items-center rounded-xl bg-surface-container-lowest p-2 text-center transition hover:-translate-y-1 hover:shadow-md"
+              >
+                <div className={`mb-2 flex h-12 w-12 items-center justify-center rounded-full ${item.color}`}>
+                  <Icon className="h-6 w-6" />
+                </div>
+                <span className="w-full text-[10px] font-bold leading-tight text-on-surface sm:text-xs">
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Promotion cards */}
+      <section className="grid gap-3 px-4 py-5 sm:px-6 md:grid-cols-2 lg:px-8">
+        <div className="relative overflow-hidden rounded-2xl bg-secondary-fixed/70 p-5 sm:p-6">
+          <span className="inline-flex rounded-full bg-secondary px-2 py-1 font-label-caps text-[10px] uppercase text-on-secondary">
+            Promo Eksklusif
+          </span>
+          <h3 className="mt-3 max-w-sm font-epilogue text-xl font-bold text-on-secondary-fixed">
+            Paket Cetak Hemat untuk Usaha Anda
+          </h3>
+          <p className="mt-1 max-w-md text-xs text-on-secondary-fixed/80">
+            Pilih produk favorit dan dapatkan harga cetak terbaik untuk pesanan rutin.
+          </p>
+          <Link
+            href="/katalog"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-surface-container-lowest px-4 py-2 text-xs font-bold text-on-surface shadow-sm"
+          >
+            <Gift className="h-4 w-4" /> Lihat Promo
+          </Link>
+        </div>
+        <div className="relative overflow-hidden rounded-2xl bg-tertiary-container/70 p-5 sm:p-6">
+          <span className="inline-flex rounded-full bg-tertiary px-2 py-1 font-label-caps text-[10px] uppercase text-on-tertiary">
+            Prepress Cepat
+          </span>
+          <h3 className="mt-3 max-w-sm font-epilogue text-xl font-bold text-on-tertiary-fixed">
+            Unggah desain dan mulai cetak
+          </h3>
+          <p className="mt-1 max-w-md text-xs text-on-tertiary-fixed/80">
+            Kirim file desain Anda dan pantau progress produksi secara mudah.
+          </p>
+          <Link
+            href="/katalog"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-surface-container-lowest px-4 py-2 text-xs font-bold text-on-surface shadow-sm"
+          >
+            <CloudUpload className="h-4 w-4" /> Upload File Cetak
+          </Link>
+        </div>
+      </section>
+
+      {/* Rejected design notification */}
+      {rejectedDesignOrders.length > 0 && (
+        <section className="mx-4 mb-5 rounded-2xl border border-error/20 bg-error-container/35 p-4 sm:mx-6 lg:mx-8">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-error-container text-error">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-error">Desain perlu diperbaiki</h2>
+                <p className="mt-0.5 text-xs text-on-error-container">
+                  {rejectedDesignOrders.length} pesanan menunggu revisi desain Anda.
+                </p>
+              </div>
+            </div>
+            <Link
+              href={`/order/${rejectedDesignOrders[0].id}/upload`}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-error px-4 py-2 text-xs font-bold text-on-error"
+            >
+              <Upload className="h-4 w-4" /> Unggah Revisi
+            </Link>
+          </div>
+          {rejectedDesignOrders.slice(0, 2).map((order) => (
+            <div key={order.id} className="mt-3 rounded-xl bg-surface-container-lowest p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold text-on-surface">{order.orderNumber}</p>
+                  <p className="mt-0.5 text-[11px] text-on-surface-variant">{order.product.name}</p>
+                  {reasonByOrder.get(order.id) && (
+                    <p className="mt-1 text-[11px] text-error">
+                      Catatan: {reasonByOrder.get(order.id)?.replace(/^Desain ditolak:\s*/i, "")}
+                    </p>
+                  )}
+                </div>
+                <Link href={`/orders/${order.id}/tracking`} className="shrink-0 text-xs font-bold text-primary">
+                  Detail
+                </Link>
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* Recommendations */}
+      <section className="px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-4 flex items-end justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <h2 className="font-epilogue text-xl sm:text-2xl font-bold text-on-surface">
+                Rekomendasi Pilihan Untukmu
+              </h2>
+            </div>
+            <p className="mt-1 text-xs text-on-surface-variant">
+              Produk cetak favorit dengan kualitas terkurasi studio.
+            </p>
+          </div>
+          <Link href="/katalog" className="shrink-0 text-xs font-bold text-primary">
+            Semua Produk
+          </Link>
+        </div>
 
         {products.length === 0 ? (
-          <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant p-8 sm:p-12 text-center shadow-[0_4px_16px_rgba(188,148,120,0.06)]">
-            <p className="text-base font-semibold text-on-surface">
-              {selectedCategory !== "all" && !activeService
-                ? `Kategori "${selectedCategory}" tidak dikenal. Menampilkan semua produk.`
-                : selectedCategory !== "all"
-                ? "Belum ada produk untuk kategori ini."
-                : "Tidak ada produk yang cocok dengan pencarian"}
+          <div className="rounded-2xl border border-outline-variant/50 bg-surface-container-lowest p-10 text-center">
+            <p className="text-sm font-bold text-on-surface">Produk tidak ditemukan</p>
+            <p className="mt-1 text-xs text-on-surface-variant">
+              Coba kata kunci atau kategori lain.
             </p>
-            <p className="text-xs text-on-surface-variant/60 mt-1">
-              {selectedCategory !== "all"
-                ? "Coba pilih kategori lain atau hapus filter."
-                : "Coba ganti kata kunci atau pilih kategori lain."}
-            </p>
-            <Link
-              href="/katalog"
-              className="mt-4 inline-block px-4 py-2 bg-primary-container text-on-primary-container rounded-full text-xs font-semibold transition shadow-[2px_2px_0px_#1c1c19]"
-            >
-              Reset Filter
+            <Link href="/dashboard" className="mt-4 inline-flex rounded-full bg-primary-container px-4 py-2 text-xs font-bold text-on-primary-container">
+              Reset Pencarian
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product, index) => (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {products.slice(0, 8).map((product, index) => (
               <ProductCard key={product.id} product={product} index={index} />
             ))}
           </div>
         )}
       </section>
 
-      {/* Welcome Banner */}
-      <div className="flex flex-col gap-5 rounded-md border border-stone-200 border-l-4 border-l-rose-700 bg-[#f2ecdf] p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8 sm:p-7">
-        <div className="min-w-0">
-          <h1 className="font-serif text-3xl font-semibold leading-tight text-slate-900 sm:text-4xl">
-            Halo, {session.user.name}!
-          </h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600">
-            Pantau status proses produksi pesanan cetak Anda atau buat pesanan custom baru dengan estimasi harga real-time.
-          </p>
-          {rejectedDesignOrders.length > 0 && (
-            <span className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800">
-              <AlertTriangle className="w-3.5 h-3.5" />
-              {rejectedDesignOrders.length} desain ditolak, perlu diunggah ulang
-            </span>
-          )}
-        </div>
-        <div className="flex flex-col gap-2 sm:w-48 sm:shrink-0">
-          <Link
-            href="/katalog"
-            className="flex items-center justify-center gap-2 rounded-md bg-rose-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-800"
-          >
-            <Printer className="w-4 h-4" />
-            <span>Pesan Cetak Baru</span>
-          </Link>
-          <Link
-            href="/chat"
-            className="flex items-center justify-center gap-2 rounded-md border border-stone-400 bg-transparent px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/70"
-          >
-            <span>AI Assistant</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Metric Cards */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4">
-        <div className="flex flex-col gap-2 rounded-md border border-stone-200 bg-white p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
-          <div className="w-fit rounded-md bg-rose-50 p-2 text-rose-700 sm:p-3">
-            <ShoppingBag className="h-4 w-4 sm:h-6 sm:w-6" />
-          </div>
-          <div>
-            <span className="text-[10px] font-medium text-slate-500 sm:text-xs">Total Pesanan</span>
-            <p className="text-xl font-bold text-slate-900 sm:text-2xl">{totalOrders}</p>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2 rounded-md border border-stone-200 bg-white p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
-          <div className="w-fit rounded-md bg-amber-50 p-2 text-amber-700 sm:p-3">
-            <Clock className="h-4 w-4 sm:h-6 sm:w-6" />
-          </div>
-          <div>
-            <span className="text-[10px] font-medium text-slate-500 sm:text-xs">Pesanan Berjalan</span>
-            <p className="text-xl font-bold text-amber-700 sm:text-2xl">{activeOrders}</p>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2 rounded-md border border-stone-200 bg-white p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
-          <div className="w-fit rounded-md bg-emerald-50 p-2 text-emerald-700 sm:p-3">
-            <CheckCircle2 className="h-4 w-4 sm:h-6 sm:w-6" />
-          </div>
-          <div>
-            <span className="text-[10px] font-medium text-slate-500 sm:text-xs">Pesanan Selesai</span>
-            <p className="text-xl font-bold text-emerald-700 sm:text-2xl">{completedOrders}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Notifikasi Desain Ditolak: CTA Unggah Ulang */}
-      {rejectedDesignOrders.length > 0 && (
-        <div className="bg-rose-50 border border-rose-200 rounded-md p-4 sm:p-6 space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="p-2.5 bg-rose-100 text-rose-700 rounded-md shrink-0">
-              <AlertTriangle className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-sm font-bold text-rose-900">
-                Desain perlu diperbaiki
-              </h2>
-              <p className="text-xs text-rose-700 mt-0.5">
-                {rejectedDesignOrders.length} pesanan ditolak dan menunggu revisi
-                desain Anda. Silakan unggah file desain terbaru.
+      {/* Recent orders */}
+      <section className="px-4 pb-8 sm:px-6 lg:px-8">
+        <div className="overflow-hidden rounded-2xl border border-outline-variant/50 bg-surface-container-lowest">
+          <div className="flex items-center justify-between border-b border-outline-variant/40 p-4 sm:p-5">
+            <div>
+              <h2 className="font-epilogue text-lg font-bold text-on-surface">Pesanan Terkini</h2>
+              <p className="mt-0.5 text-xs text-on-surface-variant">
+                Progress transaksi pesanan Anda
               </p>
             </div>
-          </div>
-
-          <div className="space-y-2.5">
-            {rejectedDesignOrders.map((order) => (
-              <div
-                key={order.id}
-                className="p-4 bg-white rounded-md border border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-              >
-                <div className="min-w-0 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-slate-900">
-                      {order.orderNumber}
-                    </span>
-                    <OrderStatusBadge status={order.status} size="sm" />
-                  </div>
-                  <p className="text-xs text-slate-600 font-medium truncate">
-                    {order.product.name}
-                    {order.material ? ` • ${order.material.name}` : ""}
-                  </p>
-                  {reasonByOrder.get(order.id) && (
-                    <p className="text-[11px] text-rose-700 bg-rose-50 border border-rose-100 rounded-lg px-2 py-1">
-                      Catatan admin:{" "}
-                      {reasonByOrder.get(order.id)?.replace(/^Desain ditolak:\s*/i, "")}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <Link
-                    href={`/order/${order.id}/upload`}
-                    className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
-                  >
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Unggah Desain Baru</span>
-                  </Link>
-                  <Link
-                    href={`/orders/${order.id}/tracking`}
-                    className="px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
-                  >
-                    Detail
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Riwayat Pesanan Terbaru */}
-      <div className="bg-white rounded-md border border-stone-200 overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-bold text-slate-900">
-              Pesanan Terkini
-            </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Daftar transaksi dan progress pengerjaan pesanan Anda
-            </p>
-          </div>
-          <Link
-            href="/orders"
-            className="text-xs font-semibold text-rose-700 hover:text-rose-800 flex items-center gap-1"
-          >
-            <span>Semua Pesanan</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        {orders.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
-              <ShoppingBag className="w-6 h-6" />
-            </div>
-            <p className="text-sm font-semibold text-slate-700">Belum ada pesanan</p>
-            <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-              Silakan kunjungi katalog untuk memilih produk dan bahan yang Anda butuhkan.
-            </p>
-            <Link
-              href="/katalog"
-              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-rose-700 text-white rounded-md text-xs font-medium"
-            >
-              Buka Katalog
+            <Link href="/orders" className="flex items-center gap-1 text-xs font-bold text-primary">
+              Semua Pesanan <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {orders.slice(0, 5).map((order) => (
-              <div
-                key={order.id}
-                className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50 transition"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-slate-900">
-                      {order.orderNumber}
-                    </span>
-                    <OrderStatusBadge status={order.status} size="sm" />
-                  </div>
-                  <p className="text-xs text-slate-600 font-medium">
-                    {order.product.name}{" "}
-                    {order.material ? `• Bahan: ${order.material.name}` : ""}
-                  </p>
-                  <p className="text-[11px] text-slate-400">
-                    Jumlah: {order.quantity} {order.product.unit} • Dibuat pada {formatDate(order.createdAt)}
-                  </p>
-                </div>
 
-                <div className="flex items-center gap-4 justify-between sm:justify-end">
-                  <div className="text-right">
-                    <span className="text-[10px] text-slate-400 block font-medium">Total Harga</span>
-                    <span className="text-sm font-bold text-slate-900">
-                      {formatRupiah(order.totalPrice)}
-                    </span>
+          {orders.length === 0 ? (
+            <div className="p-10 text-center">
+              <ShoppingBag className="mx-auto h-8 w-8 text-outline" />
+              <p className="mt-2 text-sm font-bold text-on-surface">Belum ada pesanan</p>
+              <p className="mt-1 text-xs text-on-surface-variant">
+                Mulai pesanan pertama Anda dari katalog produk.
+              </p>
+              <Link href="/katalog" className="mt-4 inline-flex rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary">
+                Buka Katalog
+              </Link>
+            </div>
+          ) : (
+            <div className="divide-y divide-outline-variant/30">
+              {orders.slice(0, 5).map((order) => (
+                <div key={order.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-on-surface">{order.orderNumber}</span>
+                      <OrderStatusBadge status={order.status} size="sm" />
+                    </div>
+                    <p className="mt-1 text-xs font-medium text-on-surface-variant">
+                      {order.product.name}
+                      {order.material ? ` • ${order.material.name}` : ""}
+                    </p>
+                    <p className="mt-1 text-[11px] text-on-surface-variant/70">
+                      {order.quantity} {order.product.unit} • {formatDate(order.createdAt)}
+                    </p>
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    {/* Link ke tracking */}
-                    <Link
-                      href={`/orders/${order.id}/tracking`}
-                      className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
-                    >
+                  <div className="flex items-center justify-between gap-3 sm:justify-end">
+                    <div className="text-right">
+                      <span className="block text-[10px] text-on-surface-variant">Total</span>
+                      <span className="text-sm font-bold text-on-surface">{formatRupiah(order.totalPrice)}</span>
+                    </div>
+                    <Link href={`/orders/${order.id}/tracking`} className="rounded-lg border border-outline-variant px-3 py-2 text-xs font-bold text-on-surface-variant">
                       Tracking
                     </Link>
-
-                    {/* Tombol Repeat Order */}
                     <Link
                       href={order.status === "DESIGN_REJECTED"
                         ? `/order/${order.id}/upload`
                         : `/order/${order.productId}?repeatOrderId=${order.id}`}
-                      title={order.status === "DESIGN_REJECTED"
-                        ? "Unggah revisi desain"
-                        : "Pesan Lagi dengan spek yang sama"}
-                      className="p-1.5 rounded-xl border border-slate-200 text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition"
+                      className="rounded-lg border border-outline-variant p-2 text-on-surface-variant"
+                      title="Pesan lagi"
                     >
                       {order.status === "DESIGN_REJECTED"
-                        ? <Upload className="w-4 h-4" />
-                        : <RefreshCw className="w-4 h-4" />}
+                        ? <Upload className="h-4 w-4" />
+                        : <RefreshCw className="h-4 w-4" />}
                     </Link>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

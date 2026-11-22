@@ -72,7 +72,7 @@ export default function CheckoutClient({ order }: Props) {
 
   const clientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || "";
   function goToTracking() {
-    router.replace(`/orders/${order.id}/tracking?payment=success`);
+    router.replace(`/orders`);
     router.refresh();
   }
 

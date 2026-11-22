@@ -32,7 +32,7 @@ export default function SiteHeader() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-2">
-          <Link href="/" className={navClass(pathname === "/")}>
+          <Link href="/dashboard" className={navClass(pathname === "/dashboard" || pathname.startsWith("/dashboard/"))}>
             Beranda
           </Link>
           <Link href="/katalog" className={navClass(pathname.startsWith("/katalog"))}>
