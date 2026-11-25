@@ -67,8 +67,9 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   const filterTabs = [
     { id: "all", label: "Semua", count: displayOrders.length },
     { id: "pending", label: "Menunggu Pembayaran", count: displayOrders.filter((o) => o.displayStatus === "PENDING_PAYMENT").length },
-    { id: "processing", label: "Diproses", count: displayOrders.filter((o) => ["PAID", "DESIGN_CHECKING", "DESIGN_APPROVED", "IN_PRODUCTION", "FINISHING"].includes(o.displayStatus)).length },
-    { id: "revision", label: "Perlu Revisi", count: displayOrders.filter((o) => o.displayStatus === "DESIGN_REJECTED").length },
+    { id: "design-checking", label: "Pengecekan Desain", count: displayOrders.filter((o) => o.displayStatus === "DESIGN_CHECKING").length },
+    { id: "revision", label: "Revisi Desain", count: displayOrders.filter((o) => o.displayStatus === "DESIGN_REJECTED").length },
+    { id: "processing", label: "Diproses", count: displayOrders.filter((o) => ["PAID", "DESIGN_APPROVED", "IN_PRODUCTION", "FINISHING"].includes(o.displayStatus)).length },
     { id: "ready", label: "Siap Diambil", count: displayOrders.filter((o) => o.displayStatus === "READY" || o.displayStatus === "SHIPPING").length },
     { id: "completed", label: "Selesai", count: displayOrders.filter((o) => o.displayStatus === "COMPLETED").length },
   ];
@@ -80,8 +81,10 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
     switch (activeFilter) {
       case "pending":
         return order.displayStatus === "PENDING_PAYMENT";
+      case "design-checking":
+        return order.displayStatus === "DESIGN_CHECKING";
       case "processing":
-        return ["PAID", "DESIGN_CHECKING", "DESIGN_APPROVED", "IN_PRODUCTION", "FINISHING"].includes(order.displayStatus);
+        return ["PAID", "DESIGN_APPROVED", "IN_PRODUCTION", "FINISHING"].includes(order.displayStatus);
       case "revision":
         return order.displayStatus === "DESIGN_REJECTED";
       case "ready":
@@ -264,18 +267,6 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                       <span className="text-xs text-on-surface-variant">
                         • {new Date(order.createdAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
                       </span>
-                      {isPending ? (
-                        <Link
-                          href={`/checkout/${order.id}`}
-                          className={`pointer-events-auto text-[10px] font-extrabold px-2 py-0.5 rounded ${cfg.color} border hover:bg-amber-200 transition`}
-                        >
-                          {cfg.label}
-                        </Link>
-                      ) : (
-                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded ${cfg.color} border`}>
-                          {cfg.label}
-                        </span>
-                      )}
                     </div>
                     <h3 className="font-heading text-xl font-bold text-on-surface leading-snug">
                       {isPending ? (
