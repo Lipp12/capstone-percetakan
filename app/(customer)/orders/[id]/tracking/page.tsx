@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { formatRupiah, formatDateTime } from "@/lib/utils";
+import { getPaymentAwareOrderStatus } from "@/lib/order-rules";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
 import OrderReviewCard from "@/components/OrderReviewCard";
 import PaymentStatusRefresher from "@/components/PaymentStatusRefresher";
@@ -51,6 +52,11 @@ export default async function OrderTrackingPage({ params }: Props) {
     notFound();
   }
 
+  const displayStatus = getPaymentAwareOrderStatus(
+    order.status,
+    order.statusHistory.map((history) => history.status)
+  );
+
   const timelineStages = [
     {
       key: "PAYMENT",
@@ -66,8 +72,8 @@ export default async function OrderTrackingPage({ params }: Props) {
         "READY",
         "SHIPPING",
         "COMPLETED",
-      ].includes(order.status),
-      isCurrent: order.status === "PENDING_PAYMENT",
+      ].includes(displayStatus),
+      isCurrent: displayStatus === "PENDING_PAYMENT",
     },
     {
       key: "DESIGN",
@@ -80,11 +86,11 @@ export default async function OrderTrackingPage({ params }: Props) {
         "READY",
         "SHIPPING",
         "COMPLETED",
-      ].includes(order.status),
+      ].includes(displayStatus),
       isCurrent:
-        order.status === "DESIGN_CHECKING" ||
-        order.status === "DESIGN_REJECTED" ||
-        order.status === "PAID",
+        displayStatus === "DESIGN_CHECKING" ||
+        displayStatus === "DESIGN_REJECTED" ||
+        displayStatus === "PAID",
     },
     {
       key: "PRINTING",
@@ -96,30 +102,30 @@ export default async function OrderTrackingPage({ params }: Props) {
         "READY",
         "SHIPPING",
         "COMPLETED",
-      ].includes(order.status),
+      ].includes(displayStatus),
       isCurrent:
-        order.status === "DESIGN_APPROVED" || order.status === "IN_PRODUCTION",
+        displayStatus === "DESIGN_APPROVED" || displayStatus === "IN_PRODUCTION",
     },
     {
       key: "FINISHING",
       label: "Finishing & Cutting",
       icon: Scissors,
-      isPassed: ["READY", "SHIPPING", "COMPLETED"].includes(order.status),
-      isCurrent: order.status === "FINISHING",
+      isPassed: ["READY", "SHIPPING", "COMPLETED"].includes(displayStatus),
+      isCurrent: displayStatus === "FINISHING",
     },
     {
       key: "READY",
       label: order.pickupMethod === "DELIVERY" ? "Pengiriman" : "Siap Diambil",
       icon: PackageCheck,
-      isPassed: ["COMPLETED"].includes(order.status),
-      isCurrent: order.status === "READY" || order.status === "SHIPPING",
+      isPassed: ["COMPLETED"].includes(displayStatus),
+      isCurrent: displayStatus === "READY" || displayStatus === "SHIPPING",
     },
     {
       key: "COMPLETED",
       label: "Selesai",
       icon: CheckCircle2,
-      isPassed: order.status === "COMPLETED",
-      isCurrent: order.status === "COMPLETED",
+      isPassed: displayStatus === "COMPLETED",
+      isCurrent: displayStatus === "COMPLETED",
     },
   ];
 
@@ -127,10 +133,10 @@ export default async function OrderTrackingPage({ params }: Props) {
     <div className="max-w-4xl mx-auto space-y-6">
       <PaymentStatusRefresher
         orderId={order.id}
-        active={["PENDING_PAYMENT", "PAID"].includes(order.status)}
+        active={["PENDING_PAYMENT", "PAID"].includes(displayStatus)}
       />
 
-      {order.status === "PENDING_PAYMENT" && (
+      {displayStatus === "PENDING_PAYMENT" && (
         <div className="p-4 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-2xl flex items-center justify-between gap-3">
           <span>Pesanan ini belum lunas. Selesaikan pembayaran agar otomatis lanjut ke pengecekan desain.</span>
           <Link
@@ -152,17 +158,17 @@ export default async function OrderTrackingPage({ params }: Props) {
           <span>Kembali ke Riwayat Pesanan</span>
         </Link>
         <div className="flex items-center gap-2">
-          <OrderStatusBadge status={order.status} size="lg" />
+          <OrderStatusBadge status={displayStatus} size="lg" />
           <Link
-            href={order.status === "DESIGN_REJECTED"
+            href={displayStatus === "DESIGN_REJECTED"
               ? `/order/${order.id}/upload`
               : `/order/${order.productId}?repeatOrderId=${order.id}`}
             className="px-3 py-1.5 rounded-xl border border-outline-variant text-xs font-semibold text-on-surface hover:bg-surface-container transition flex items-center gap-1.5"
           >
-            {order.status === "DESIGN_REJECTED"
+            {displayStatus === "DESIGN_REJECTED"
               ? <Upload className="w-3.5 h-3.5" />
               : <RefreshCw className="w-3.5 h-3.5" />}
-            <span>{order.status === "DESIGN_REJECTED" ? "Upload Revisi" : "Pesan Lagi"}</span>
+            <span>{displayStatus === "DESIGN_REJECTED" ? "Upload Revisi" : "Pesan Lagi"}</span>
           </Link>
         </div>
       </div>
@@ -254,12 +260,12 @@ export default async function OrderTrackingPage({ params }: Props) {
       </div>
 
       {/* Review Card (completed orders) */}
-      {order.status === "COMPLETED" && (
+      {displayStatus === "COMPLETED" && (
         <OrderReviewCard
           orderId={order.id}
           orderNumber={order.orderNumber}
           productName={order.product.name}
-          orderStatus={order.status}
+          orderStatus={displayStatus}
         />
       )}
 

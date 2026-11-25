@@ -3,6 +3,8 @@
 // Jalankan: npx tsx scripts/test-production-gate.ts
 import {
   evaluateProductionGate,
+  getPaymentAwareOrderStatus,
+  isOrderPaymentPaid,
   productionGateMessage,
   PRODUCTION_AREA_STATUSES,
 } from "../lib/order-rules";
@@ -20,7 +22,40 @@ function check(label: string, actual: boolean, expected: boolean) {
   }
 }
 
+function checkValue(label: string, actual: string, expected: string) {
+  if (actual === expected) {
+    pass++;
+    console.log(`  PASS  ${label}`);
+  } else {
+    fail++;
+    console.log(`  FAIL  ${label} (expected ${expected}, got ${actual})`);
+  }
+}
+
 console.log("== evaluateProductionGate ==");
+
+// 0. Status desain tidak boleh tampil sebagai sudah dibayar tanpa bukti lunas.
+{
+  checkValue(
+    "DESIGN_CHECKING tanpa PAID -> status pelanggan Menunggu Pembayaran",
+    getPaymentAwareOrderStatus("DESIGN_CHECKING", ["PENDING_PAYMENT"]),
+    "PENDING_PAYMENT"
+  );
+  checkValue(
+    "DESIGN_CHECKING dengan riwayat PAID -> status tetap Cek Desain",
+    getPaymentAwareOrderStatus("DESIGN_CHECKING", [
+      "PENDING_PAYMENT",
+      "PAID",
+      "DESIGN_CHECKING",
+    ]),
+    "DESIGN_CHECKING"
+  );
+  check(
+    "status DESIGN_CHECKING tanpa PAID tidak dianggap lunas",
+    isOrderPaymentPaid("DESIGN_CHECKING", ["PENDING_PAYMENT"]),
+    false
+  );
+}
 
 // 1. Sudah bayar, sedang cek desain -> belum ACC, belum boleh masuk produksi
 {

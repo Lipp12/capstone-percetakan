@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import DesignCheckClient from "./DesignCheckClient";
+import { isOrderPaymentPaid } from "@/lib/order-rules";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDesignCheckPage() {
-  const checkingOrders = await prisma.order.findMany({
+  const candidateOrders = await prisma.order.findMany({
     where: {
       status: { in: ["DESIGN_CHECKING", "PAID"] },
     },
@@ -13,8 +14,15 @@ export default async function AdminDesignCheckPage() {
       user: { select: { name: true, phone: true, email: true } },
       product: true,
       material: true,
+      statusHistory: { select: { status: true } },
     },
   });
+  const checkingOrders = candidateOrders.filter((order) =>
+    isOrderPaymentPaid(
+      order.status,
+      order.statusHistory.map((history) => history.status)
+    )
+  );
 
   return (
     <div className="space-y-6">
