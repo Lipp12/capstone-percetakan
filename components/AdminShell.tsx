@@ -7,15 +7,14 @@ import Sidebar from "@/components/Sidebar";
 import AdminHeader from "@/components/AdminHeader";
 
 /**
- * Shell admin: sidebar fixed + topbar. Saat navigasi dipinjamkan, sidebar
- * hilang sepenuhnya dan konten memakai lebar penuh layar.
+ * Shell admin: sidebar fixed + topbar.
  */
 export default function AdminShell({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isOpen, isMobileOpen, closeMobile } = useSidebar();
+  const { isMobileOpen, closeMobile } = useSidebar();
   const pathname = usePathname();
 
   // Halaman chat memakai seluruh area konten, jadi padding <main> dilepas
@@ -40,8 +39,7 @@ export default function AdminShell({
 
       <div
         className={cn(
-          "flex h-full flex-col transition-[padding] duration-300 ease-in-out",
-          isOpen ? "xl:ps-72" : "xl:ps-0",
+          "flex h-full flex-col xl:ps-72",
         )}
       >
         <AdminHeader />

@@ -25,7 +25,7 @@ import { useSidebar } from "@/components/SidebarContext";
 export default function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const { isMobileOpen, isOpen, closeMobile } = useSidebar();
+  const { isMobileOpen, closeMobile } = useSidebar();
 
   const [lowStockCount, setLowStockCount] = useState(0);
   const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
@@ -224,10 +224,8 @@ export default function Sidebar() {
         "fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)] transition-transform duration-300 ease-in-out",
         isMobileOpen ? "translate-x-0" : "-translate-x-full",
         "xl:translate-x-0",
-        !isOpen && "xl:-translate-x-full xl:pointer-events-none",
       )}
       aria-label="Navigasi admin"
-      {...(!isOpen ? ({ inert: "" } as Record<string, string>) : {})}
     >
       <div className="flex flex-col">
         {/* Brand */}

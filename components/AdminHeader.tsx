@@ -8,8 +8,6 @@ import {
   ChevronDown,
   LogOut,
   Menu,
-  PanelLeftClose,
-  PanelLeftOpen,
   Search,
   UserRound,
 } from "lucide-react";
@@ -26,7 +24,7 @@ type NotificationItem = {
 /** Topbar admin: toggle sidebar, notifikasi pesanan, dan menu user. */
 export default function AdminHeader() {
   const { data: session } = useSession();
-  const { isExpanded, isMobileOpen, toggleSidebar } = useSidebar();
+  const { isMobileOpen, toggleMobile } = useSidebar();
 
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -105,23 +103,11 @@ export default function AdminHeader() {
       <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
         <button
           type="button"
-          onClick={toggleSidebar}
-          aria-label={
-            isMobileOpen
-              ? "Tutup navigasi"
-              : isExpanded
-                ? "Ciutkan navigasi"
-                : "Tampilkan navigasi"
-          }
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
+          onClick={toggleMobile}
+          aria-label={isMobileOpen ? "Tutup navigasi" : "Buka navigasi"}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface xl:hidden"
         >
-          {isMobileOpen ? (
-            <Menu className="h-5 w-5" aria-hidden />
-          ) : isExpanded ? (
-            <PanelLeftClose className="h-5 w-5" aria-hidden />
-          ) : (
-            <PanelLeftOpen className="h-5 w-5" aria-hidden />
-          )}
+          <Menu className="h-5 w-5" aria-hidden />
         </button>
 
         <div className="relative hidden max-w-md flex-1 sm:block">

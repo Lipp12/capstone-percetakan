@@ -10,14 +10,9 @@ import {
 } from "react";
 
 type SidebarContextValue = {
-  /** Sidebar dalam keadaan expanded (desktop >= xl). */
-  isExpanded: boolean;
   /** Drawer terbuka di layar kecil (< xl). */
   isMobileOpen: boolean;
-  /** Sidebar yang efektif terlihat: expanded atau mobile drawer. */
-  isOpen: boolean;
-  toggleSidebar: () => void;
-  openMobile: () => void;
+  toggleMobile: () => void;
   closeMobile: () => void;
 };
 
@@ -28,18 +23,13 @@ export function SidebarProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [isExpanded, setIsExpanded] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const openMobile = useCallback(() => setIsMobileOpen(true), []);
   const closeMobile = useCallback(() => setIsMobileOpen(false), []);
-  const toggleSidebar = useCallback(() => {
-    if (window.matchMedia("(min-width: 1280px)").matches) {
-      setIsExpanded((prev) => !prev);
-    } else {
-      setIsMobileOpen((prev) => !prev);
-    }
-  }, []);
+  const toggleMobile = useCallback(
+    () => setIsMobileOpen((prev) => !prev),
+    [],
+  );
 
   // Kunci scroll body selagi drawer mobile terbuka.
   useEffect(() => {
@@ -63,14 +53,11 @@ export function SidebarProvider({
 
   const value = useMemo<SidebarContextValue>(
     () => ({
-      isExpanded,
       isMobileOpen,
-      isOpen: isExpanded || isMobileOpen,
-      toggleSidebar,
-      openMobile,
+      toggleMobile,
       closeMobile,
     }),
-    [isExpanded, isMobileOpen, toggleSidebar, openMobile, closeMobile],
+    [isMobileOpen, toggleMobile, closeMobile],
   );
 
   return (
