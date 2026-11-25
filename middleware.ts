@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { authSecret } from "@/lib/auth-secret";
 
 export async function middleware(req: NextRequest) {
-  const secret =
-    process.env.NEXTAUTH_SECRET ||
-    "capstone-percetakan-super-secret-key-2026-production-ready";
-
   // Deteksi cookie session (baik dengan prefix __Secure- pada HTTPS maupun biasa)
   const hasSecureCookie = req.cookies.has("__Secure-next-auth.session-token");
   const isHttps =
@@ -15,7 +12,7 @@ export async function middleware(req: NextRequest) {
 
   let token = await getToken({
     req,
-    secret,
+    secret: authSecret,
     secureCookie: hasSecureCookie || isHttps,
   });
 
@@ -23,7 +20,7 @@ export async function middleware(req: NextRequest) {
   if (!token && !hasSecureCookie) {
     token = await getToken({
       req,
-      secret,
+      secret: authSecret,
       secureCookie: false,
     });
   }
@@ -37,10 +34,17 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const role = token.role as string | undefined;
+  const role =
+    typeof token.role === "string" ? token.role.toUpperCase() : undefined;
 
   // Proteksi route admin & operator
   if (path.startsWith("/admin")) {
+    if (!role) {
+      const loginUrl = new URL("/login", req.url);
+      loginUrl.searchParams.set("callbackUrl", path);
+      return NextResponse.redirect(loginUrl);
+    }
+
     if (role !== "ADMIN" && role !== "OPERATOR") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }

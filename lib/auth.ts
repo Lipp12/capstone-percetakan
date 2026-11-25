@@ -2,13 +2,14 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { authSecret } from "@/lib/auth-secret";
 
 export const authOptions: NextAuthOptions = {
+  secret: authSecret,
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 hari
   },
-  secret: process.env.NEXTAUTH_SECRET || "capstone-percetakan-secret-2026",
   providers: [
     CredentialsProvider({
       name: "Credentials",
