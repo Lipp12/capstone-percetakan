@@ -87,7 +87,7 @@ export const adminNav: NavGroup[] = [
       },
       {
         href: "/admin/chat",
-        label: "AI Copilot",
+        label: "Chatbot Admin",
         icon: Bot,
       },
       {

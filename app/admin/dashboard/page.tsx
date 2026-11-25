@@ -4,7 +4,7 @@ import DashboardClient from "./DashboardClient";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  const [orders, users, materials] = await Promise.all([
+  const [orders, transactions, users, materials] = await Promise.all([
     prisma.order.findMany({
       orderBy: { createdAt: "desc" },
       include: {
@@ -12,6 +12,11 @@ export default async function AdminDashboardPage() {
         product: true,
         material: true,
       },
+    }),
+    prisma.transaction.findMany({
+      where: { type: "INCOME" },
+      orderBy: { date: "desc" },
+      select: { date: true, total: true },
     }),
     prisma.user.findMany({
       where: { role: "CUSTOMER" },
@@ -28,6 +33,7 @@ export default async function AdminDashboardPage() {
     <div className="space-y-6">
       <DashboardClient
         initialOrders={orders}
+        initialTransactions={transactions}
         totalCustomers={users.length}
         lowStockMaterials={lowStockMaterials}
       />

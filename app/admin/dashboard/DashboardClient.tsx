@@ -27,6 +27,7 @@ import { formatRupiah } from "@/lib/utils";
 
 interface Props {
   initialOrders: any[];
+  initialTransactions: { date: Date; total: number }[];
   totalCustomers: number;
   lowStockMaterials: any[];
 }
@@ -35,6 +36,7 @@ type Period = "today" | "week" | "month" | "all";
 
 export default function DashboardClient({
   initialOrders,
+  initialTransactions,
   totalCustomers,
   lowStockMaterials,
 }: Props) {
@@ -64,16 +66,37 @@ export default function DashboardClient({
     });
   }, [initialOrders, period]);
 
+  const filteredTransactions = useMemo(() => {
+    const now = new Date();
+    return initialTransactions.filter((transaction) => {
+      const invoiceDate = new Date(transaction.date);
+      if (period === "today") {
+        return (
+          invoiceDate.getDate() === now.getDate() &&
+          invoiceDate.getMonth() === now.getMonth() &&
+          invoiceDate.getFullYear() === now.getFullYear()
+        );
+      }
+      if (period === "week") {
+        return invoiceDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      }
+      if (period === "month") {
+        return (
+          invoiceDate.getMonth() === now.getMonth() &&
+          invoiceDate.getFullYear() === now.getFullYear()
+        );
+      }
+      return true;
+    });
+  }, [initialTransactions, period]);
+
   const totalRevenue = useMemo(
     () =>
-      filteredOrders
-        .filter(
-          (order) =>
-            order.status !== "CANCELLED" &&
-            order.status !== "PENDING_PAYMENT",
-        )
-        .reduce((sum, order) => sum + order.totalPrice, 0),
-    [filteredOrders],
+      filteredTransactions.reduce(
+        (sum, transaction) => sum + transaction.total,
+        0,
+      ),
+    [filteredTransactions],
   );
 
   const activeOrdersCount = useMemo(
@@ -86,20 +109,16 @@ export default function DashboardClient({
 
   const chartData = useMemo(() => {
     const map: Record<string, number> = {};
-    filteredOrders.forEach((order) => {
-      const date = new Date(order.createdAt);
+    filteredTransactions.forEach((transaction) => {
+      const date = new Date(transaction.date);
       const label = date.toLocaleDateString("id-ID", {
         day: "numeric",
         month: "short",
       });
-      map[label] = (map[label] || 0) + order.totalPrice;
+      map[label] = (map[label] || 0) + transaction.total;
     });
     return Object.entries(map).map(([date, revenue]) => ({ date, revenue }));
-  }, [filteredOrders]);
-
-  const completedCount = initialOrders.filter(
-    (order) => order.status === "COMPLETED",
-  ).length;
+  }, [filteredTransactions]);
 
   return (
     <div className="mx-auto w-full max-w-[1280px] space-y-6">
@@ -196,9 +215,9 @@ export default function DashboardClient({
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard
-          label="Omzet tercatat"
+          label="Pendapatan dari Invoice"
           value={formatRupiah(totalRevenue)}
-          caption={`${completedCount} pesanan selesai`}
+          caption={`${filteredTransactions.length} invoice terbayar`}
           icon={CreditCard}
           tone="yellow"
         />
@@ -232,7 +251,7 @@ export default function DashboardClient({
               Tren Performa Finansial Harian
             </h2>
             <p className="font-body-sm text-body-sm text-outline">
-              Nilai penjualan pada periode yang dipilih
+              Nilai invoice terbayar pada periode yang dipilih
             </p>
           </div>
           <div className="flex items-center gap-1 overflow-x-auto rounded-lg bg-surface-container-low p-1.5">

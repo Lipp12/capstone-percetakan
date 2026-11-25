@@ -384,7 +384,7 @@ export default function ChatBox({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold text-on-surface">
-                  {isAdmin ? "Faeyza Copilot" : channel === "ai" ? "Chatbot AI Faeyza" : "Faeyza CS"}
+                  {isAdmin ? "Chatbot Admin" : channel === "ai" ? "Chatbot AI Faeyza" : "Faeyza CS"}
                 </h3>
                 <span className="h-2 w-2 rounded-full bg-tertiary" />
               </div>
@@ -408,7 +408,7 @@ export default function ChatBox({
               </div>
               <h4 className="font-epilogue text-sm font-bold text-on-surface">
                 {isAdmin
-                  ? "Admin Copilot Siap Membantu"
+                  ? "Chatbot Admin Siap Membantu"
                   : channel === "ai"
                     ? "Halo! Saya asisten AI Faeyza"
                     : "Halo! Ada yang bisa Admin CS bantu?"}
