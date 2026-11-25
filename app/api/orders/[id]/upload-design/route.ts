@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { uploadFileBuffer } from "@/lib/upload";
+import { isOrderPaymentPaid } from "@/lib/order-rules";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ export async function POST(
     const orderId = params.id;
     const order = await prisma.order.findUnique({
       where: { id: orderId },
+      include: { statusHistory: { select: { status: true } } },
     });
 
     if (!order) {
@@ -79,19 +81,26 @@ export async function POST(
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const fileUrl = await uploadFileBuffer(fileBuffer, `designs/${orderId}`, safeOriginalName, "auto");
 
-    // Update status order ke DESIGN_CHECKING
+    const isPaid = isOrderPaymentPaid(
+      order.status,
+      order.statusHistory.map((history) => history.status)
+    );
+    const nextStatus = isPaid ? "DESIGN_CHECKING" : "PENDING_PAYMENT";
+
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
       data: {
         designFileUrl: fileUrl,
         designNotes: designNotes || (order.status === "DESIGN_REJECTED" ? null : order.designNotes),
-        status: "DESIGN_CHECKING",
+        status: nextStatus,
         statusHistory: {
           create: {
-            status: "DESIGN_CHECKING",
-            notes: order.status === "DESIGN_REJECTED"
-              ? "File revisi desain berhasil diunggah pada pesanan yang sama, menunggu validasi."
-              : "File desain berhasil diunggah oleh pelanggan, menunggu validasi.",
+            status: nextStatus,
+            notes: isPaid
+              ? order.status === "DESIGN_REJECTED"
+                ? "File revisi desain berhasil diunggah pada pesanan yang sama, menunggu validasi."
+                : "File desain berhasil diunggah oleh pelanggan, menunggu validasi."
+              : "File desain berhasil diunggah. Pesanan menunggu pembayaran sebelum masuk antrean pengecekan.",
             changedBy: session.user.name || "Customer",
           },
         },

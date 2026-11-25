@@ -31,6 +31,27 @@ export type ProductionGate = {
   canEnterProduction: boolean;
 };
 
+export function isOrderPaymentPaid(
+  currentStatus: string,
+  historyStatuses: readonly string[]
+): boolean {
+  return historyStatuses.includes("PAID") || currentStatus === "PAID";
+}
+
+/**
+ * Prevents an unpaid order from appearing as if it has reached a later step.
+ * Cancelled orders keep their terminal status.
+ */
+export function getPaymentAwareOrderStatus(
+  currentStatus: string,
+  historyStatuses: readonly string[]
+): string {
+  if (currentStatus === "CANCELLED" || isOrderPaymentPaid(currentStatus, historyStatuses)) {
+    return currentStatus;
+  }
+  return "PENDING_PAYMENT";
+}
+
 /**
  * Menentukan apakah pesanan sudah lunas dan desainnya sudah di-ACC.
  *
@@ -49,8 +70,7 @@ export function evaluateProductionGate(
 ): ProductionGate {
   // Bukti lunas: entri PAID eksplisit di riwayat (fallback: status saat ini PAID
   // untuk order lama yang riwayatnya tidak lengkap).
-  const isPaymentPaid =
-    historyStatuses.includes("PAID") || currentStatus === "PAID";
+  const isPaymentPaid = isOrderPaymentPaid(currentStatus, historyStatuses);
 
   // Bukti ACC: status saat ini sudah melewati tahap desain, ATAU riwayat
   // pernah mencatat DESIGN_APPROVED.

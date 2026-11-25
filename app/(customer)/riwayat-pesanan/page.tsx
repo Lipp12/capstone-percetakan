@@ -30,7 +30,7 @@ interface Props {
 }
 
 const statusLabels: Record<string, string> = {
-  PENDING_PAYMENT: "Menunggu Pembayaran",
+  PENDING_PAYMENT: "Belum Bayar",
   PAID: "Dibayar",
   DESIGN_CHECKING: "Cek Desain",
   DESIGN_REJECTED: "Perlu Revisi",

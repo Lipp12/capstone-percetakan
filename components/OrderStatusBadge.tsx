@@ -23,7 +23,7 @@ const statusConfig: Record<
   { label: string; bg: string; text: string; border: string }
 > = {
   PENDING_PAYMENT: {
-    label: "Menunggu Bayar",
+    label: "Belum Bayar",
     bg: "bg-amber-50",
     text: "text-amber-700",
     border: "border-amber-200",

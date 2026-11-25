@@ -2,6 +2,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { formatRupiah } from "@/lib/utils";
+import { getPaymentAwareOrderStatus } from "@/lib/order-rules";
 import Link from "next/link";
 import { ArrowLeft, Search, Package, Clock, CheckCircle2, AlertCircle, XCircle, RefreshCw, FileCheck, Printer, Scissors, PackageCheck } from "lucide-react";
 
@@ -37,11 +38,20 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
       product: true,
       material: true,
       finishings: { include: { finishing: true } },
+      statusHistory: { select: { status: true } },
     },
   });
 
+  const displayOrders = orders.map((order) => ({
+    ...order,
+    displayStatus: getPaymentAwareOrderStatus(
+      order.status,
+      order.statusHistory.map((history) => history.status)
+    ),
+  }));
+
   const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
-    PENDING_PAYMENT: { label: "Menunggu Pembayaran", color: "bg-amber-100 text-amber-800 border-amber-300", icon: Clock },
+    PENDING_PAYMENT: { label: "Belum Bayar", color: "bg-amber-100 text-amber-800 border-amber-300", icon: Clock },
     PAID: { label: "Dibayar", color: "bg-blue-100 text-blue-800 border-blue-300", icon: CheckCircle2 },
     DESIGN_CHECKING: { label: "Cek Desain", color: "bg-sky-100 text-sky-800 border-sky-300", icon: FileCheck },
     DESIGN_REJECTED: { label: "Perlu Revisi", color: "bg-rose-100 text-rose-800 border-rose-300", icon: AlertCircle },
@@ -55,29 +65,32 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   };
 
   const filterTabs = [
-    { id: "all", label: "Semua", count: orders.length },
-    { id: "pending", label: "Menunggu Pembayaran", count: orders.filter((o) => o.status === "PENDING_PAYMENT").length },
-    { id: "processing", label: "Diproses", count: orders.filter((o) => ["PAID", "DESIGN_CHECKING", "DESIGN_APPROVED", "IN_PRODUCTION", "FINISHING"].includes(o.status)).length },
-    { id: "revision", label: "Perlu Revisi", count: orders.filter((o) => o.status === "DESIGN_REJECTED").length },
-    { id: "ready", label: "Siap Diambil", count: orders.filter((o) => o.status === "READY" || o.status === "SHIPPING").length },
-    { id: "completed", label: "Selesai", count: orders.filter((o) => o.status === "COMPLETED").length },
+    { id: "all", label: "Semua", count: displayOrders.length },
+    { id: "pending", label: "Menunggu Pembayaran", count: displayOrders.filter((o) => o.displayStatus === "PENDING_PAYMENT").length },
+    { id: "design-checking", label: "Pengecekan Desain", count: displayOrders.filter((o) => o.displayStatus === "DESIGN_CHECKING").length },
+    { id: "revision", label: "Revisi Desain", count: displayOrders.filter((o) => o.displayStatus === "DESIGN_REJECTED").length },
+    { id: "processing", label: "Diproses", count: displayOrders.filter((o) => ["PAID", "DESIGN_APPROVED", "IN_PRODUCTION", "FINISHING"].includes(o.displayStatus)).length },
+    { id: "ready", label: "Siap Diambil", count: displayOrders.filter((o) => o.displayStatus === "READY" || o.displayStatus === "SHIPPING").length },
+    { id: "completed", label: "Selesai", count: displayOrders.filter((o) => o.displayStatus === "COMPLETED").length },
   ];
   const requestedFilter = searchParams.status || "all";
   const activeFilter = filterTabs.some((tab) => tab.id === requestedFilter)
     ? requestedFilter
     : "all";
-  const filteredOrders = orders.filter((order) => {
+  const filteredOrders = displayOrders.filter((order) => {
     switch (activeFilter) {
       case "pending":
-        return order.status === "PENDING_PAYMENT";
+        return order.displayStatus === "PENDING_PAYMENT";
+      case "design-checking":
+        return order.displayStatus === "DESIGN_CHECKING";
       case "processing":
-        return ["PAID", "DESIGN_CHECKING", "DESIGN_APPROVED", "IN_PRODUCTION", "FINISHING"].includes(order.status);
+        return ["PAID", "DESIGN_APPROVED", "IN_PRODUCTION", "FINISHING"].includes(order.displayStatus);
       case "revision":
-        return order.status === "DESIGN_REJECTED";
+        return order.displayStatus === "DESIGN_REJECTED";
       case "ready":
-        return order.status === "READY" || order.status === "SHIPPING";
+        return order.displayStatus === "READY" || order.displayStatus === "SHIPPING";
       case "completed":
-        return order.status === "COMPLETED";
+        return order.displayStatus === "COMPLETED";
       default:
         return true;
     }
@@ -105,7 +118,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
       </div>
 
       {/* Alert banner for action-needed orders */}
-      {orders.some((o) => o.status === "DESIGN_REJECTED" || o.status === "PENDING_PAYMENT") && (
+      {displayOrders.some((o) => o.displayStatus === "DESIGN_REJECTED" || o.displayStatus === "PENDING_PAYMENT") && (
         <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-3xl p-5 shadow-sm">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex items-start sm:items-center gap-3.5">
@@ -122,8 +135,8 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              {orders
-                .filter((o) => o.status === "DESIGN_REJECTED")
+              {displayOrders
+                .filter((o) => o.displayStatus === "DESIGN_REJECTED")
                 .slice(0, 1)
                 .map((o) => (
                   <Link
@@ -136,8 +149,8 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                     <ArrowLeft className="w-3 h-3 rotate-180 group-hover:translate-x-0.5 transition-transform" />
                   </Link>
                 ))}
-              {orders
-                .filter((o) => o.status === "PENDING_PAYMENT")
+              {displayOrders
+                .filter((o) => o.displayStatus === "PENDING_PAYMENT")
                 .slice(0, 1)
                 .map((o) => (
                   <Link
@@ -191,28 +204,29 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
           <div className="bg-surface-container-lowest border border-outline-variant rounded-3xl p-12 text-center">
             <Package className="w-12 h-12 text-outline mx-auto mb-3" />
             <p className="text-on-surface-variant text-sm">
-              {orders.length === 0 ? "Belum ada pesanan." : "Tidak ada pesanan pada kategori ini."}
+              {displayOrders.length === 0 ? "Belum ada pesanan." : "Tidak ada pesanan pada kategori ini."}
             </p>
             <Link
-              href={orders.length === 0 ? "/katalog" : "/orders"}
+              href={displayOrders.length === 0 ? "/katalog" : "/orders"}
               className="text-primary font-semibold hover:underline mt-2 inline-block text-sm"
             >
-              {orders.length === 0 ? "Mulai belanja" : "Tampilkan semua pesanan"}
+              {displayOrders.length === 0 ? "Mulai belanja" : "Tampilkan semua pesanan"}
             </Link>
           </div>
         )}
 
         {filteredOrders.map((order) => {
-          const cfg = statusConfig[order.status] || {
-            label: order.status,
+          const orderStatus = order.displayStatus;
+          const cfg = statusConfig[orderStatus] || {
+            label: orderStatus,
             color: "bg-surface-container text-on-surface-variant border-outline-variant",
             icon: Package,
           };
           const Icon = cfg.icon;
-          const isCancelled = order.status === "CANCELLED";
-          const isCompleted = order.status === "COMPLETED";
-          const isPending = order.status === "PENDING_PAYMENT";
-          const isRevision = order.status === "DESIGN_REJECTED";
+          const isCancelled = orderStatus === "CANCELLED";
+          const isCompleted = orderStatus === "COMPLETED";
+          const isPending = orderStatus === "PENDING_PAYMENT";
+          const isRevision = orderStatus === "DESIGN_REJECTED";
 
           return (
             <article
@@ -227,9 +241,16 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                   : "border-outline-variant"
               }`}
             >
-              <div className="absolute top-0 left-0 bottom-0 w-2 bg-primary" />
+              {isPending && (
+                <Link
+                  href={`/checkout/${order.id}`}
+                  aria-label={`Lanjutkan pembayaran untuk pesanan #${order.orderNumber}`}
+                  className="absolute inset-0 z-0"
+                />
+              )}
+              <div className="pointer-events-none absolute top-0 left-0 bottom-0 w-2 bg-primary" />
 
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pl-2">
+              <div className={`relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 pl-2 ${isPending ? "pointer-events-none" : ""}`}>
                 {/* Product info */}
                 <div className="flex items-start gap-4">
                   <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-[#e0f2fe] to-[#bae6fd] flex-shrink-0 flex flex-col items-center justify-center p-3 border border-[#93c5fd] shadow-inner">
@@ -246,12 +267,15 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                       <span className="text-xs text-on-surface-variant">
                         • {new Date(order.createdAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
                       </span>
-                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded ${cfg.color} border`}>
-                        {cfg.label}
-                      </span>
                     </div>
                     <h3 className="font-heading text-xl font-bold text-on-surface leading-snug">
-                      {order.product.name}
+                      {isPending ? (
+                        <Link href={`/checkout/${order.id}`} className="pointer-events-auto hover:text-amber-800">
+                          {order.product.name}
+                        </Link>
+                      ) : (
+                        order.product.name
+                      )}
                     </h3>
                     <p className="text-xs sm:text-sm text-on-surface-variant">
                       {order.quantity} {order.product.unit}
@@ -273,10 +297,20 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                 {/* Status, Price & Actions */}
                 <div className="flex flex-col sm:flex-row lg:flex-row items-start sm:items-center justify-between lg:justify-end gap-5 pt-4 lg:pt-0 border-t lg:border-t-0 border-surface-container-low">
                   <div className="flex flex-col lg:items-end">
-                    <span className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold border ${cfg.color}`}>
-                      <span className="w-2 h-2 rounded-full bg-current mr-2" />
-                      {cfg.label}
-                    </span>
+                    {isPending ? (
+                      <Link
+                        href={`/checkout/${order.id}`}
+                        className={`pointer-events-auto inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold border ${cfg.color} hover:bg-amber-200 transition`}
+                      >
+                        <span className="w-2 h-2 rounded-full bg-current mr-2" />
+                        {cfg.label}
+                      </Link>
+                    ) : (
+                      <span className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold border ${cfg.color}`}>
+                        <span className="w-2 h-2 rounded-full bg-current mr-2" />
+                        {cfg.label}
+                      </span>
+                    )}
                     <span className="font-heading text-2xl font-extrabold text-on-surface mt-2">
                       {formatRupiah(order.totalPrice)}
                     </span>
@@ -284,7 +318,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                   <div className="flex items-center gap-2 w-full sm:w-auto">
                     <Link
                       href={`/orders/${order.id}/invoice`}
-                      className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-full transition"
+                      className="pointer-events-auto flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-full transition"
                     >
                       <span className="material-symbols-outlined text-xs">receipt</span>
                       <span>Invoice</span>
@@ -292,7 +326,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                     {isRevision && (
                       <Link
                         href={`/order/${order.id}/upload`}
-                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-amber-100 border border-amber-300 text-amber-900 hover:bg-amber-200 text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-full transition"
+                        className="pointer-events-auto flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-amber-100 border border-amber-300 text-amber-900 hover:bg-amber-200 text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-full transition"
                       >
                         <span className="material-symbols-outlined text-xs">upload_file</span>
                         <span>Upload Revisi</span>
